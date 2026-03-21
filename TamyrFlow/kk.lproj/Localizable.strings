@@ -1,0 +1,261 @@
+/* Tabs */
+"tab_scan" = "Іздеу";
+"tab_home" = "Басты";
+"tab_heart" = "Жүрек";
+"tab_spo2" = "SpO₂";
+"tab_temp" = "Темп.";
+"tab_ecg" = "ЭКГ";
+"tab_micro" = "Микро";
+"tab_vitals" = "Қысым / қант";
+"tab_settings" = "Баптаулар";
+
+/* Dashboard */
+"dash_title" = "Басты бет";
+"dash_battery" = "Батарея";
+"dash_charge" = "Заряд";
+"dash_device" = "Құрылғы";
+"dash_sdk" = "SDK";
+"dash_sdk_ok" = "ОК";
+"dash_sdk_wait" = "…";
+"dash_live_traces" = "Графиктер";
+"dash_live_sub" = "Соңғы өлшеу";
+"dash_hr" = "Жүрек соғуы";
+"dash_spo2" = "SpO₂";
+"dash_sync" = "Синхрондау";
+"dash_sync_sub" = "Күнделікті дерек";
+"dash_progress_pct" = "Прогресс %";
+"dash_device_card" = "Құрылғы";
+"dash_name" = "Атауы";
+"dash_status" = "Күйі";
+"dash_actions" = "Әрекеттер";
+"dash_actions_sub" = "Жылдам командалар";
+"dash_read_battery" = "Батарея мен заряд";
+"dash_sync_time" = "Уақытты синхрондау";
+"dash_read_daily" = "Барлық күнделікті оқу";
+"dash_pipeline" = "Кезек";
+"dash_pipeline_sub" = "SDK жүктемесі";
+"dash_manual_ok" = "Қолмен тесттер қолжетімді";
+"dash_busy" = "Бос емес";
+"dash_caps_title" = "Сағат қандай дерек жібереді";
+"dash_caps_sub" = "Модельге байланысты (SDK)";
+"dash_caps_body" = "Пульс, температура және SpO₂ көптеген модельдерде бар. ЭКГ, микро-тексеру, қан қысымы, глюкоза және кейбір есептер тек прошивка/SDK қолдаса ғана; экран бос болса, ET488 осы арна арқылы жібермейді. Толық синхрондау үшін басты бетті төмен тартыңыз.";
+
+/* Scan */
+"scan_title" = "Іздеу";
+"scan_bluetooth" = "Bluetooth";
+"scan_sdk" = "SDK";
+"scan_sdk_ready" = "Дайын";
+"scan_sdk_init" = "Бастау…";
+"scan_bt_on" = "Қос.";
+"scan_bt_off" = "Өш.";
+"scan_connection" = "Қосылу";
+"scan_connection_hint" = "Білезікті тауып, Қосылу батырмасын басыңыз.";
+"scan_start" = "Іздеу";
+"scan_stop" = "Тоқтату";
+"scan_refresh" = "BT жаңарту";
+"scan_app_settings" = "Қолданба баптаулары";
+"scan_xpc_hint" = "Нақты iPhone қажет. «XPC connection invalid» көбіне дебагер шуынан; тізім бос болса Bluetooth рұқсатын тексеріңіз.";
+"scan_devices" = "Құрылғылар";
+"scan_no_devices" = "Әлі құрылғы жоқ";
+"scan_connect" = "Қосылу";
+"scan_disconnect" = "Ажырату";
+"scan_unknown_addr" = "Мекенжай белгісіз";
+"scan_scanning_title" = "Іздеу жүріп жатыр…";
+"scan_scanning_hint" = "Білезікті оятыңыз және жақында ұстаңыз — құрылғылар төменде пайда болады.";
+
+/* Heart */
+"heart_title" = "Жүрек соғуы";
+"heart_current" = "Ағымдағы пульс";
+"heart_live_chart" = "Тірі график";
+"heart_bpm_time" = "Уақыт бойынша соғу";
+"heart_manual" = "Қолмен өлшеу";
+"heart_manual_sub" = "Аяқтағанда Тоқтату";
+
+/* Oxygen */
+"oxygen_title" = "Қандағы оттегі";
+"oxygen_live_chart" = "Тірі график";
+"oxygen_chart_title" = "Оттегі %";
+"oxygen_manual" = "Қолмен өлшеу";
+"oxygen_manual_sub" = "Калибрлеуде мән өрісін қараңыз";
+
+/* Temperature */
+"temp_title" = "Температура";
+"temp_body" = "Дене";
+"temp_skin" = "Тері";
+"temp_trend" = "Температура динамикасы";
+"temp_trend_sub_fmt" = "Прогресс %d%%";
+"temp_c" = "°C";
+"temp_manual" = "Қолмен өлшеу";
+"temp_manual_sub" = "Құрылғыны тығыз киіңіз";
+"temp_not_supported" = "Қолдау жоқ";
+"temp_not_supported_sub" = "Бұл білезікте температура сенсоры жоқ";
+
+/* ECG */
+"ecg_title" = "ЭКГ";
+"ecg_supported" = "ЭКГ қолдауы бар";
+"ecg_supported_sub" = "Құрғақ тері және тығыз контакт";
+"ecg_not_avail" = "ЭКГ жоқ";
+"ecg_not_avail_sub" = "Бұл модельде ecgType = 0";
+"ecg_progress" = "Прогресс";
+"ecg_samples" = "Ұпайлар";
+"ecg_curve" = "Жазба қисығы";
+"ecg_progress_pct" = "Прогресс %";
+"ecg_controls" = "Басқару";
+"ecg_controls_sub" = "Тоқтату арқылы аяқтаңыз";
+"ecg_start" = "ЭКГ бастау";
+"ecg_wave_title" = "Тікелей толқын";
+"ecg_wave_sub_idle" = "Жазуды бастаңыз — белдіктен сигнал көрінеді.";
+"ecg_wave_sub_live" = "Құрылғыдан дерек қабылдануда…";
+"ecg_wave_frozen" = "Соңғы толқын (аяқталды)";
+"ecg_wave_waiting" = "ЭКГ дерегін күту…";
+
+/* Micro */
+"micro_title" = "Микро тест";
+"micro_check" = "Микро тексеру";
+"micro_check_ok" = "Көрсеткіштер суреті";
+"micro_check_no" = "healthGlanceType ≠ 1";
+"micro_progress" = "Прогресс";
+"micro_chart" = "Прогресс графигі";
+"micro_chart_sub" = "Өлшеу кезінде";
+"micro_completion" = "Дайындық %";
+"micro_run" = "Іске қосу";
+"micro_run_sub" = "Білезікті қозғамаңыз";
+"micro_last" = "Соңғы нәтиже";
+"micro_last_none" = "—";
+"micro_last_ok" = "Құрылғыдан";
+"micro_metric_stress" = "Стресс";
+"micro_metric_temp" = "Темп.";
+"micro_unit_mmhg" = "мм сын.бағ.";
+
+/* Settings */
+"settings_title" = "Баптаулар";
+"settings_profile" = "Профиль";
+"settings_profile_sub" = "Қосылғанда білезікке жіберіледі";
+"settings_height" = "Бойы (см)";
+"settings_weight" = "Салмағы (кг)";
+"settings_age" = "Жасы";
+"settings_sex" = "Жынысы";
+"settings_female" = "Әйел";
+"settings_male" = "Ер";
+"settings_steps" = "Қадам мақсаты";
+"settings_sync_personal" = "Профильді синхрондау";
+"settings_device_prefs" = "Құрылғы баптаулары";
+"settings_device_prefs_sub" = "Ауыстырғыштардан кейін қолдану";
+"settings_metric" = "Метрлік жүйе";
+"settings_24h" = "24 сағаттық формат";
+"settings_auto_hr" = "Авто пульс";
+"settings_auto_hr_hint" = "Көп сағатта тікелей SpO₂/пульс үшін «Авто пульс» қосулы болуы керек. Сәтті қосылғаннан кейін ол өзі қосылады; өзгертсеңіз «Белдікке қолдану» басыңыз.";
+"settings_auto_temp" = "Авто температура";
+"settings_apply" = "Білезікке қолдану";
+"settings_time_card" = "Уақыт";
+"settings_time_sub" = "SDK API арқылы";
+"settings_sync_time_band" = "Уақытты білезікпен синхрондау";
+
+/* States */
+"state_idle" = "Күту";
+"state_starting" = "Басталуда…";
+"state_measuring" = "Өлшеу";
+"state_not_worn" = "Киілмеген";
+"state_device_busy" = "Құрылғы бос емес";
+"state_finished" = "Аяқталды";
+"state_done" = "Дайын";
+"state_unsupported" = "Қолдау жоқ";
+"state_calibrating" = "Калибрлеу";
+"state_calib_done" = "Калибрлеу аяқталды";
+"state_invalid" = "Қате мәлімет";
+"state_preparing" = "Дайындау…";
+"state_recording" = "Жазба";
+"state_lead_off" = "Электрод үзілді";
+"state_busy" = "Бос емес";
+"state_stopped" = "Тоқтатылды";
+"state_failed" = "Сәтсіз";
+"state_complete" = "Аяқталды";
+"state_no_func" = "Функция жоқ";
+
+"chart_empty_hint" = "Графикті көру үшін өлшеуді бастаңыз";
+
+/* Errors */
+"err_veepoo_unavailable" = "Veepoo BLE менеджері қолжетімсіз.";
+"err_not_connected" = "Құрылғы қосылмаған.";
+"err_daily_busy" = "Күнделікті дерек оқылғанда тест іске қосылмайды.";
+"err_op_busy" = "Басқа операция орындалуда.";
+"err_ecg_unsupported" = "Бұл құрылғыда ЭКГ жоқ.";
+"err_temp_unsupported" = "Бұл құрылғыда температура жоқ.";
+"err_micro_unsupported" = "Микро тест қолдау көрсетпейді.";
+"err_sync_time" = "Уақытты синхрондау сәтсіз.";
+"err_sync_personal" = "Профильді жіберу сәтсіз.";
+"err_setting_failed" = "Баптауды жаңарту сәтсіз.";
+"err_setting_map" = "Белгісіз баптау түрі.";
+"err_setting_state" = "Қате күй.";
+"err_read_battery" = "Құрылғы қосылмаған.";
+"err_bt_permission" = "Bluetooth рұқсаты жоқ. Баптаулар → Tamyr Flow.";
+"err_bt_permission_detail" = "Bluetooth рұқсаты жоқ. Баптаулар → Tamyr Flow → Bluetooth немесе Құпиялылық → Bluetooth.";
+"err_bt_off" = "Bluetooth өшірулі. Қосыңыз.";
+"err_bt_unsupported" = "Бұл құрылғыда Bluetooth жоқ.";
+"err_bt_scan" = "Іздеу үшін Bluetooth қосулы және рұқсат берілген болуы керек.";
+"err_measurement_timeout" = "Белдіктен уақытында дерек жоқ — өлшеу тоқтатылды. Киімді тексеріңіз, қолданбаны ашық ұстаңыз және қайталаңыз.";
+
+/* Connection */
+"conn_disconnected" = "Ажыратылған";
+"conn_connecting" = "Қосылуда";
+"conn_connected" = "Қосылған";
+"conn_verified" = "Расталған";
+"conn_failed" = "Сәтсіз";
+"conn_timeout" = "Уақыт асып кетті";
+
+/* Operations */
+"op_idle" = "Бос";
+"op_reading_daily" = "Күнделікті синхрон";
+"op_heart" = "Пульс тесті";
+"op_oxygen" = "SpO₂ тесті";
+"op_temperature" = "Температура тесті";
+"op_ecg" = "ЭКГ тесті";
+"op_micro" = "Микро тест";
+"op_bp" = "Қысымды өлшеу";
+"op_glucose" = "Қантты өлшеу";
+"op_steps" = "Қадам оқу";
+"op_sleep" = "Ұйқы оқу";
+
+"conn_bar_no_device" = "Сағат жоқ";
+"conn_bar_sdk_init" = "SDK дайындалуда…";
+"conn_bar_bt_off" = "Bluetooth өшік";
+"conn_bar_not_linked" = "Сағат қосылмаған";
+"conn_bar_phone_bt_on" = "Тел. BT қос.";
+"conn_bar_phone_bt_off" = "Тел. BT өш.";
+"conn_bar_bt_warming" = "Bluetooth іске қосылуда… (өшік емес)";
+
+"measure_hint" = "Қозғалмаңыз — белдік дерек жіберуде.";
+"measure_close" = "Жабу";
+"measure_heart" = "Пульс өлшенуде";
+"measure_spo2" = "Оттегі өлшенуде";
+"measure_temp" = "Температура өлшенуде";
+"measure_ecg" = "ЭКГ жазылуда";
+"measure_micro" = "Денсаулық сканы";
+"measure_bp" = "Қысым өлшенуде";
+"measure_glucose" = "Қант өлшенуде";
+"measure_daily_sync" = "Дерек синхрондалуда";
+"measure_steps" = "Қадам оқылуда";
+"measure_sleep" = "Ұйқы оқылуда";
+
+"vitals_title" = "Қысым және қант";
+"vitals_bp_card" = "Қан қысымы";
+"vitals_bp_sub" = "Белдіктен қолмен өлшеу (қолдаса)";
+"vitals_glucose_card" = "Қан қанты";
+"vitals_glucose_sub" = "Калибрлеу ережелері болуы мүмкін";
+"vitals_last" = "Соңғы мәні";
+"vitals_mmol" = "ммоль/л";
+
+"hub_section" = "Денсаулық";
+"hub_section_sub" = "Көрсеткішке өту";
+"hub_steps" = "Қадамды оқу (бүгін)";
+"hub_sleep" = "Ұйқыны оқу (бүгін)";
+"hub_sleep_sub" = "сегмент";
+"hub_vitals" = "Қысым және қант";
+"hub_vitals_sub" = "Қолмен тесттер";
+
+"btn_start" = "Бастау";
+"btn_stop" = "Тоқтату";
+
+"bat_charging" = "Зарядталуда";
+"bat_full" = "Толық";
+"bat_normal" = "Қалыпты";

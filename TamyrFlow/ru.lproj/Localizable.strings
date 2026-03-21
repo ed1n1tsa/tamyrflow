@@ -1,0 +1,261 @@
+/* Tabs */
+"tab_scan" = "Поиск";
+"tab_home" = "Главная";
+"tab_heart" = "Пульс";
+"tab_spo2" = "SpO₂";
+"tab_temp" = "Темп.";
+"tab_ecg" = "ЭКГ";
+"tab_micro" = "Микро";
+"tab_vitals" = "Давление / сахар";
+"tab_settings" = "Настройки";
+
+/* Dashboard */
+"dash_title" = "Обзор";
+"dash_battery" = "Батарея";
+"dash_charge" = "Заряд";
+"dash_device" = "Устройство";
+"dash_sdk" = "SDK";
+"dash_sdk_ok" = "ОК";
+"dash_sdk_wait" = "…";
+"dash_live_traces" = "Графики";
+"dash_live_sub" = "Последнее измерение";
+"dash_hr" = "Пульс";
+"dash_spo2" = "SpO₂";
+"dash_sync" = "Синхронизация";
+"dash_sync_sub" = "Суточные данные";
+"dash_progress_pct" = "Прогресс %";
+"dash_device_card" = "Устройство";
+"dash_name" = "Имя";
+"dash_status" = "Статус";
+"dash_actions" = "Действия";
+"dash_actions_sub" = "Быстрые команды";
+"dash_read_battery" = "Батарея и заряд";
+"dash_sync_time" = "Синхронизировать время";
+"dash_read_daily" = "Считать все суточные данные";
+"dash_pipeline" = "Очередь";
+"dash_pipeline_sub" = "Занятость SDK";
+"dash_manual_ok" = "Ручные тесты доступны";
+"dash_busy" = "Занято";
+"dash_caps_title" = "Что браслет реально отдаёт";
+"dash_caps_sub" = "Зависит от модели (SDK)";
+"dash_caps_body" = "Пульс, температура и SpO₂ есть у многих моделей. ЭКГ, микро-проверка, давление, глюкоза и часть отчётов — только при поддержке в прошивке/SDK; если экран пустой, ET488 может не отдавать этот канал. Потяните главную вниз для полной синхронизации.";
+
+/* Scan */
+"scan_title" = "Поиск";
+"scan_bluetooth" = "Bluetooth";
+"scan_sdk" = "SDK";
+"scan_sdk_ready" = "Готов";
+"scan_sdk_init" = "Инициал…";
+"scan_bt_on" = "Вкл";
+"scan_bt_off" = "Выкл";
+"scan_connection" = "Подключение";
+"scan_connection_hint" = "Найдите браслет и нажмите Подключить.";
+"scan_start" = "Сканировать";
+"scan_stop" = "Стоп";
+"scan_refresh" = "Обновить BT";
+"scan_app_settings" = "Настройки приложения";
+"scan_xpc_hint" = "Нужен реальный iPhone. Сообщение «XPC connection invalid» часто от отладчика; если список пуст — проверьте доступ к Bluetooth в Настройках.";
+"scan_devices" = "Устройства";
+"scan_no_devices" = "Пока нет устройств";
+"scan_connect" = "Подключить";
+"scan_disconnect" = "Отключить";
+"scan_unknown_addr" = "Адрес неизвестен";
+"scan_scanning_title" = "Идёт поиск…";
+"scan_scanning_hint" = "Разбудите браслет и держите его рядом — устройства появятся ниже.";
+
+/* Heart */
+"heart_title" = "Пульс";
+"heart_current" = "Текущий пульс";
+"heart_live_chart" = "График";
+"heart_bpm_time" = "Уд/мин по времени";
+"heart_manual" = "Ручной замер";
+"heart_manual_sub" = "По окончании нажмите Стоп";
+
+/* Oxygen */
+"oxygen_title" = "Кислород в крови";
+"oxygen_live_chart" = "График";
+"oxygen_chart_title" = "Кислород %";
+"oxygen_manual" = "Ручной замер";
+"oxygen_manual_sub" = "При калибровке смотрите поле значения";
+
+/* Temperature */
+"temp_title" = "Температура";
+"temp_body" = "Тело";
+"temp_skin" = "Кожа";
+"temp_trend" = "Динамика температуры";
+"temp_trend_sub_fmt" = "Прогресс %d%%";
+"temp_c" = "°C";
+"temp_manual" = "Ручной замер";
+"temp_manual_sub" = "Носите устройство плотнее";
+"temp_not_supported" = "Нет датчика";
+"temp_not_supported_sub" = "На этом браслете нет измерения температуры";
+
+/* ECG */
+"ecg_title" = "ЭКГ";
+"ecg_supported" = "ЭКГ поддерживается";
+"ecg_supported_sub" = "Сухая кожа и плотный контакт";
+"ecg_not_avail" = "ЭКГ недоступна";
+"ecg_not_avail_sub" = "ecgType = 0 на этой модели";
+"ecg_progress" = "Прогресс";
+"ecg_samples" = "Отсчёты";
+"ecg_curve" = "Кривая записи";
+"ecg_progress_pct" = "Прогресс %";
+"ecg_controls" = "Управление";
+"ecg_controls_sub" = "Завершите тест кнопкой Стоп";
+"ecg_start" = "Начать ЭКГ";
+"ecg_wave_title" = "Живая кривая";
+"ecg_wave_sub_idle" = "Запустите запись, чтобы увидеть сигнал с браслета.";
+"ecg_wave_sub_live" = "Приём данных с устройства…";
+"ecg_wave_frozen" = "Последняя кривая (запись завершена)";
+"ecg_wave_waiting" = "Ожидание данных ЭКГ…";
+
+/* Micro */
+"micro_title" = "Микротест";
+"micro_check" = "Микропроверка";
+"micro_check_ok" = "Снимок показателей";
+"micro_check_no" = "healthGlanceType ≠ 1";
+"micro_progress" = "Прогресс";
+"micro_chart" = "График прогресса";
+"micro_chart_sub" = "Во время измерения";
+"micro_completion" = "Готовность %";
+"micro_run" = "Запуск";
+"micro_run_sub" = "Держите браслет неподвижно";
+"micro_last" = "Последний результат";
+"micro_last_none" = "—";
+"micro_last_ok" = "С устройства";
+"micro_metric_stress" = "Стресс";
+"micro_metric_temp" = "Темп.";
+"micro_unit_mmhg" = "мм рт.ст.";
+
+/* Settings */
+"settings_title" = "Настройки";
+"settings_profile" = "Профиль";
+"settings_profile_sub" = "Отправляется на браслет при подключении";
+"settings_height" = "Рост (см)";
+"settings_weight" = "Вес (кг)";
+"settings_age" = "Возраст";
+"settings_sex" = "Пол";
+"settings_female" = "Жен";
+"settings_male" = "Муж";
+"settings_steps" = "Цель шагов";
+"settings_sync_personal" = "Синхронизировать профиль";
+"settings_device_prefs" = "Настройки устройства";
+"settings_device_prefs_sub" = "Применить после переключателей";
+"settings_metric" = "Метрические единицы";
+"settings_24h" = "24-часовой формат";
+"settings_auto_hr" = "Авто пульс";
+"settings_auto_hr_hint" = "На многих часах без «Авто пульс» приложение не получает живые SpO₂/пульс. После успешного подключения опция включается сама; при необходимости измените и нажмите «Применить на браслет».";
+"settings_auto_temp" = "Авто температура";
+"settings_apply" = "Применить на браслет";
+"settings_time_card" = "Время";
+"settings_time_sub" = "Через API SDK";
+"settings_sync_time_band" = "Синхронизировать время с браслетом";
+
+/* States */
+"state_idle" = "Ожидание";
+"state_starting" = "Запуск…";
+"state_measuring" = "Измерение";
+"state_not_worn" = "Не надето";
+"state_device_busy" = "Устройство занято";
+"state_finished" = "Завершено";
+"state_done" = "Готово";
+"state_unsupported" = "Не поддерживается";
+"state_calibrating" = "Калибровка";
+"state_calib_done" = "Калибровка готова";
+"state_invalid" = "Некорректно";
+"state_preparing" = "Подготовка…";
+"state_recording" = "Запись";
+"state_lead_off" = "Отрыв электрода";
+"state_busy" = "Занято";
+"state_stopped" = "Остановлено";
+"state_failed" = "Ошибка";
+"state_complete" = "Завершено";
+"state_no_func" = "Нет функции";
+
+"chart_empty_hint" = "Запустите измерение, чтобы увидеть график";
+
+/* Errors */
+"err_veepoo_unavailable" = "Менеджер Veepoo BLE недоступен.";
+"err_not_connected" = "Устройство не подключено.";
+"err_daily_busy" = "Нельзя запустить тест во время чтения суточных данных.";
+"err_op_busy" = "Уже выполняется другая операция.";
+"err_ecg_unsupported" = "ЭКГ не поддерживается на этом устройстве.";
+"err_temp_unsupported" = "Температура не поддерживается на этом устройстве.";
+"err_micro_unsupported" = "Микротест не поддерживается на этом устройстве.";
+"err_sync_time" = "Не удалось синхронизировать время.";
+"err_sync_personal" = "Не удалось отправить профиль.";
+"err_setting_failed" = "Не удалось обновить настройку.";
+"err_setting_map" = "Неизвестный тип настройки.";
+"err_setting_state" = "Некорректное состояние настройки.";
+"err_read_battery" = "Устройство не подключено.";
+"err_bt_permission" = "Доступ к Bluetooth запрещён. Включите в Настройки → Tamyr Flow.";
+"err_bt_permission_detail" = "Нет доступа к Bluetooth. Настройки → Tamyr Flow → Bluetooth, либо Конфиденциальность → Bluetooth.";
+"err_bt_off" = "Bluetooth выключен. Включите в Пункте управления или Настройках.";
+"err_bt_unsupported" = "Bluetooth не поддерживается на этом устройстве.";
+"err_bt_scan" = "Для поиска нужен включённый Bluetooth и разрешение для Tamyr Flow.";
+"err_measurement_timeout" = "Нет данных с браслета за отведённое время — измерение остановлено. Проверьте посадку, держите приложение открытым и повторите.";
+
+/* Connection */
+"conn_disconnected" = "Отключено";
+"conn_connecting" = "Подключение";
+"conn_connected" = "Подключено";
+"conn_verified" = "Проверено";
+"conn_failed" = "Сбой";
+"conn_timeout" = "Тайм-аут";
+
+/* Operations */
+"op_idle" = "Простой";
+"op_reading_daily" = "Синхронизация суток";
+"op_heart" = "Тест пульса";
+"op_oxygen" = "Тест SpO₂";
+"op_temperature" = "Тест температуры";
+"op_ecg" = "Тест ЭКГ";
+"op_micro" = "Микротест";
+"op_bp" = "Измерение давления";
+"op_glucose" = "Измерение глюкозы";
+"op_steps" = "Чтение шагов";
+"op_sleep" = "Чтение сна";
+
+"conn_bar_no_device" = "Нет часов";
+"conn_bar_sdk_init" = "Инициализация SDK…";
+"conn_bar_bt_off" = "Bluetooth выкл.";
+"conn_bar_not_linked" = "Часы не подключены";
+"conn_bar_phone_bt_on" = "BT телефона вкл.";
+"conn_bar_phone_bt_off" = "BT телефона выкл.";
+"conn_bar_bt_warming" = "Bluetooth в приложении запускается…";
+
+"measure_hint" = "Не двигайтесь — идёт приём данных с браслета.";
+"measure_close" = "Закрыть";
+"measure_heart" = "Измерение пульса";
+"measure_spo2" = "Измерение кислорода";
+"measure_temp" = "Измерение температуры";
+"measure_ecg" = "Запись ЭКГ";
+"measure_micro" = "Скан здоровья";
+"measure_bp" = "Измерение давления";
+"measure_glucose" = "Измерение глюкозы";
+"measure_daily_sync" = "Синхронизация данных";
+"measure_steps" = "Чтение шагов";
+"measure_sleep" = "Чтение сна";
+
+"vitals_title" = "Давление и глюкоза";
+"vitals_bp_card" = "Кровяное давление";
+"vitals_bp_sub" = "Ручное измерение с браслета (если поддерживается)";
+"vitals_glucose_card" = "Сахар в крови";
+"vitals_glucose_sub" = "На устройстве могут действовать правила калибровки";
+"vitals_last" = "Последнее значение";
+"vitals_mmol" = "ммоль/л";
+
+"hub_section" = "Здоровье";
+"hub_section_sub" = "Перейти к метрике";
+"hub_steps" = "Считать шаги (сегодня)";
+"hub_sleep" = "Считать сон (сегодня)";
+"hub_sleep_sub" = "сегментов";
+"hub_vitals" = "Давление и сахар";
+"hub_vitals_sub" = "Ручные тесты";
+
+"btn_start" = "Старт";
+"btn_stop" = "Стоп";
+
+"bat_charging" = "Зарядка";
+"bat_full" = "Полный";
+"bat_normal" = "Обычный";

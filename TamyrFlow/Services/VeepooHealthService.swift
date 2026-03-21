@@ -1,0 +1,791 @@
+import Foundation
+import VeepooBleSDK
+import Combine
+
+@MainActor
+final class VeepooHealthService: ObservableObject {
+    @Published private(set) var operation: BleOperation = .idle
+    @Published private(set) var readProgressText = ""
+    @Published private(set) var heartRate: HeartRateReading?
+    @Published private(set) var oxygen: OxygenReading?
+    @Published private(set) var temperature: TemperatureReading?
+    @Published private(set) var ecg: ECGReading?
+    @Published private(set) var microTest: MicroTestReading?
+    @Published private(set) var bloodPressure: BloodPressureReading?
+    @Published private(set) var bloodGlucose: BloodGlucoseReading?
+    @Published private(set) var lastError: String?
+    /// Today’s total steps from the band (best-effort parse of SDK dictionary).
+    @Published private(set) var todaySteps: Int?
+    /// Number of sleep segments returned for day 0 (today).
+    @Published private(set) var sleepSegmentsToday: Int?
+    /// Full-screen overlay while measuring / syncing (official-app style).
+    @Published private(set) var measurementHUD: MeasurementHUDState?
+
+    // MARK: - Chart history (live measurements)
+    @Published private(set) var heartRateHistory: [ChartPoint] = []
+    @Published private(set) var oxygenHistory: [ChartPoint] = []
+    @Published private(set) var bodyTemperatureHistory: [ChartPoint] = []
+    @Published private(set) var ecgProgressHistory: [ChartPoint] = []
+    /// Last ECG strip in millivolts (for live drawing; from SDK `filterSignals` + `convertToMv`).
+    @Published private(set) var ecgWaveformMv: [Float] = []
+    /// Instant heart rate from `muHearts` last value during ECG test, if provided.
+    @Published private(set) var ecgLiveHeartRate: Int?
+    @Published private(set) var syncProgressHistory: [ChartPoint] = []
+    @Published private(set) var microProgressHistory: [ChartPoint] = []
+
+    private var chartSeq = 0
+    private let chartCap = 96
+
+    /// Cancels if measurement finishes normally. Fires `abortStuckManualMeasurement()` if still on the same op.
+    private var measurementTimeoutTask: Task<Void, Never>?
+    private let defaultManualMeasurementSeconds: UInt64 = 30
+    /// Some bands stop sending “Over” state but leave the app waiting — close HUD after this quiet period with a valid reading.
+    private let liveReadingQuietFinishNanoseconds: UInt64 = 2_200_000_000
+
+    private let bleService: BleService
+    private var liveMeasurementDebounceTask: Task<Void, Never>?
+    /// SpO₂: some bands send state `0` again when the user stops on the watch instead of `Over`.
+    private var oxygenSawNonStartState = false
+    /// Heart rate: same pattern as SpO₂ (`VPTestHeartStateStart` after testing).
+    private var heartSawNonStartState = false
+    private var isAutoHRPulseInFlight = false
+
+    /// Only valid after `BleService.configureSDKIfNeeded()` — calling `shareVPPeripheralManager()` earlier can crash inside the SDK.
+    private var manager: VPPeripheralBaseManage? {
+        guard bleService.isSDKConfigured else { return nil }
+        return VPPeripheralManage.shareVPPeripheralManager()
+    }
+
+    init(bleService: BleService) {
+        self.bleService = bleService
+    }
+
+    var canRunManualTests: Bool {
+        switch operation {
+        case .idle:
+            return true
+        case .readingDailyData, .readingSteps, .readingSleep:
+            return false
+        default:
+            return false
+        }
+    }
+
+    var isMeasuringOrSyncing: Bool {
+        measurementHUD != nil
+    }
+
+    var isConnected: Bool {
+        guard bleService.isSDKConfigured else { return false }
+        guard let central = VPBleCentralManage.sharedBleManager() else { return false }
+        return central.isConnected
+    }
+
+    var supportsECG: Bool {
+        (bleService.connectedDevice?.ecgType ?? 0) != 0
+    }
+
+    var supportsTemperature: Bool {
+        (bleService.connectedDevice?.temperatureType ?? 0) != 0
+    }
+
+    var supportsMicroTest: Bool {
+        (bleService.connectedDevice?.healthGlanceType ?? 0) == 1
+    }
+
+    func syncTime() {
+        guardConnectedAndManager { manage in
+            manage.veepooSDKSettingTime { [weak self] success in
+                Task { @MainActor in
+                    self?.lastError = success ? nil : L10n.Err.syncTime
+                }
+            }
+        }
+    }
+
+    func syncPersonalInfo(height: Int, weight: Int, age: Int, sex: Int, targetStep: Int) {
+        guardConnectedAndManager { manage in
+            let info = VPSyncPersonalInfo()
+            info.status = Int32(height)
+            info.weight = Int32(weight)
+            info.age = Int32(age)
+            info.sex = Int32(sex)
+            info.targetStep = Int32(targetStep)
+            manage.veepooSDKSynchronousPersonalInformation(info) { [weak self] state in
+                Task { @MainActor in
+                    self?.lastError = state == 1 ? nil : L10n.Err.syncPersonal
+                }
+            }
+        }
+    }
+
+    func setMetric(_ enabled: Bool) {
+        setBaseFunction(rawType: 3, enabled: enabled)
+    }
+
+    func setTimeFormat24h(_ enabled: Bool) {
+        setBaseFunction(rawType: 4, enabled: enabled)
+    }
+
+    func setAutoHR(_ enabled: Bool) {
+        setBaseFunction(rawType: 5, enabled: enabled)
+    }
+
+    func setAutoTemperature(_ enabled: Bool) {
+        setBaseFunction(rawType: 24, enabled: enabled)
+    }
+
+    /// After BLE shows “verified”, enable continuous HR on the band so health/SpO₂ commands work on many JL+Veepoo watches.
+    func bootstrapHealthChannelAfterVerification() {
+        guard isConnected else { return }
+        syncTime()
+        setAutoHR(true)
+    }
+
+    /// Same “kick” as toggling Auto HR — call before live measurements if the band was slow to open the health pipe.
+    func ensureLiveMeasurementChannel() {
+        guard isConnected else { return }
+        setAutoHR(true)
+    }
+
+    /// Brief Auto-HR off→on to keep the health/SpO₂ pipe open on some bands. Restores `enabled` after ~200ms (matches Settings when passed from the view model).
+    func pulseAutoHRHealthChannel(restoreTo enabled: Bool) {
+        guard isConnected else { return }
+        guard !isAutoHRPulseInFlight else { return }
+        isAutoHRPulseInFlight = true
+        setAutoHR(false)
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            if self.isConnected {
+                self.setAutoHR(enabled)
+            }
+            self.isAutoHRPulseInFlight = false
+        }
+    }
+
+    func readAllDailyData() {
+        guard canStart(.readingDailyData) else { return }
+        ensureLiveMeasurementChannel()
+        syncProgressHistory.removeAll()
+        measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: 0.05)
+        manager?.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
+            Task { @MainActor in
+                guard let self else { return }
+                self.readProgressText = "state: \(state.rawValue), day \(current)/\(max(total, 1)), progress \(progress)%"
+                self.appendChart(Double(progress), to: &self.syncProgressHistory)
+                let p = Double(progress) / 100.0
+                self.measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: max(0.05, min(1, p)))
+                if state.rawValue == 2 {
+                    self.finishOperation()
+                } else if state.rawValue == 0 || state.rawValue == 1 {
+                    self.operation = .readingDailyData
+                }
+            }
+        }
+    }
+
+    func readTodaySteps() {
+        guard canStart(.readingSteps) else { return }
+        ensureLiveMeasurementChannel()
+        guard let mgr = manager else {
+            lastError = L10n.Err.deviceNotConnected
+            finishOperation()
+            return
+        }
+        measurementHUD = MeasurementHUDState(kind: .stepsSnapshot, progress01: nil)
+        scheduleManualMeasurementTimeout(for: .readingSteps, seconds: defaultManualMeasurementSeconds)
+        mgr.veepooSDK_readStepData(withDayNumber: 0, result: { [weak self] stepDict in
+            Task { @MainActor in
+                guard let self else { return }
+                self.todaySteps = Self.parseTotalSteps(from: stepDict)
+                self.finishOperation()
+            }
+        })
+    }
+
+    func readTodaySleep() {
+        guard canStart(.readingSleep) else { return }
+        ensureLiveMeasurementChannel()
+        guard let mgr = manager else {
+            lastError = L10n.Err.deviceNotConnected
+            finishOperation()
+            return
+        }
+        measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
+        scheduleManualMeasurementTimeout(for: .readingSleep, seconds: defaultManualMeasurementSeconds)
+        mgr.veepooSDK_readSleepData(withDayNumber: 0, result: { [weak self] sleepOneDayArray in
+            Task { @MainActor in
+                guard let self else { return }
+                if let arr = sleepOneDayArray as? [Any] {
+                    self.sleepSegmentsToday = arr.count
+                } else if let arr = sleepOneDayArray as? NSArray {
+                    self.sleepSegmentsToday = arr.count
+                } else {
+                    self.sleepSegmentsToday = 0
+                }
+                self.finishOperation()
+            }
+        })
+    }
+
+    func startHeartTest() {
+        guard canStart(.heartTest, needsManualFreeState: true) else { return }
+        heartSawNonStartState = false
+        ensureLiveMeasurementChannel()
+        heartRateHistory.removeAll()
+        measurementHUD = MeasurementHUDState(kind: .heart, progress01: nil)
+        scheduleManualMeasurementTimeout(for: .heartTest, seconds: defaultManualMeasurementSeconds)
+        manager?.veepooSDKTestHeartStart(true) { [weak self] state, value in
+            Task { @MainActor in
+                guard let self else { return }
+                self.heartRate = HeartRateReading(state: state, value: Int(value))
+                if state.rawValue == 0, self.heartSawNonStartState {
+                    self.finishOperation()
+                    return
+                }
+                if state.rawValue != 0 {
+                    self.heartSawNonStartState = true
+                }
+                if value > 0 {
+                    self.appendChart(Double(value), to: &self.heartRateHistory)
+                }
+                if state.rawValue == 1 {
+                    self.measurementHUD = MeasurementHUDState(kind: .heart, progress01: nil)
+                    let v = Int(value)
+                    if v >= 40, v <= 220 {
+                        self.scheduleQuietFinishForLiveMeasurement(expected: .heartTest)
+                    }
+                }
+                if state.rawValue == 2 || state.rawValue == 3 || state.rawValue == 4 {
+                    self.finishOperation()
+                }
+            }
+        }
+    }
+
+    func stopHeartTest() {
+        manager?.veepooSDKTestHeartStart(false) { [weak self] _, _ in
+            Task { @MainActor in self?.finishOperation() }
+        }
+    }
+
+    func startOxygenTest() {
+        guard canStart(.oxygenTest, needsManualFreeState: true) else { return }
+        oxygenSawNonStartState = false
+        ensureLiveMeasurementChannel()
+        oxygenHistory.removeAll()
+        measurementHUD = MeasurementHUDState(kind: .oxygen, progress01: nil)
+        scheduleManualMeasurementTimeout(for: .oxygenTest, seconds: defaultManualMeasurementSeconds)
+        manager?.veepooSDKTestOxygenStart(true) { [weak self] state, value in
+            Task { @MainActor in
+                guard let self else { return }
+                self.oxygen = OxygenReading(state: state, value: Int(value))
+                // Watch stopped / idle: often only `Start(0)` is sent again — close HUD like pulse tab does.
+                if state.rawValue == 0, self.oxygenSawNonStartState {
+                    self.finishOperation()
+                    return
+                }
+                if state.rawValue != 0 {
+                    self.oxygenSawNonStartState = true
+                }
+                if state.rawValue == 1, value > 0, value <= 100 {
+                    self.appendChart(Double(value), to: &self.oxygenHistory)
+                }
+                // 6 = calibration (value is progress), 7 = calibration done — keep session alive.
+                if state.rawValue == 6 {
+                    let p = min(1, max(0.08, Double(value) / 100.0))
+                    self.measurementHUD = MeasurementHUDState(kind: .oxygen, progress01: p)
+                    if value >= 95 {
+                        self.scheduleQuietFinishForLiveMeasurement(expected: .oxygenTest)
+                    }
+                } else if state.rawValue == 7 {
+                    self.measurementHUD = MeasurementHUDState(kind: .oxygen, progress01: 0.92)
+                    self.scheduleQuietFinishForLiveMeasurement(expected: .oxygenTest)
+                } else if state.rawValue == 1 {
+                    self.measurementHUD = MeasurementHUDState(kind: .oxygen, progress01: nil)
+                    let v = Int(value)
+                    if v >= 60, v <= 100 {
+                        self.scheduleQuietFinishForLiveMeasurement(expected: .oxygenTest)
+                    }
+                } else if state.rawValue == 0 {
+                    self.measurementHUD = MeasurementHUDState(kind: .oxygen, progress01: nil)
+                }
+                if state.rawValue == 2 || state.rawValue == 3 || state.rawValue == 4 || state.rawValue == 5 || state.rawValue == 8 {
+                    self.finishOperation()
+                }
+            }
+        }
+    }
+
+    func stopOxygenTest() {
+        manager?.veepooSDKTestOxygenStart(false) { [weak self] _, _ in
+            Task { @MainActor in self?.finishOperation() }
+        }
+    }
+
+    func startTemperatureTest() {
+        guard supportsTemperature else {
+            lastError = L10n.Err.tempUnsupported
+            return
+        }
+        guard canStart(.temperatureTest, needsManualFreeState: true) else { return }
+        ensureLiveMeasurementChannel()
+        bodyTemperatureHistory.removeAll()
+        measurementHUD = MeasurementHUDState(kind: .temperature, progress01: 0.05)
+        scheduleManualMeasurementTimeout(for: .temperatureTest, seconds: defaultManualMeasurementSeconds)
+        manager?.veepooSDK_temperatureTestStart(true, result: { [weak self] state, enable, progress, temp, originalTemp in
+            Task { @MainActor in
+                guard let self else { return }
+                self.temperature = TemperatureReading(
+                    state: state,
+                    enable: enable,
+                    progress: progress,
+                    bodyTemperature: Double(temp) / 10.0,
+                    skinTemperature: Double(originalTemp) / 10.0
+                )
+                let body = Double(temp) / 10.0
+                if body > 30, body < 45 {
+                    self.appendChart(body, to: &self.bodyTemperatureHistory)
+                }
+                let p = min(1, max(0, Double(progress) / 100.0))
+                self.measurementHUD = MeasurementHUDState(kind: .temperature, progress01: max(0.05, p))
+                if body > 30, body < 45, progress >= 90 {
+                    self.scheduleQuietFinishForLiveMeasurement(expected: .temperatureTest)
+                }
+                if state.rawValue == 2 || state.rawValue == 9 || state.rawValue == 0 {
+                    self.finishOperation()
+                }
+            }
+        })
+    }
+
+    func stopTemperatureTest() {
+        manager?.veepooSDK_temperatureTestStart(false, result: { [weak self] _, _, _, _, _ in
+            Task { @MainActor in self?.finishOperation() }
+        })
+    }
+
+    func startECGTest() {
+        guard supportsECG else {
+            lastError = L10n.Err.ecgUnsupported
+            return
+        }
+        guard canStart(.ecgTest, needsManualFreeState: true) else { return }
+        ensureLiveMeasurementChannel()
+        ecgProgressHistory.removeAll()
+        ecgWaveformMv.removeAll()
+        ecgLiveHeartRate = nil
+        measurementHUD = MeasurementHUDState(kind: .ecg, progress01: 0.05)
+        scheduleManualMeasurementTimeout(for: .ecgTest, seconds: defaultManualMeasurementSeconds)
+        manager?.veepooSDKTestECGStart(true) { [weak self] state, progress, model in
+            Task { @MainActor in
+                guard let self else { return }
+                // `filterSignals` can be nil while bridged as non-optional → avoid implicit unwrap crash.
+                let count = Self.safeECGFilterSignalCount(model)
+                let p = Self.clampECGProgress(progress)
+                self.ecg = ECGReading(state: state, progress: p, sampleCount: count)
+                let mv = Self.ecgWaveformMillivolts(from: model)
+                self.ecgWaveformMv = Self.downsampleECG(mv, maxPoints: 1_600)
+                if let hr = Self.ecgLiveHeartRate(from: model) {
+                    self.ecgLiveHeartRate = hr
+                }
+                self.appendChart(Double(p), to: &self.ecgProgressHistory)
+                let frac = min(1, max(0.05, Double(p) / 100.0))
+                self.measurementHUD = MeasurementHUDState(kind: .ecg, progress01: frac)
+                if p >= 92 {
+                    self.scheduleQuietFinishForLiveMeasurement(expected: .ecgTest)
+                }
+                if state.rawValue == 4 || state.rawValue == 5 || state.rawValue == 6 || state.rawValue == 2 || state.rawValue == 3 || state.rawValue == 7 {
+                    self.finishOperation()
+                }
+            }
+        }
+    }
+
+    func stopECGTest() {
+        manager?.veepooSDKTestECGStart(false) { [weak self] _, _, _ in
+            Task { @MainActor in self?.finishOperation() }
+        }
+    }
+
+    func startMicroTest() {
+        guard supportsMicroTest else {
+            lastError = L10n.Err.microUnsupported
+            return
+        }
+        guard canStart(.microTest, needsManualFreeState: true) else { return }
+        ensureLiveMeasurementChannel()
+        microProgressHistory.removeAll()
+        measurementHUD = MeasurementHUDState(kind: .micro, progress01: 0.05)
+        scheduleManualMeasurementTimeout(for: .microTest, seconds: defaultManualMeasurementSeconds)
+        manager?.veepooSDKMicroTestOpenState(
+            true,
+            andProgress: { [weak self] progress in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.microTest = MicroTestReading(progress: Int(progress), model: self.microTest?.model)
+                    self.appendChart(Double(progress), to: &self.microProgressHistory)
+                    let frac = min(1, max(0.05, Double(progress) / 100.0))
+                    self.measurementHUD = MeasurementHUDState(kind: .micro, progress01: frac)
+                    if progress >= 95 {
+                        self.scheduleQuietFinishForLiveMeasurement(expected: .microTest)
+                    }
+                }
+            },
+            andFail: { [weak self] error in
+                Task { @MainActor in
+                    self?.lastError = (error as NSError?)?.localizedDescription ?? "Micro test failed."
+                    self?.finishOperation()
+                }
+            },
+            andSuccess: { [weak self] _, model in
+                Task { @MainActor in
+                    self?.microTest = MicroTestReading(progress: 100, model: model)
+                    self?.finishOperation()
+                }
+            },
+            andHeartRate: { _ in },
+            andPPG: { _ in }
+        )
+    }
+
+    func stopMicroTest() {
+        manager?.veepooSDKMicroTestOpenState(
+            false,
+            andProgress: { _ in },
+            andFail: { _ in },
+            andSuccess: { [weak self] _, _ in
+                Task { @MainActor in self?.finishOperation() }
+            },
+            andHeartRate: { _ in },
+            andPPG: { _ in }
+        )
+    }
+
+    func startBloodPressureTest() {
+        guard canStart(.bloodPressureTest, needsManualFreeState: true) else { return }
+        ensureLiveMeasurementChannel()
+        measurementHUD = MeasurementHUDState(kind: .bloodPressure, progress01: 0.08)
+        scheduleManualMeasurementTimeout(for: .bloodPressureTest, seconds: defaultManualMeasurementSeconds)
+        manager?.veepooSDKTestBloodStart(true, testMode: 0) { [weak self] testState, testProgress, highBlood, lowBlood in
+            Task { @MainActor in
+                guard let self else { return }
+                self.bloodPressure = BloodPressureReading(
+                    state: testState,
+                    progress: Int(testProgress),
+                    systolic: Int(highBlood),
+                    diastolic: Int(lowBlood)
+                )
+                let frac = min(1, max(0.08, Double(testProgress) / 100.0))
+                self.measurementHUD = MeasurementHUDState(kind: .bloodPressure, progress01: frac)
+                if testProgress >= 95 {
+                    self.scheduleQuietFinishForLiveMeasurement(expected: .bloodPressureTest)
+                }
+                // VPTestBloodStateTesting = 0 — keep measuring; any other state ends the session.
+                if testState.rawValue != 0 {
+                    self.finishOperation()
+                }
+            }
+        }
+    }
+
+    func stopBloodPressureTest() {
+        manager?.veepooSDKTestBloodStart(false, testMode: 0) { [weak self] _, _, _, _ in
+            Task { @MainActor in self?.finishOperation() }
+        }
+    }
+
+    func startBloodGlucoseTest() {
+        guard canStart(.bloodGlucoseTest, needsManualFreeState: true) else { return }
+        ensureLiveMeasurementChannel()
+        measurementHUD = MeasurementHUDState(kind: .bloodGlucose, progress01: nil)
+        scheduleManualMeasurementTimeout(for: .bloodGlucoseTest, seconds: defaultManualMeasurementSeconds)
+        manager?.veepooSDKTestBloodGlucoseStart(true, isPersonalModel: false) { [weak self] testState, testProgress, value, _ in
+            Task { @MainActor in
+                guard let self else { return }
+                self.bloodGlucose = BloodGlucoseReading(state: testState, progress: Int(testProgress), valueRaw: value)
+                let frac = min(1, max(0.08, Double(testProgress) / 100.0))
+                // VPDeviceBloodGlucoseTestStateOpen = 1 — in progress; stay on overlay until a terminal state.
+                if testState.rawValue == 1 {
+                    self.measurementHUD = MeasurementHUDState(
+                        kind: .bloodGlucose,
+                        progress01: testProgress > 0 ? frac : nil
+                    )
+                    if testProgress >= 90, value > 0 {
+                        self.scheduleQuietFinishForLiveMeasurement(expected: .bloodGlucoseTest)
+                    }
+                } else {
+                    self.measurementHUD = MeasurementHUDState(kind: .bloodGlucose, progress01: frac)
+                }
+                if testState.rawValue != 1 {
+                    self.finishOperation()
+                }
+            }
+        }
+    }
+
+    func stopBloodGlucoseTest() {
+        manager?.veepooSDKTestBloodGlucoseStart(false, isPersonalModel: false) { [weak self] _, _, _, _ in
+            Task { @MainActor in self?.finishOperation() }
+        }
+    }
+
+    private func setBaseFunction(rawType: Int, enabled: Bool) {
+        guardConnectedAndManager { manage in
+            guard let type = VPSettingBaseFunctionSwitchType(rawValue: rawType) else {
+                self.lastError = L10n.Err.settingMap
+                return
+            }
+            guard let state = VPSettingFunctionState(rawValue: enabled ? 1 : 2) else {
+                self.lastError = L10n.Err.settingState
+                return
+            }
+            manage.veepooSDKSettingBaseFunctionType(type, settingState: state) { [weak self] complete in
+                Task { @MainActor in
+                    if complete.rawValue == 3 || complete.rawValue == 0 {
+                        self?.lastError = L10n.Err.settingFailed
+                    } else {
+                        self?.lastError = nil
+                    }
+                }
+            }
+        }
+    }
+
+    private func canStart(_ op: BleOperation, needsManualFreeState: Bool = false) -> Bool {
+        guard isConnected else {
+            lastError = L10n.Err.deviceNotConnected
+            return false
+        }
+        if needsManualFreeState && operation == .readingDailyData {
+            lastError = L10n.Err.dailyBusy
+            return false
+        }
+        if operation != .idle {
+            lastError = L10n.Err.opBusy
+            return false
+        }
+        operation = op
+        lastError = nil
+        return true
+    }
+
+    private func guardConnectedAndManager(_ body: (VPPeripheralBaseManage) -> Void) {
+        guard isConnected, let manage = manager else {
+            lastError = L10n.Err.deviceNotConnected
+            return
+        }
+        body(manage)
+    }
+
+    private func finishOperation() {
+        cancelManualMeasurementTimeout()
+        cancelLiveMeasurementDebounce()
+        operation = .idle
+        measurementHUD = nil
+    }
+
+    private func cancelLiveMeasurementDebounce() {
+        liveMeasurementDebounceTask?.cancel()
+        liveMeasurementDebounceTask = nil
+    }
+
+    /// If the band keeps sending “testing” but never sends Over/Complete, hide the overlay after readings go quiet.
+    private func scheduleQuietFinishForLiveMeasurement(expected: BleOperation) {
+        liveMeasurementDebounceTask?.cancel()
+        liveMeasurementDebounceTask = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: liveReadingQuietFinishNanoseconds)
+            } catch {
+                return
+            }
+            await MainActor.run {
+                guard let self else { return }
+                guard self.operation == expected else { return }
+                self.finishOperation()
+            }
+        }
+    }
+
+    /// For `readAllDailyData` — await until idle or timeout (used by pull-to-refresh / launch).
+    func waitUntilOperationIdle(timeoutSeconds: Double) async {
+        let deadline = Date().addingTimeInterval(timeoutSeconds)
+        while operation != .idle, Date() < deadline {
+            try? await Task.sleep(nanoseconds: 200_000_000)
+        }
+    }
+
+    private func scheduleManualMeasurementTimeout(for expected: BleOperation, seconds: UInt64) {
+        measurementTimeoutTask?.cancel()
+        measurementTimeoutTask = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: seconds * 1_000_000_000)
+            } catch {
+                return
+            }
+            await MainActor.run {
+                guard let self else { return }
+                guard self.operation == expected else { return }
+                self.lastError = L10n.Err.measurementTimeout
+                self.abortStuckManualMeasurement()
+            }
+        }
+    }
+
+    private func cancelManualMeasurementTimeout() {
+        measurementTimeoutTask?.cancel()
+        measurementTimeoutTask = nil
+    }
+
+    /// User tapped the ✕ — clear HUD **immediately** (Veepoo stop calls can block the main thread and freeze the UI).
+    func dismissMeasurementOverlay() {
+        let opToStop = operation
+        finishOperation()
+        guard opToStop != .idle else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let mgr = self.manager, self.isConnected else { return }
+            self.sendSDKStopCommands(for: opToStop, manager: mgr)
+        }
+    }
+
+    /// Force-stop the current manual read/test if the SDK never answers (timeout).
+    private func abortStuckManualMeasurement() {
+        cancelManualMeasurementTimeout()
+        cancelLiveMeasurementDebounce()
+        if let mgr = manager {
+            sendSDKStopCommands(for: operation, manager: mgr)
+        }
+        operation = .idle
+        measurementHUD = nil
+    }
+
+    private func sendSDKStopCommands(for op: BleOperation, manager mgr: VPPeripheralBaseManage) {
+        switch op {
+        case .heartTest:
+            mgr.veepooSDKTestHeartStart(false) { _, _ in }
+        case .oxygenTest:
+            mgr.veepooSDKTestOxygenStart(false) { _, _ in }
+        case .temperatureTest:
+            mgr.veepooSDK_temperatureTestStart(false, result: { _, _, _, _, _ in })
+        case .ecgTest:
+            mgr.veepooSDKTestECGStart(false) { _, _, _ in }
+        case .microTest:
+            mgr.veepooSDKMicroTestOpenState(
+                false,
+                andProgress: { _ in },
+                andFail: { _ in },
+                andSuccess: { _, _ in },
+                andHeartRate: { _ in },
+                andPPG: { _ in }
+            )
+        case .bloodPressureTest:
+            mgr.veepooSDKTestBloodStart(false, testMode: 0) { _, _, _, _ in }
+        case .bloodGlucoseTest:
+            mgr.veepooSDKTestBloodGlucoseStart(false, isPersonalModel: false) { _, _, _, _ in }
+        case .readingSteps, .readingSleep, .readingDailyData, .idle:
+            break
+        }
+    }
+
+    private static func parseTotalSteps(from dict: Any?) -> Int? {
+        guard let dict else { return nil }
+        let keys = ["totalStep", "step", "steps", "TotalStep", "stepValue", "value", "stepTotal"]
+        if let d = dict as? NSDictionary {
+            for k in keys {
+                if let n = d.object(forKey: k) as? NSNumber { return n.intValue }
+                if let s = d.object(forKey: k) as? String, let v = Int(s) { return v }
+            }
+            return nil
+        }
+        if let d = dict as? [AnyHashable: Any] {
+            for k in keys {
+                if let n = d[k] as? NSNumber { return n.intValue }
+                if let n = d[k] as? Int { return n }
+                if let s = d[k] as? String, let v = Int(s) { return v }
+            }
+        }
+        return nil
+    }
+
+    private func appendChart(_ value: Double, to series: inout [ChartPoint]) {
+        guard value.isFinite else { return }
+        chartSeq += 1
+        series.append(ChartPoint(id: chartSeq, value: value))
+        if series.count > chartCap {
+            series.removeFirst(series.count - chartCap)
+        }
+    }
+
+    /// Obj-C `NSArray *filterSignals` may be nil; Swift bridge can still crash on `.count`.
+    private static func safeECGFilterSignalCount(_ model: VPECGTestDataModel?) -> Int {
+        guard let model else { return 0 }
+        if let arr = model.value(forKey: "filterSignals") as? NSArray {
+            return arr.count
+        }
+        return 0
+    }
+
+    private static func clampECGProgress(_ progress: UInt) -> Int {
+        Int(min(progress, 100))
+    }
+
+    /// Converts `filterSignals` ADC samples to mV using Veepoo’s helper (falls back to scaled ADC if conversion returns flat zero).
+    private static func ecgWaveformMillivolts(from model: VPECGTestDataModel?) -> [Float] {
+        guard let model else { return [] }
+        guard let raw = model.value(forKey: "filterSignals") as? NSArray, raw.count > 0 else { return [] }
+
+        let ecgType = (model.ecgType as String?) ?? "1"
+        let testType = (model.type as String?) ?? "1"
+        let gain = model.getGainValue()
+
+        // Keep only the tail so UI + conversion stay responsive (SDK appends continuously).
+        let maxRaw = 12_000
+        let startIdx = max(0, raw.count - maxRaw)
+
+        var out: [Float] = []
+        out.reserveCapacity(raw.count - startIdx)
+        for i in startIdx..<raw.count {
+            let el = raw.object(at: i)
+            let adc: CGFloat
+            if let n = el as? NSNumber {
+                adc = CGFloat(truncating: n)
+            } else {
+                continue
+            }
+            var mv = CGFloat(
+                VPECGTestDataModel.convertToMv(
+                    withValue: adc,
+                    ecgType: ecgType,
+                    testType: testType,
+                    gain: gain
+                )
+            )
+            if mv == 0, adc != 0 {
+                mv = adc / 128.0
+            }
+            out.append(Float(mv))
+        }
+        return out
+    }
+
+    private static func ecgLiveHeartRate(from model: VPECGTestDataModel?) -> Int? {
+        guard let model else { return nil }
+        guard let mu = model.value(forKey: "muHearts") as? NSArray, mu.count > 0 else { return nil }
+        guard let last = mu.lastObject as? NSNumber else { return nil }
+        let v = last.intValue
+        return v > 0 ? v : nil
+    }
+
+    private static func downsampleECG(_ values: [Float], maxPoints: Int) -> [Float] {
+        guard values.count > maxPoints else { return values }
+        let step = max(1, values.count / maxPoints)
+        var result: [Float] = []
+        result.reserveCapacity(min(maxPoints, values.count / step + 1))
+        var i = 0
+        while i < values.count {
+            result.append(values[i])
+            i += step
+        }
+        return result
+    }
+}

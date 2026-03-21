@@ -1,0 +1,265 @@
+/* Tabs */
+"tab_scan" = "Scan";
+"tab_home" = "Home";
+"tab_heart" = "Heart";
+"tab_spo2" = "SpO₂";
+"tab_temp" = "Temp";
+"tab_ecg" = "ECG";
+"tab_micro" = "Micro";
+"tab_vitals" = "Vitals";
+"tab_settings" = "Settings";
+
+/* Dashboard */
+"dash_title" = "Dashboard";
+"dash_battery" = "Battery";
+"dash_charge" = "Charge";
+"dash_device" = "Device";
+"dash_sdk" = "SDK";
+"dash_sdk_ok" = "OK";
+"dash_sdk_wait" = "…";
+"dash_live_traces" = "Live traces";
+"dash_live_sub" = "Last session samples";
+"dash_hr" = "Heart rate";
+"dash_spo2" = "SpO₂";
+"dash_sync" = "Sync progress";
+"dash_sync_sub" = "Daily data read";
+"dash_progress_pct" = "Progress %";
+"dash_device_card" = "Device";
+"dash_name" = "Name";
+"dash_status" = "Status";
+"dash_actions" = "Actions";
+"dash_actions_sub" = "Quick controls";
+"dash_read_battery" = "Read battery + charge";
+"dash_sync_time" = "Sync time";
+"dash_read_daily" = "Read all daily data";
+"dash_pipeline" = "Pipeline";
+"dash_pipeline_sub" = "Operation guard";
+"dash_manual_ok" = "Manual tests OK";
+"dash_busy" = "Busy";
+"dash_caps_title" = "What your watch can send";
+"dash_caps_sub" = "Model-dependent (SDK)";
+"dash_caps_body" = "Heart rate, temperature and SpO₂ are supported on many bands. ECG, health scan, blood pressure, glucose and some reports need extra hardware/SDK features — if a tab shows no data, your ET488 may not expose that channel here. Pull down on Home to fully resync.";
+
+/* Scan */
+"scan_title" = "Scan";
+"scan_bluetooth" = "Bluetooth";
+"scan_sdk" = "SDK";
+"scan_sdk_ready" = "Ready";
+"scan_sdk_init" = "Init…";
+"scan_bt_on" = "On";
+"scan_bt_off" = "Off";
+"scan_connection" = "Connection";
+"scan_connection_hint" = "Scan for your band and tap Connect.";
+"scan_start" = "Start scan";
+"scan_stop" = "Stop";
+"scan_refresh" = "Refresh BT";
+"scan_app_settings" = "App settings";
+"scan_xpc_hint" = "Use a real iPhone. “XPC connection invalid” is often debugger noise; if the list stays empty, check Bluetooth permission in Settings.";
+"scan_devices" = "Devices";
+"scan_no_devices" = "No devices yet";
+"scan_connect" = "Connect";
+"scan_disconnect" = "Disconnect";
+"scan_unknown_addr" = "Unknown address";
+"scan_scanning_title" = "Scanning…";
+"scan_scanning_hint" = "Keep the band awake and nearby. Devices will appear below.";
+
+/* Heart */
+"heart_title" = "Heart rate";
+"heart_current" = "Current heart rate";
+"heart_live_chart" = "Live chart";
+"heart_bpm_time" = "BPM over time";
+"heart_manual" = "Manual test";
+"heart_manual_sub" = "Stop when finished";
+
+/* Oxygen */
+"oxygen_title" = "Blood oxygen";
+"oxygen_live_chart" = "Live chart";
+"oxygen_chart_title" = "Oxygen %";
+"oxygen_manual" = "Manual test";
+"oxygen_manual_sub" = "Calibration may use the value field";
+
+/* Temperature */
+"temp_title" = "Temperature";
+"temp_body" = "Body";
+"temp_skin" = "Skin";
+"temp_trend" = "Body temperature trend";
+"temp_trend_sub_fmt" = "Progress %d%%";
+"temp_c" = "°C";
+"temp_manual" = "Manual test";
+"temp_manual_sub" = "Wear the device snugly";
+"temp_not_supported" = "Not supported";
+"temp_not_supported_sub" = "This band has no temperature sensor";
+
+/* ECG */
+"ecg_title" = "ECG";
+"ecg_supported" = "ECG supported";
+"ecg_supported_sub" = "Use dry skin & firm contact";
+"ecg_not_avail" = "ECG not available";
+"ecg_not_avail_sub" = "ecgType is 0 on this model";
+"ecg_progress" = "Progress";
+"ecg_samples" = "Samples";
+"ecg_curve" = "Recording curve";
+"ecg_progress_pct" = "Progress %";
+"ecg_controls" = "Controls";
+"ecg_controls_sub" = "End test with Stop";
+"ecg_start" = "Start ECG";
+"ecg_wave_title" = "Live waveform";
+"ecg_wave_sub_idle" = "Start recording to see the trace from the band.";
+"ecg_wave_sub_live" = "Receiving samples from the device…";
+"ecg_wave_frozen" = "Last trace (finished)";
+"ecg_wave_waiting" = "Waiting for waveform data…";
+
+/* Micro */
+"micro_title" = "Micro test";
+"micro_check" = "Micro check";
+"micro_check_ok" = "Multi-vital snapshot";
+"micro_check_no" = "healthGlanceType ≠ 1";
+"micro_progress" = "Progress";
+"micro_chart" = "Progress chart";
+"micro_chart_sub" = "During the run";
+"micro_completion" = "Completion %";
+"micro_run" = "Run";
+"micro_run_sub" = "Keep the band steady";
+"micro_last" = "Last result";
+"micro_last_none" = "—";
+"micro_last_ok" = "From device";
+"micro_metric_stress" = "Stress";
+"micro_metric_temp" = "Temp";
+"micro_unit_mmhg" = "mmHg";
+
+/* Settings */
+"settings_title" = "Settings";
+"settings_profile" = "Profile";
+"settings_profile_sub" = "Sent to the band when connected";
+"settings_height" = "Height (cm)";
+"settings_weight" = "Weight (kg)";
+"settings_age" = "Age";
+"settings_sex" = "Sex";
+"settings_female" = "Female";
+"settings_male" = "Male";
+"settings_steps" = "Target steps";
+"settings_sync_personal" = "Sync personal info";
+"settings_device_prefs" = "Device preferences";
+"settings_device_prefs_sub" = "Apply after editing toggles";
+"settings_metric" = "Metric units";
+"settings_24h" = "24-hour time";
+"settings_auto_hr" = "Auto heart rate";
+"settings_auto_hr_hint" = "On many watches this must stay ON for live SpO₂ / HR data to reach the app. It is turned on automatically after a successful link; you can change it and tap “Apply to band”.";
+"settings_auto_temp" = "Auto temperature";
+"settings_apply" = "Apply toggles to device";
+"settings_time_card" = "Time";
+"settings_time_sub" = "Uses SDK sync API";
+"settings_sync_time_band" = "Sync phone time to band";
+
+/* States */
+"state_idle" = "Idle";
+"state_starting" = "Starting…";
+"state_measuring" = "Measuring";
+"state_not_worn" = "Not worn";
+"state_device_busy" = "Device busy";
+"state_finished" = "Finished";
+"state_done" = "Done";
+"state_unsupported" = "Unsupported";
+"state_calibrating" = "Calibrating";
+"state_calib_done" = "Calibration done";
+"state_invalid" = "Invalid";
+"state_preparing" = "Preparing…";
+"state_recording" = "Recording";
+"state_lead_off" = "Lead off";
+"state_busy" = "Busy";
+"state_stopped" = "Stopped";
+"state_failed" = "Failed";
+"state_complete" = "Complete";
+"state_no_func" = "No function";
+
+"chart_empty_hint" = "Start a measurement to see the live chart";
+
+/* Errors */
+"err_veepoo_unavailable" = "Veepoo BLE manager is unavailable.";
+"err_not_connected" = "Device is not connected.";
+"err_daily_busy" = "Cannot run manual test while daily data read is in progress.";
+"err_op_busy" = "Another operation is already running.";
+"err_ecg_unsupported" = "ECG is not supported on this device.";
+"err_temp_unsupported" = "Temperature is not supported on this device.";
+"err_micro_unsupported" = "Micro test is not supported on this device.";
+"err_sync_time" = "Failed to sync time.";
+"err_sync_personal" = "Failed to sync personal info.";
+"err_setting_failed" = "Failed to update setting.";
+"err_setting_map" = "Unsupported local setting mapping.";
+"err_setting_state" = "Invalid setting state.";
+"err_read_battery" = "Device is not connected.";
+"err_bt_permission" = "Bluetooth access denied for Tamyr Flow. Enable it in Settings → Tamyr Flow.";
+"err_bt_permission_detail" = "Bluetooth permission denied. Open Settings → Tamyr Flow → turn Bluetooth ON, or Privacy & Security → Bluetooth.";
+"err_bt_off" = "Bluetooth is off. Turn it on in Control Center or Settings.";
+"err_bt_unsupported" = "Bluetooth is not supported on this device.";
+"err_bt_scan" = "Bluetooth must be on and allowed for Tamyr Flow to scan.";
+"err_measurement_timeout" = "No data from the band in time — measurement stopped. Check the fit, keep the app open, and try again.";
+
+/* Connection status */
+"conn_disconnected" = "Disconnected";
+"conn_connecting" = "Connecting";
+"conn_connected" = "Connected";
+"conn_verified" = "Verified";
+"conn_failed" = "Failed";
+"conn_timeout" = "Timeout";
+
+/* Operations */
+"op_idle" = "Idle";
+"op_reading_daily" = "Daily sync";
+"op_heart" = "Heart test";
+"op_oxygen" = "SpO₂ test";
+"op_temperature" = "Temperature test";
+"op_ecg" = "ECG test";
+"op_micro" = "Micro test";
+"op_bp" = "Blood pressure test";
+"op_glucose" = "Glucose test";
+"op_steps" = "Reading steps";
+"op_sleep" = "Reading sleep";
+
+/* Connection bar */
+"conn_bar_no_device" = "No watch";
+"conn_bar_sdk_init" = "SDK initializing…";
+"conn_bar_bt_off" = "Bluetooth off";
+"conn_bar_not_linked" = "Not connected to watch";
+"conn_bar_phone_bt_on" = "Phone BT on";
+"conn_bar_phone_bt_off" = "Phone BT off";
+"conn_bar_bt_warming" = "Bluetooth stack starting… (not off)";
+
+/* Measurement overlay */
+"measure_hint" = "Hold still — the band is sending data.";
+"measure_close" = "Close";
+"measure_heart" = "Measuring heart rate";
+"measure_spo2" = "Measuring blood oxygen";
+"measure_temp" = "Measuring temperature";
+"measure_ecg" = "Recording ECG";
+"measure_micro" = "Health scan";
+"measure_bp" = "Measuring blood pressure";
+"measure_glucose" = "Measuring blood glucose";
+"measure_daily_sync" = "Syncing daily data";
+"measure_steps" = "Reading steps";
+"measure_sleep" = "Reading sleep";
+
+/* Vitals tab */
+"vitals_title" = "Blood pressure & glucose";
+"vitals_bp_card" = "Blood pressure";
+"vitals_bp_sub" = "Manual test from the band (if supported)";
+"vitals_glucose_card" = "Blood glucose";
+"vitals_glucose_sub" = "Calibration rules may apply on the band";
+"vitals_last" = "Last reading";
+"vitals_mmol" = "mmol/L";
+
+/* Hub */
+"hub_section" = "Health hub";
+"hub_section_sub" = "Open a metric";
+"hub_steps" = "Read steps (today)";
+"hub_sleep" = "Read sleep (today)";
+"hub_sleep_sub" = "segments";
+"hub_vitals" = "BP & glucose";
+"hub_vitals_sub" = "Manual tests";
+
+"btn_start" = "Start";
+"btn_stop" = "Stop";
+
+"bat_charging" = "Charging";
+"bat_full" = "Full";
+"bat_normal" = "Normal";
