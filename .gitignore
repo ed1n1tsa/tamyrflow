@@ -1,0 +1,25 @@
+# Secrets and signing keys
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+keystore.properties
+
+# Android build artifacts
+**/build/
+*.apk
+*.ap_
+*.aab
+*.idsig
+*.dm
+
+# Gradle / IDE
+.gradle/
+local.properties
+.idea/
+*.iml
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

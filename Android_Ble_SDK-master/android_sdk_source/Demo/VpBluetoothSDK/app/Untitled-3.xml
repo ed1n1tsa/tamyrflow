@@ -1,0 +1,22 @@
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\jniso\arm64-v8a\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\jniso\armeabi-v7a\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\jniso\x86\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\jniso\x86_64\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+
+
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\GBand\jniLibs\arm64-v8a\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\GBand\jniLibs\armeabi-v7a\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\GBand\jniLibs\x86\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\GBand\jniLibs\x86_64\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\HBand\lib\arm64-v8a\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\HBand\lib\armeabi-v7a\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\HBand\lib\x86\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\HBand\lib\x86_64\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+
+
+for %a in (arm64-v8a armeabi-v7a x86 x86_64) do (echo ====================================== & echo 正在处理架构：%a & echo -------------------------------------- & for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\jniso\%a\*.so") do (echo 🔹 文件：%f & llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD" & echo.) & echo.)
+
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\jniso\armeabi\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\jniso\mips\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"
+for %f in ("G:\AndroidSDK\ndk\28.0.12674087\toolchains\llvm\prebuilt\windows-x86_64\bin\jniso\mips64\*.so") do llvm-readelf.exe -l "%f" | findstr /R /C:"LOAD"

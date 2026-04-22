@@ -1,0 +1,487 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FA3F3DD72F40831900680321 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3DD42F40831900680321 /* ContentView.swift */; };
+		FA3F3DD82F40831900680321 /* TamyrFlowAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3DD52F40831900680321 /* TamyrFlowAppApp.swift */; };
+		FA3F3DD92F40831900680321 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA3F3DD32F40831900680321 /* Assets.xcassets */; };
+		FA3F3F062F44013600680321 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3F052F44011C00680321 /* SupabaseManager.swift */; };
+		FA3F3F082F4402CD00680321 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3F072F4402AC00680321 /* AuthViewModel.swift */; };
+		FA3F3F0C2F44033B00680321 /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = FA3F3F0B2F44033B00680321 /* Auth */; };
+		FA3F3F0E2F44033B00680321 /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = FA3F3F0D2F44033B00680321 /* Functions */; };
+		FA3F3F102F44033B00680321 /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = FA3F3F0F2F44033B00680321 /* PostgREST */; };
+		FA3F3F122F44033B00680321 /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = FA3F3F112F44033B00680321 /* Realtime */; };
+		FA3F3F142F44033B00680321 /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = FA3F3F132F44033B00680321 /* Storage */; };
+		FA3F3F162F44033B00680321 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = FA3F3F152F44033B00680321 /* Supabase */; };
+		FA3F3F182F44042A00680321 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3F172F44041C00680321 /* LoginView.swift */; };
+		FA3F3F1A2F44BC4900680321 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3F192F44BC4000680321 /* Models.swift */; };
+		FA3F3F1C2F44BC7200680321 /* HealthDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3F1B2F44BC7000680321 /* HealthDataService.swift */; };
+		FA3F3F202F44D83300680321 /* BluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3F1F2F44D83000680321 /* BluetoothManager.swift */; };
+		FA3F3F222F44E05000680321 /* WatchHealthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3F3F212F44E04E00680321 /* WatchHealthModels.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3A1230DC2F3EB79100A5798C /* TamyrFlowApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TamyrFlowApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA3F3DD32F40831900680321 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FA3F3DD42F40831900680321 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FA3F3DD52F40831900680321 /* TamyrFlowAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TamyrFlowAppApp.swift; sourceTree = "<group>"; };
+		FA3F3F052F44011C00680321 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
+		FA3F3F072F4402AC00680321 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		FA3F3F172F44041C00680321 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		FA3F3F192F44BC4000680321 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		FA3F3F1B2F44BC7000680321 /* HealthDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDataService.swift; sourceTree = "<group>"; };
+		FA3F3F1F2F44D83000680321 /* BluetoothManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothManager.swift; sourceTree = "<group>"; };
+		FA3F3F212F44E04E00680321 /* WatchHealthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHealthModels.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3A1230D92F3EB79100A5798C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA3F3F102F44033B00680321 /* PostgREST in Frameworks */,
+				FA3F3F0E2F44033B00680321 /* Functions in Frameworks */,
+				FA3F3F162F44033B00680321 /* Supabase in Frameworks */,
+				FA3F3F0C2F44033B00680321 /* Auth in Frameworks */,
+				FA3F3F142F44033B00680321 /* Storage in Frameworks */,
+				FA3F3F122F44033B00680321 /* Realtime in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3A1230D32F3EB79100A5798C = {
+			isa = PBXGroup;
+			children = (
+				3A1230DD2F3EB79100A5798C /* Products */,
+				FA3F3DD62F40831900680321 /* TamyrFlowApp */,
+			);
+			sourceTree = "<group>";
+		};
+		3A1230DD2F3EB79100A5798C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3A1230DC2F3EB79100A5798C /* TamyrFlowApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FA3F3DD62F40831900680321 /* TamyrFlowApp */ = {
+			isa = PBXGroup;
+			children = (
+				FA3F3F212F44E04E00680321 /* WatchHealthModels.swift */,
+				FA3F3F1B2F44BC7000680321 /* HealthDataService.swift */,
+				FA3F3F1F2F44D83000680321 /* BluetoothManager.swift */,
+				FA3F3F192F44BC4000680321 /* Models.swift */,
+				FA3F3F172F44041C00680321 /* LoginView.swift */,
+				FA3F3F072F4402AC00680321 /* AuthViewModel.swift */,
+				FA3F3F052F44011C00680321 /* SupabaseManager.swift */,
+				FA3F3DD32F40831900680321 /* Assets.xcassets */,
+				FA3F3DD42F40831900680321 /* ContentView.swift */,
+				FA3F3DD52F40831900680321 /* TamyrFlowAppApp.swift */,
+			);
+			path = TamyrFlowApp;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3A1230DB2F3EB79100A5798C /* TamyrFlowApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3A1230E72F3EB79200A5798C /* Build configuration list for PBXNativeTarget "TamyrFlowApp" */;
+			buildPhases = (
+				3A1230D82F3EB79100A5798C /* Sources */,
+				3A1230D92F3EB79100A5798C /* Frameworks */,
+				3A1230DA2F3EB79100A5798C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TamyrFlowApp;
+			packageProductDependencies = (
+				FA3F3F0B2F44033B00680321 /* Auth */,
+				FA3F3F0D2F44033B00680321 /* Functions */,
+				FA3F3F0F2F44033B00680321 /* PostgREST */,
+				FA3F3F112F44033B00680321 /* Realtime */,
+				FA3F3F132F44033B00680321 /* Storage */,
+				FA3F3F152F44033B00680321 /* Supabase */,
+			);
+			productName = TamyrFlowApp;
+			productReference = 3A1230DC2F3EB79100A5798C /* TamyrFlowApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3A1230D42F3EB79100A5798C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				KnownAssetTags = (
+					New,
+				);
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					3A1230DB2F3EB79100A5798C = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = 3A1230D72F3EB79100A5798C /* Build configuration list for PBXProject "TamyrFlowApp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				de,
+				ja,
+			);
+			mainGroup = 3A1230D32F3EB79100A5798C;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FA3F3F0A2F44033B00680321 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3A1230DD2F3EB79100A5798C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3A1230DB2F3EB79100A5798C /* TamyrFlowApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3A1230DA2F3EB79100A5798C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA3F3DD92F40831900680321 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3A1230D82F3EB79100A5798C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA3F3F082F4402CD00680321 /* AuthViewModel.swift in Sources */,
+				FA3F3F062F44013600680321 /* SupabaseManager.swift in Sources */,
+				FA3F3F202F44D83300680321 /* BluetoothManager.swift in Sources */,
+				FA3F3DD72F40831900680321 /* ContentView.swift in Sources */,
+				FA3F3F222F44E05000680321 /* WatchHealthModels.swift in Sources */,
+				FA3F3F1A2F44BC4900680321 /* Models.swift in Sources */,
+				FA3F3F182F44042A00680321 /* LoginView.swift in Sources */,
+				FA3F3F1C2F44BC7200680321 /* HealthDataService.swift in Sources */,
+				FA3F3DD82F40831900680321 /* TamyrFlowAppApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		3A1230E52F3EB79200A5798C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3A1230E62F3EB79200A5798C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		3A1230E82F3EB79200A5798C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 665BH238C2;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ray.TamyrApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		3A1230E92F3EB79200A5798C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 665BH238C2;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ray.TamyrApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3A1230D72F3EB79100A5798C /* Build configuration list for PBXProject "TamyrFlowApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3A1230E52F3EB79200A5798C /* Debug */,
+				3A1230E62F3EB79200A5798C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3A1230E72F3EB79200A5798C /* Build configuration list for PBXNativeTarget "TamyrFlowApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3A1230E82F3EB79200A5798C /* Debug */,
+				3A1230E92F3EB79200A5798C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FA3F3F0A2F44033B00680321 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FA3F3F0B2F44033B00680321 /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3F3F0A2F44033B00680321 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		FA3F3F0D2F44033B00680321 /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3F3F0A2F44033B00680321 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		FA3F3F0F2F44033B00680321 /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3F3F0A2F44033B00680321 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		FA3F3F112F44033B00680321 /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3F3F0A2F44033B00680321 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		FA3F3F132F44033B00680321 /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3F3F0A2F44033B00680321 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		FA3F3F152F44033B00680321 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3F3F0A2F44033B00680321 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 3A1230D42F3EB79100A5798C /* Project object */;
+}
