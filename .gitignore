@@ -14,6 +14,9 @@ keystore.properties
 *.idsig
 *.dm
 
+# iOS vendor repo with broken nested git metadata
+Ios/TamyrFlowApp/TamyrFlowApp/supabase-swift/
+
 # Gradle / IDE
 .gradle/
 local.properties
