@@ -26,3 +26,9 @@ local.properties
 # OS/editor noise
 .DS_Store
 Thumbs.db
+
+# Env / Supabase keys
+.env
+.env.*
+!.env.example
+**/service_role*
