@@ -37,6 +37,7 @@
 		FAE2A1582F6ED60B0085824D /* DFUnits.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE29FA52F6E90250085824D /* DFUnits.framework */; };
 		FAE2A15C2F6ED6100085824D /* VeepooBleSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE29F9F2F6E8FCE0085824D /* VeepooBleSDK.framework */; };
 		FAE2A1612F6EE0000085824D /* JL_BLEKit_NoDup.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE2A1602F6EE0000085824D /* JL_BLEKit_NoDup.a */; };
+		FAE2A3002F8000010085824D /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = FAE2A3012F8000010085824D /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -124,6 +125,7 @@
 				FAE29FA42F6E90100085824D /* ABParTool.framework in Frameworks */,
 				FAE2A1582F6ED60B0085824D /* DFUnits.framework in Frameworks */,
 				FAE2A0E42F6EA1000085824D /* ZipZap.framework in Frameworks */,
+				FAE2A3002F8000010085824D /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,6 +262,7 @@
 			);
 			name = TamyrFlow;
 			packageProductDependencies = (
+				FAE2A3012F8000010085824D /* Supabase */,
 			);
 			productName = TamyrFlow;
 			productReference = FAE29F712F6E713D0085824D /* TamyrFlow.app */;
@@ -509,12 +512,14 @@
 					"$(PROJECT_DIR)",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Tamyr Flow uses Bluetooth to scan and connect to your wearable device.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Tamyr Flow uses Bluetooth to communicate with your wearable device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -550,12 +555,14 @@
 					"$(PROJECT_DIR)",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Config/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Tamyr Flow uses Bluetooth to scan and connect to your wearable device.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Tamyr Flow uses Bluetooth to communicate with your wearable device.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -609,6 +616,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FAE2A3012F8000010085824D /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FAE29F7F2F6E73010085824D /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FAE29F692F6E713D0085824D /* Project object */;
 }
