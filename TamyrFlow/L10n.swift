@@ -3,7 +3,43 @@ import Foundation
 /// Centralized keys for `Localizable.strings` (en / ru / kk).
 enum L10n {
     private static func tr(_ key: String) -> String {
-        String(localized: String.LocalizationValue(key))
+        let bundle = LanguageStoreBootstrap.bundle
+        return bundle.localizedString(forKey: key, value: nil, table: nil)
+    }
+
+    enum Auth {
+        static var start: String { tr("auth_start") }
+        static var loginTitle: String { tr("auth_login_title") }
+        static var registerTitle: String { tr("auth_register_title") }
+        static var email: String { tr("auth_email") }
+        static var password: String { tr("auth_password") }
+        static var noAccount: String { tr("auth_no_account") }
+        static var haveAccount: String { tr("auth_have_account") }
+        static var forgotPassword: String { tr("auth_forgot_password") }
+        static var login: String { tr("auth_login") }
+        static var register: String { tr("auth_register") }
+        static var termsPrefix: String { tr("auth_terms_prefix") }
+        static var privacy: String { tr("auth_privacy") }
+        static var termsAnd: String { tr("auth_terms_and") }
+        static var terms: String { tr("auth_terms") }
+        static var termsSuffix: String { tr("auth_terms_suffix") }
+        static var errorGeneric: String { tr("auth_error_generic") }
+        static var confirmEmail: String { tr("auth_confirm_email") }
+        static var forgotTitle: String { tr("auth_forgot_title") }
+        static var forgotHintEmpty: String { tr("auth_forgot_hint_empty") }
+        static var forgotHintFormat: String { tr("auth_forgot_hint_format") }
+        static var forgotResend: String { tr("auth_forgot_resend") }
+        static var forgotSubmit: String { tr("auth_forgot_submit") }
+        static var forgotCodeSent: String { tr("auth_forgot_code_sent") }
+        static var forgotNeedEmail: String { tr("auth_forgot_need_email") }
+        static var newPasswordTitle: String { tr("auth_new_password_title") }
+        static var newPassword: String { tr("auth_new_password") }
+        static var confirmPassword: String { tr("auth_confirm_password") }
+        static var savePassword: String { tr("auth_save_password") }
+        static var passwordMismatch: String { tr("auth_password_mismatch") }
+        static var mailPopupTitle: String { tr("auth_mail_popup_title") }
+        static var mailPopupBody: String { tr("auth_mail_popup_body") }
+        static var mailPopupOK: String { tr("auth_mail_popup_ok") }
     }
 
     enum Tab {
@@ -16,6 +52,109 @@ enum L10n {
         static var ecg: String { tr("tab_ecg") }
         static var micro: String { tr("tab_micro") }
         static var settings: String { tr("tab_settings") }
+        static var metrics: String { tr("tab_metrics") }
+        static var activity: String { tr("tab_activity") }
+        static var goals: String { tr("tab_goals") }
+        static var profile: String { tr("tab_profile") }
+    }
+
+    enum Placeholder {
+        static var activitySub: String { tr("ph_activity_sub") }
+        static var goalsSub: String { tr("ph_goals_sub") }
+    }
+
+    enum ProfileSetup {
+        static var stepFormat: String { tr("ps_step_format") }
+        static var back: String { tr("ps_back") }
+        static var next: String { tr("ps_next") }
+        static var done: String { tr("ps_done") }
+        static var cancel: String { tr("ps_cancel") }
+        static var sheetDone: String { tr("ps_sheet_done") }
+        static var nameTitle: String { tr("ps_name_title") }
+        static var nameSub: String { tr("ps_name_sub") }
+        static var namePlaceholder: String { tr("ps_name_placeholder") }
+        static var sectionProfile: String { tr("ps_section_profile") }
+        static var genderTitle: String { tr("ps_gender_title") }
+        static var genderSub: String { tr("ps_gender_sub") }
+        static var genderMale: String { tr("ps_gender_male") }
+        static var genderFemale: String { tr("ps_gender_female") }
+        static var genderUnspecified: String { tr("ps_gender_unspecified") }
+        static var ageTitle: String { tr("ps_age_title") }
+        static var ageSub: String { tr("ps_age_sub") }
+        static var ageSheetTitle: String { tr("ps_age_sheet_title") }
+        static var ageYearsFormat: String { tr("ps_age_years_format") }
+        static var yearsUnit: String { tr("ps_years_unit") }
+        static var heightTitle: String { tr("ps_height_title") }
+        static var heightSub: String { tr("ps_height_sub") }
+        static var weightTitle: String { tr("ps_weight_title") }
+        static var weightSub: String { tr("ps_weight_sub") }
+        static var cmUnit: String { tr("ps_cm") }
+        static var kgUnit: String { tr("ps_kg") }
+    }
+
+    enum Profile {
+        static var title: String { tr("prof_title") }
+        static var subtitle: String { tr("prof_subtitle") }
+        static var edit: String { tr("prof_edit") }
+        static var gender: String { tr("prof_gender") }
+        static var age: String { tr("prof_age") }
+        static var height: String { tr("prof_height") }
+        static var weight: String { tr("prof_weight") }
+        static var genderUnspecifiedShort: String { tr("prof_gender_unspecified_short") }
+        static var goalsTitle: String { tr("prof_goals_title") }
+        static var goalsSubMock: String { tr("prof_goals_sub_mock") }
+        static var myWatch: String { tr("prof_my_watch") }
+        static var connected: String { tr("prof_connected") }
+        static var disconnected: String { tr("prof_disconnected") }
+        static var lastSyncMock: String { tr("prof_last_sync_mock") }
+        static var menuPersonal: String { tr("prof_menu_personal") }
+        static var menuPersonalSub: String { tr("prof_menu_personal_sub") }
+        static var menuMetrics: String { tr("prof_menu_metrics") }
+        static var menuMetricsSub: String { tr("prof_menu_metrics_sub") }
+        static var menuGoals: String { tr("prof_menu_goals") }
+        static var menuGoalsSub: String { tr("prof_menu_goals_sub") }
+        static var menuSettings: String { tr("prof_menu_settings") }
+        static var menuSettingsSub: String { tr("prof_menu_settings_sub") }
+        static var menuPrivacy: String { tr("prof_menu_privacy") }
+        static var menuPrivacySub: String { tr("prof_menu_privacy_sub") }
+        static var menuSupport: String { tr("prof_menu_support") }
+        static var menuSupportSub: String { tr("prof_menu_support_sub") }
+        static var menuTerms: String { tr("prof_menu_terms") }
+        static var menuTermsSub: String { tr("prof_menu_terms_sub") }
+        static var menuPolicy: String { tr("prof_menu_policy") }
+        static var menuPolicySub: String { tr("prof_menu_policy_sub") }
+        static var menuAbout: String { tr("prof_menu_about") }
+        static var menuAboutSub: String { tr("prof_menu_about_sub") }
+        static var logout: String { tr("prof_logout") }
+        static var deleteAccount: String { tr("prof_delete") }
+        static var logoutConfirmTitle: String { tr("prof_logout_title") }
+        static var logoutConfirmBody: String { tr("prof_logout_body") }
+        static var deleteConfirmTitle: String { tr("prof_delete_title") }
+        static var deleteConfirmBody: String { tr("prof_delete_body") }
+        static var deleteConfirmAction: String { tr("prof_delete_action") }
+        static var cancel: String { tr("prof_cancel") }
+        static var stubTitle: String { tr("prof_stub_title") }
+        static var stubBody: String { tr("prof_stub_body") }
+    }
+
+    enum EditProfile {
+        static var title: String { tr("edit_title") }
+        static var subtitle: String { tr("edit_subtitle") }
+        static var photoTitle: String { tr("edit_photo_title") }
+        static var photoSub: String { tr("edit_photo_sub") }
+        static var photoError: String { tr("edit_photo_error") }
+        static var nameLabel: String { tr("edit_name_label") }
+        static var save: String { tr("edit_save") }
+        static var cancel: String { tr("edit_cancel") }
+        static var successTitle: String { tr("edit_success_title") }
+        static var successBody: String { tr("edit_success_body") }
+        static var successOK: String { tr("edit_success_ok") }
+    }
+
+    enum PersonalData {
+        static var title: String { tr("pdata_title") }
+        static var subtitle: String { tr("pdata_subtitle") }
+        static var emailLabel: String { tr("pdata_email") }
     }
 
     enum Dashboard {
@@ -292,4 +431,9 @@ enum L10n {
         static var full: String { tr("bat_full") }
         static var normal: String { tr("bat_normal") }
     }
+}
+
+/// Non-observable access to the active language bundle (set by `LanguageStore`).
+enum LanguageStoreBootstrap {
+    nonisolated(unsafe) static var bundle: Bundle = .main
 }

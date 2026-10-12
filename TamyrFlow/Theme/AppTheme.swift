@@ -1,13 +1,29 @@
 import SwiftUI
 
 enum AppTheme {
-    static let accent = Color(red: 0.35, green: 0.88, blue: 0.82)
+    /// Brand blue from Figma onboarding (НАЧАТЬ / ДАЛЕЕ active).
+    static let brandBlue = Color(red: 0.204, green: 0.353, blue: 0.800) // #345ACC
+    static let brandBlueDeep = Color(red: 0.106, green: 0.204, blue: 0.459) // #1B3475
+
+    static let accent = brandBlue
     static let accentSecondary = Color(red: 0.45, green: 0.55, blue: 0.98)
     static let danger = Color(red: 1.0, green: 0.38, blue: 0.42)
     static let warning = Color(red: 1.0, green: 0.76, blue: 0.28)
 
     static let cardBackground = Color.white.opacity(0.08)
     static let cardBorder = Color.white.opacity(0.12)
+
+    static let onboardingOverlay = Color(red: 0.07, green: 0.12, blue: 0.28).opacity(0.72)
+    /// Figma top photo scrim: #273151 @ 69%
+    static let onboardingTopScrim = Color(red: 39 / 255, green: 49 / 255, blue: 81 / 255)
+    static let onboardingTopScrimOpacity = 0.69
+    static let onboardingButtonDisabled = Color(red: 0.86, green: 0.87, blue: 0.90)
+    static let onboardingButtonDisabledText = Color(red: 0.45, green: 0.47, blue: 0.52)
+
+    /// Figma auth link / legal accent
+    static let authLink = Color(red: 0, green: 218 / 255, blue: 252 / 255) // #00DAFC
+    static let authFieldPlaceholder = Color(red: 0.70, green: 0.72, blue: 0.76)
+    static let authPrimaryButton = Color(red: 0.18, green: 0.40, blue: 0.92) // login ВОЙТИ
 
     static var backgroundGradient: LinearGradient {
         LinearGradient(
