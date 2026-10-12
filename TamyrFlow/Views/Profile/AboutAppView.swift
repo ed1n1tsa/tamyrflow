@@ -7,7 +7,7 @@ struct AboutAppView: View {
     @Environment(\.openURL) private var openURL
 
     private var versionLabel: String {
-        let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.1.0"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
         return String(format: L10n.About.versionFormat, short, build)
     }
@@ -22,7 +22,7 @@ struct AboutAppView: View {
                     .padding(.top, 6)
 
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 20) {
                         brandCard
                         missionCard
                         featuresCard
@@ -30,8 +30,8 @@ struct AboutAppView: View {
                         contactRow
                     }
                     .padding(.horizontal, ProfileTheme.contentInset)
-                    .padding(.top, 14)
-                    .padding(.bottom, 28)
+                    .padding(.top, 18)
+                    .padding(.bottom, 32)
                 }
             }
         }
@@ -66,139 +66,158 @@ struct AboutAppView: View {
     // MARK: - Cards
 
     private var brandCard: some View {
-        HStack(alignment: .center, spacing: 14) {
+        HStack(alignment: .top, spacing: 16) {
+            // Own logo only — no frame / glow.
             Image("BrandLogoTF")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 56, height: 56)
-                .padding(8)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(Color(red: 0.05, green: 0.18, blue: 0.42))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .strokeBorder(ProfileTheme.accent.opacity(0.85), lineWidth: 1.5)
-                        )
-                        .shadow(color: ProfileTheme.accent.opacity(0.35), radius: 10, y: 0)
-                )
+                .frame(width: 64, height: 64)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text("TAMYR FLOW")
-                    .font(AppFont.interBold(20))
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Tamyr Flow")
+                    .font(AppFont.interBold(22))
                     .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+
                 Text(versionLabel)
-                    .font(AppFont.interBold(12))
+                    .font(AppFont.interBold(13))
                     .foregroundStyle(ProfileTheme.muted)
+
                 Text(L10n.About.tagline)
-                    .font(AppFont.interBold(12))
-                    .foregroundStyle(ProfileTheme.accentSoft)
+                    .font(AppFont.interBold(14))
+                    .foregroundStyle(Color.white.opacity(0.78))
+                    .lineSpacing(5)
                     .fixedSize(horizontal: false, vertical: true)
             }
-
-            Spacer(minLength: 4)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Image(systemName: "dumbbell.fill")
-                .font(.system(size: 36, weight: .semibold))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [ProfileTheme.accent, ProfileTheme.accentSoft],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .shadow(color: ProfileTheme.accent.opacity(0.55), radius: 12, y: 0)
-                .frame(width: 64, height: 64)
+                .font(.system(size: 30, weight: .semibold))
+                .foregroundStyle(ProfileTheme.accent)
+                .frame(width: 36, height: 36)
+                .padding(.top, 4)
         }
-        .padding(16)
+        .padding(20)
         .profileCard()
     }
 
     private var missionCard: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: "target")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(ProfileTheme.accent)
-                .frame(width: 36, height: 36)
-                .background(Circle().fill(ProfileTheme.accent.opacity(0.18)))
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 14) {
+                Image(systemName: "target")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(ProfileTheme.accent)
+                    .frame(width: 48, height: 48)
+                    .background(Circle().fill(ProfileTheme.accent.opacity(0.18)))
 
-            VStack(alignment: .leading, spacing: 8) {
                 Text(L10n.About.missionTitle)
-                    .font(AppFont.interBold(16))
+                    .font(AppFont.interBold(18))
                     .foregroundStyle(.white)
-                Text(L10n.About.missionBody)
-                    .font(AppFont.interBold(13))
-                    .foregroundStyle(ProfileTheme.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
+
+            Text(L10n.About.missionBody)
+                .font(AppFont.interBold(14))
+                .foregroundStyle(Color.white.opacity(0.72))
+                .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(16)
+        .padding(20)
         .profileCard()
     }
 
     private var featuresCard: some View {
-        LazyVGrid(
-            columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
-            spacing: 16
-        ) {
-            featureCell(systemImage: "chart.bar.fill", title: L10n.About.featureTrackTitle, body: L10n.About.featureTrackBody)
-            featureCell(systemImage: "trophy.fill", title: L10n.About.featureAchieveTitle, body: L10n.About.featureAchieveBody)
-            featureCell(systemImage: "calendar", title: L10n.About.featureHabitsTitle, body: L10n.About.featureHabitsBody)
-            featureCell(systemImage: "heart.fill", title: L10n.About.featureMotivateTitle, body: L10n.About.featureMotivateBody)
+        Grid(alignment: .topLeading, horizontalSpacing: 18, verticalSpacing: 22) {
+            GridRow {
+                featureCell(
+                    systemImage: "chart.bar.fill",
+                    title: L10n.About.featureTrackTitle,
+                    body: L10n.About.featureTrackBody
+                )
+                featureCell(
+                    systemImage: "trophy.fill",
+                    title: L10n.About.featureAchieveTitle,
+                    body: L10n.About.featureAchieveBody
+                )
+            }
+            GridRow {
+                featureCell(
+                    systemImage: "calendar",
+                    title: L10n.About.featureHabitsTitle,
+                    body: L10n.About.featureHabitsBody
+                )
+                featureCell(
+                    systemImage: "heart.fill",
+                    title: L10n.About.featureMotivateTitle,
+                    body: L10n.About.featureMotivateBody
+                )
+            }
         }
-        .padding(16)
+        .padding(20)
         .profileCard()
     }
 
     private func featureCell(systemImage: String, title: String, body: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             Image(systemName: systemImage)
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(ProfileTheme.accent)
+                .frame(width: 28, height: 28, alignment: .leading)
+
             Text(title)
-                .font(AppFont.interBold(14))
+                .font(AppFont.interBold(15))
                 .foregroundStyle(.white)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+
             Text(body)
-                .font(AppFont.interBold(11))
-                .foregroundStyle(ProfileTheme.muted)
+                .font(AppFont.interBold(12))
+                .foregroundStyle(Color.white.opacity(0.68))
+                .lineSpacing(3)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
+        .gridCellColumns(1)
     }
 
     private var disclaimerCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 12) {
                 Image(systemName: "checkmark.shield.fill")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(ProfileTheme.accent)
-                    .frame(width: 36, height: 36)
+                    .frame(width: 44, height: 44)
                     .background(Circle().fill(ProfileTheme.accent.opacity(0.18)))
                 Text(L10n.About.disclaimerTitle)
-                    .font(AppFont.interBold(16))
+                    .font(AppFont.interBold(17))
                     .foregroundStyle(.white)
             }
 
             Text(L10n.About.disclaimerBody)
-                .font(AppFont.interBold(13))
-                .foregroundStyle(ProfileTheme.muted)
+                .font(AppFont.interBold(14))
+                .foregroundStyle(Color.white.opacity(0.72))
+                .lineSpacing(6)
                 .fixedSize(horizontal: false, vertical: true)
 
-            HStack(alignment: .top, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "exclamationmark.circle.fill")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(ProfileTheme.accent)
+                    .padding(.top, 1)
                 Text(L10n.About.disclaimerWarn)
-                    .font(AppFont.interBold(12))
-                    .foregroundStyle(ProfileTheme.accentSoft)
+                    .font(AppFont.interBold(13))
+                    .foregroundStyle(Color.white.opacity(0.78))
+                    .lineSpacing(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(12)
+            .padding(14)
             .background(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .fill(ProfileTheme.accent.opacity(0.12))
             )
         }
-        .padding(16)
+        .padding(20)
         .profileCard()
     }
 
@@ -210,18 +229,19 @@ struct AboutAppView: View {
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "envelope.fill")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(ProfileTheme.accent)
-                    .frame(width: 36, height: 36)
+                    .frame(width: 40, height: 40)
                     .background(Circle().fill(ProfileTheme.accent.opacity(0.16)))
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(L10n.About.contactTitle)
                         .font(AppFont.interBold(15))
                         .foregroundStyle(.white)
                     Text(L10n.About.contactSub)
-                        .font(AppFont.interBold(12))
-                        .foregroundStyle(ProfileTheme.muted)
+                        .font(AppFont.interBold(13))
+                        .foregroundStyle(Color.white.opacity(0.68))
+                        .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -230,7 +250,7 @@ struct AboutAppView: View {
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(ProfileTheme.muted)
             }
-            .padding(14)
+            .padding(18)
             .profileCard()
         }
         .buttonStyle(.plain)

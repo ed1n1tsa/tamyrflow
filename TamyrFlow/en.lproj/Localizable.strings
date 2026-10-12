@@ -188,11 +188,11 @@
 "err_setting_map" = "Unsupported local setting mapping.";
 "err_setting_state" = "Invalid setting state.";
 "err_read_battery" = "Device is not connected.";
-"err_bt_permission" = "Bluetooth access denied for Tamyr Flow. Enable it in Settings → Tamyr Flow.";
-"err_bt_permission_detail" = "Bluetooth permission denied. Open Settings → Tamyr Flow → turn Bluetooth ON, or Privacy & Security → Bluetooth.";
+"err_bt_permission" = "Bluetooth access denied for Tamyr Flow. Enable it in Settings → Tamyr Flow.";
+"err_bt_permission_detail" = "Bluetooth permission denied. Open Settings → Tamyr Flow → turn Bluetooth ON, or Privacy & Security → Bluetooth.";
 "err_bt_off" = "Bluetooth is off. Turn it on in Control Center or Settings.";
 "err_bt_unsupported" = "Bluetooth is not supported on this device.";
-"err_bt_scan" = "Bluetooth must be on and allowed for Tamyr Flow to scan.";
+"err_bt_scan" = "Bluetooth must be on and allowed for Tamyr Flow to scan.";
 "err_measurement_timeout" = "No data from the band in time — measurement stopped. Check the fit, keep the app open, and try again.";
 
 /* Connection status */
@@ -463,7 +463,7 @@ Open the email and enter the code below.";
 "about_version_format" = "Version %@ (%@)";
 "about_tagline" = "Your progress. Your discipline. Every day.";
 "about_mission_title" = "More than just a tracker";
-"about_mission_body" = "Tamyr Flow helps you build habits and track workouts, activity, and progress. We believe the best results come from discipline, consistency, and a mindful approach to yourself.";
+"about_mission_body" = "Tamyr Flow helps you build habits and track workouts, activity, and progress. We believe the best results come from discipline, consistency, and a mindful approach to yourself.";
 "about_feat_track_title" = "Track";
 "about_feat_track_body" = "Workouts, activity, and progress";
 "about_feat_achieve_title" = "Achieve";
@@ -473,7 +473,7 @@ Open the email and enter the code below.";
 "about_feat_motivate_title" = "Stay motivated";
 "about_feat_motivate_body" = "Together toward a better you";
 "about_disclaimer_title" = "Important information";
-"about_disclaimer_body" = "Tamyr Flow is not a medical app and does not provide medical advice, diagnoses, or treatment recommendations. All information is for informational purposes only and does not replace consultation with a qualified professional.";
+"about_disclaimer_body" = "Tamyr Flow is not a medical app and does not provide medical advice, diagnoses, or treatment recommendations. All information is for informational purposes only and does not replace consultation with a qualified professional.";
 "about_disclaimer_warn" = "Do not self-diagnose or make treatment decisions based on app data. For any health-related questions, consult a doctor or other qualified medical professional.";
 "about_contact_title" = "Contact us";
 "about_contact_sub" = "Questions, ideas, or feedback? We're always here.";
