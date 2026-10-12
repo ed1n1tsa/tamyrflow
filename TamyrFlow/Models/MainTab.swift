@@ -1,14 +1,31 @@
+import Combine
 import Foundation
 
-/// `TabView` selection tags (keep order in sync with `RootTabView`).
+/// Primary app tabs (Figma: Home / Metrics / Activity / Goals / Profile).
 enum MainTab: Int, Hashable, CaseIterable {
-    case scan = 0
-    case home = 1
-    case heart = 2
-    case spo2 = 3
-    case temp = 4
-    case vitals = 5
-    case ecg = 6
-    case micro = 7
-    case settings = 8
+    case home = 0
+    case metrics = 1
+    case activity = 2
+    case goals = 3
+    case profile = 4
+
+    var titleKey: String {
+        switch self {
+        case .home: return "tab_home"
+        case .metrics: return "tab_metrics"
+        case .activity: return "tab_activity"
+        case .goals: return "tab_goals"
+        case .profile: return "tab_profile"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .home: return "house.fill"
+        case .metrics: return "chart.bar.fill"
+        case .activity: return "figure.run"
+        case .goals: return "trophy.fill"
+        case .profile: return "person.fill"
+        }
+    }
 }

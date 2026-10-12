@@ -6,3 +6,4 @@
 .env
 .env.*
 **/supabase-credentials.md
+supabase/.temp/
