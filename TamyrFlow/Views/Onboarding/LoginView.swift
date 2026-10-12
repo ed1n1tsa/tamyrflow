@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Figma login — after «НАЧАТЬ». Auth wiring comes next; UI matches refs 1–2.
+/// Figma login — after «НАЧАТЬ». Layout: logo top, form block mid/lower (not stuck to top).
 struct LoginView: View {
     var onLogin: (_ email: String, _ password: String) -> Void
     var onNoAccount: () -> Void = {}
@@ -10,33 +10,36 @@ struct LoginView: View {
     @State private var password = ""
     @State private var acceptedTerms = false
 
-    private let fieldHeight: CGFloat = 52
+    private let fieldHeight: CGFloat = 54
 
     var body: some View {
         ZStack {
             loginBackground
 
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    brandHeader
-                        .padding(.top, 20)
+            VStack(spacing: 0) {
+                brandHeader
+                    .padding(.top, 12)
 
+                Spacer(minLength: 24)
+
+                // Mid–lower cluster (matches Figma ref: not packed under the logo)
+                VStack(spacing: 0) {
                     Text("ВОЙДИТЕ В АККАУНТ")
-                        .font(AppFont.interBold(26))
+                        .font(AppFont.interBold(28))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 36)
+                        .frame(maxWidth: .infinity)
 
                     VStack(spacing: 14) {
                         authField(placeholder: "ПОЧТА", text: $email, isSecure: false)
                         authField(placeholder: "ПАРОЛЬ", text: $password, isSecure: true)
                     }
-                    .padding(.top, 28)
+                    .padding(.top, 26)
 
                     HStack {
                         Button(action: onNoAccount) {
                             Text("Нет аккаунта?")
-                                .font(AppFont.interBold(13))
+                                .font(AppFont.interBold(14))
                                 .foregroundStyle(AppTheme.authLink)
                         }
                         .buttonStyle(.plain)
@@ -45,26 +48,26 @@ struct LoginView: View {
 
                         Button(action: onForgotPassword) {
                             Text("Забыли пароль?")
-                                .font(AppFont.interBold(13))
+                                .font(AppFont.interBold(14))
                                 .foregroundStyle(AppTheme.authLink)
                         }
                         .buttonStyle(.plain)
                     }
-                    .padding(.top, 14)
+                    .padding(.top, 16)
 
                     termsRow
-                        .padding(.top, 28)
+                        .padding(.top, 26)
 
                     Button {
                         guard canSubmit else { return }
                         onLogin(email.trimmingCharacters(in: .whitespacesAndNewlines), password)
                     } label: {
                         Text("ВОЙТИ")
-                            .font(AppFont.interBold(17))
+                            .font(AppFont.interBold(18))
                             .tracking(1.0)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 54)
+                            .frame(height: 56)
                             .background(
                                 Capsule(style: .continuous)
                                     .fill(canSubmit ? AppTheme.authPrimaryButton : AppTheme.authPrimaryButton.opacity(0.45))
@@ -73,10 +76,12 @@ struct LoginView: View {
                     .buttonStyle(.plain)
                     .disabled(!canSubmit)
                     .padding(.top, 28)
-                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal, 28)
+
+                Spacer(minLength: 40)
             }
+            .padding(.horizontal, 28)
+            .padding(.bottom, 12)
         }
     }
 
@@ -106,7 +111,7 @@ struct LoginView: View {
         HStack(spacing: 10) {
             BrandLogoMark()
             Text("TAMYR FLOW")
-                .font(AppFont.interBold(18))
+                .font(AppFont.interBold(20))
                 .tracking(1.2)
                 .foregroundStyle(.white)
         }
@@ -123,10 +128,11 @@ struct LoginView: View {
                     .autocorrectionDisabled()
             }
         }
-        .font(AppFont.interBold(15))
+        .font(AppFont.interBold(16))
         .foregroundStyle(.black)
-        .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity)
+        .multilineTextAlignment(.leading)
+        .padding(.horizontal, 22)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: fieldHeight)
         .background(
             Capsule(style: .continuous)
@@ -136,7 +142,7 @@ struct LoginView: View {
 
     private func fieldPrompt(_ text: String) -> Text {
         Text(text)
-            .font(AppFont.interBold(15))
+            .font(AppFont.interBold(16))
             .foregroundStyle(AppTheme.authFieldPlaceholder)
     }
 
@@ -166,7 +172,7 @@ struct LoginView: View {
                 + Text("Условиями использования").foregroundColor(AppTheme.authLink)
                 + Text(" приложения TamyrFlow.").foregroundColor(.white)
             )
-            .font(AppFont.interBold(12))
+            .font(AppFont.interBold(13))
             .multilineTextAlignment(.leading)
             .fixedSize(horizontal: false, vertical: true)
         }

@@ -11,6 +11,10 @@ import SwiftUI
 struct TamyrFlowApp: App {
     @StateObject private var vm = BluetoothViewModel()
 
+    init() {
+        AppFont.register()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

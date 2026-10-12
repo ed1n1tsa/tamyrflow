@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Exact Figma welcome: logo top 26×29, title + НАЧАТЬ centered block.
+/// Figma welcome: logo top 26×29, title + НАЧАТЬ centered — Inter Bold / heavy fallback.
 struct WelcomeStartView: View {
     var onStart: () -> Void
 
@@ -9,26 +9,24 @@ struct WelcomeStartView: View {
             OnboardingBackgroundView(blurred: false)
 
             VStack(spacing: 0) {
-                // Logo — top center (under status bar), as green mark on Zen screenshot
                 BrandLogoMark()
                     .padding(.top, 18)
 
                 Spacer(minLength: 0)
 
-                // Center cluster: title + button (Figma frame)
                 VStack(spacing: 28) {
                     Text("TAMYR FLOW")
-                        .font(AppFont.interBold(34))
+                        .font(AppFont.interBold(36))
                         .tracking(2.0)
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
 
                     Button(action: onStart) {
                         Text("НАЧАТЬ")
-                            .font(AppFont.interBold(17))
+                            .font(AppFont.interBold(18))
                             .tracking(1.2)
                             .frame(maxWidth: 280)
-                            .frame(height: 54)
+                            .frame(height: 56)
                     }
                     .buttonStyle(WelcomeStartButtonStyle())
                 }
