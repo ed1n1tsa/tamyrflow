@@ -37,6 +37,9 @@ enum L10n {
         static var confirmPassword: String { tr("auth_confirm_password") }
         static var savePassword: String { tr("auth_save_password") }
         static var passwordMismatch: String { tr("auth_password_mismatch") }
+        static var mailPopupTitle: String { tr("auth_mail_popup_title") }
+        static var mailPopupBody: String { tr("auth_mail_popup_body") }
+        static var mailPopupOK: String { tr("auth_mail_popup_ok") }
     }
 
     enum Tab {

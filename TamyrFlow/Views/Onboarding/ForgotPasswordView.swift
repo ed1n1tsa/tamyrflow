@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Figma «Восстановить пароль»: email + 4-digit OTP + resend/submit.
+/// Restore password: email → send OTP popup → 8-digit code → new password (Figma).
 struct ForgotPasswordView: View {
     @EnvironmentObject private var auth: AuthService
     @EnvironmentObject private var language: LanguageStore
@@ -10,13 +10,13 @@ struct ForgotPasswordView: View {
     var onBackToLogin: () -> Void
 
     @State private var email = ""
-    @State private var digits: [String] = ["", "", "", ""]
-    @State private var codeSent = false
-    @State private var infoMessage: String?
+    @State private var digits: [String] = Array(repeating: "", count: Self.codeLength)
     @State private var phase: Phase = .otp
     @State private var newPassword = ""
     @State private var confirmPassword = ""
-    @State private var isPasswordVisible = false
+    @State private var showMailPopup = false
+    @State private var resendSecondsLeft = 0
+    @State private var didAutoSend = false
     @FocusState private var focusedDigit: Int?
 
     private enum Phase {
@@ -24,8 +24,9 @@ struct ForgotPasswordView: View {
         case newPassword
     }
 
+    private static let codeLength = 8
+    private static let resendCooldown = 60
     private let fieldHeight: CGFloat = 54
-    private let codeBoxSize: CGFloat = 58
 
     private var code: String { digits.joined() }
 
@@ -33,12 +34,27 @@ struct ForgotPasswordView: View {
         email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
+    private var canResend: Bool {
+        !trimmedEmail.isEmpty && resendSecondsLeft == 0 && !auth.isBusy
+    }
+
+    private var canSubmitOTP: Bool {
+        !trimmedEmail.isEmpty
+            && code.count == Self.codeLength
+            && code.allSatisfy(\.isNumber)
+            && !auth.isBusy
+    }
+
+    private var canSavePassword: Bool {
+        newPassword.count >= 6 && newPassword == confirmPassword && !auth.isBusy
+    }
+
     var body: some View {
         ZStack {
             authBackground
 
             VStack(spacing: 0) {
-                Spacer(minLength: 40)
+                Spacer(minLength: 36)
 
                 Group {
                     switch phase {
@@ -50,71 +66,75 @@ struct ForgotPasswordView: View {
                 }
                 .id(language.code)
 
-                Spacer(minLength: 40)
+                Spacer(minLength: 36)
             }
-            .padding(.horizontal, 28)
+            .padding(.horizontal, 24)
             .padding(.bottom, 12)
+
+            if showMailPopup {
+                mailSentPopup
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                    .zIndex(2)
+            }
         }
+        .animation(.easeInOut(duration: 0.22), value: showMailPopup)
         .onAppear {
             if email.isEmpty { email = initialEmail }
+            if !trimmedEmail.isEmpty, !didAutoSend {
+                didAutoSend = true
+                Task { await sendCode(showPopup: true) }
+            }
+        }
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if resendSecondsLeft > 0 {
+                resendSecondsLeft -= 1
+            }
         }
     }
 
-    // MARK: - OTP phase (Figma)
+    // MARK: - OTP
 
     private var otpContent: some View {
         VStack(spacing: 0) {
             Text(L10n.Auth.forgotTitle)
-                .font(AppFont.interBold(26))
+                .font(AppFont.interBold(24))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.85)
+                .lineLimit(2)
                 .frame(maxWidth: .infinity)
 
             emailField
-                .padding(.top, 28)
+                .padding(.top, 24)
 
             codeBoxes
-                .padding(.top, 22)
+                .padding(.top, 18)
 
             Text(hintText)
-                .font(AppFont.interBold(13))
+                .font(AppFont.interBold(12))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
-                .padding(.top, 18)
+                .padding(.top, 14)
                 .fixedSize(horizontal: false, vertical: true)
-
-            if let infoMessage {
-                Text(infoMessage)
-                    .font(AppFont.interBold(13))
-                    .foregroundStyle(AppTheme.authLink)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 12)
-            }
 
             if let err = auth.lastError {
                 Text(err)
-                    .font(AppFont.interBold(13))
+                    .font(AppFont.interBold(12))
                     .foregroundStyle(AppTheme.danger)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 10)
+                    .padding(.top, 8)
             }
 
-            HStack(spacing: 12) {
-                actionButton(
-                    title: L10n.Auth.forgotResend,
-                    enabled: !trimmedEmail.isEmpty && !auth.isBusy
-                ) {
-                    Task { await resendCode() }
-                }
-
+            HStack(spacing: 10) {
+                resendButton
                 actionButton(
                     title: L10n.Auth.forgotSubmit,
-                    enabled: canSubmitOTP && !auth.isBusy
+                    enabled: canSubmitOTP
                 ) {
                     Task { await submitOTP() }
                 }
             }
-            .padding(.top, 26)
+            .padding(.top, 22)
 
             Button(action: onBackToLogin) {
                 Text(L10n.Auth.haveAccount)
@@ -122,7 +142,7 @@ struct ForgotPasswordView: View {
                     .foregroundStyle(AppTheme.authLink)
             }
             .buttonStyle(.plain)
-            .padding(.top, 20)
+            .padding(.top, 18)
         }
     }
 
@@ -133,66 +153,68 @@ struct ForgotPasswordView: View {
         return String(format: L10n.Auth.forgotHintFormat, trimmedEmail)
     }
 
-    private var canSubmitOTP: Bool {
-        !trimmedEmail.isEmpty && code.count == 4 && code.allSatisfy(\.isNumber)
-    }
-
     private var emailField: some View {
         TextField("", text: $email, prompt: prompt(L10n.Auth.email))
             .textInputAutocapitalization(.never)
             .keyboardType(.emailAddress)
             .textContentType(.emailAddress)
             .autocorrectionDisabled()
-            .font(AppFont.interBold(16))
+            .font(AppFont.interBold(15))
             .foregroundStyle(.black)
-            .multilineTextAlignment(.leading)
-            .padding(.horizontal, 22)
+            .padding(.horizontal, 20)
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: fieldHeight)
             .background(Capsule(style: .continuous).fill(Color.white))
             .onSubmit {
-                Task { await resendCode() }
+                Task { await sendCode(showPopup: true) }
             }
     }
 
     private var codeBoxes: some View {
-        HStack(spacing: 12) {
-            ForEach(0..<4, id: \.self) { index in
-                TextField("", text: Binding(
-                    get: { digits[index] },
-                    set: { handleDigitChange(index, $0) }
-                ))
-                .keyboardType(.numberPad)
-                .textContentType(.oneTimeCode)
-                .multilineTextAlignment(.center)
-                .font(AppFont.interBold(22))
-                .foregroundStyle(.black)
-                .frame(width: codeBoxSize, height: codeBoxSize)
-                .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color.white)
-                )
-                .focused($focusedDigit, equals: index)
+        GeometryReader { geo in
+            let spacing: CGFloat = 6
+            let totalSpacing = spacing * CGFloat(Self.codeLength - 1)
+            let side = min(44, max(30, (geo.size.width - totalSpacing) / CGFloat(Self.codeLength)))
+
+            HStack(spacing: spacing) {
+                ForEach(0..<Self.codeLength, id: \.self) { index in
+                    TextField("", text: Binding(
+                        get: { digits[index] },
+                        set: { handleDigitChange(index, $0) }
+                    ))
+                    .keyboardType(.numberPad)
+                    .textContentType(.oneTimeCode)
+                    .multilineTextAlignment(.center)
+                    .font(AppFont.interBold(side > 36 ? 18 : 15))
+                    .foregroundStyle(.black)
+                    .frame(width: side, height: side + 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .focused($focusedDigit, equals: index)
+                }
             }
+            .frame(maxWidth: .infinity)
         }
+        .frame(height: 52)
     }
 
     private func handleDigitChange(_ index: Int, _ value: String) {
         let filtered = value.filter(\.isNumber)
 
-        // Paste full code into first box
         if filtered.count > 1 {
-            let chars = Array(filtered.prefix(4))
-            for i in 0..<4 {
+            let chars = Array(filtered.prefix(Self.codeLength))
+            for i in 0..<Self.codeLength {
                 digits[i] = i < chars.count ? String(chars[i]) : ""
             }
-            focusedDigit = chars.count >= 4 ? 3 : chars.count
+            focusedDigit = chars.count >= Self.codeLength ? Self.codeLength - 1 : chars.count
             return
         }
 
         digits[index] = filtered.isEmpty ? "" : String(filtered.suffix(1))
         if !filtered.isEmpty {
-            if index < 3 {
+            if index < Self.codeLength - 1 {
                 focusedDigit = index + 1
             } else {
                 focusedDigit = nil
@@ -202,75 +224,153 @@ struct ForgotPasswordView: View {
         }
     }
 
-    // MARK: - New password phase
+    private var resendButton: some View {
+        let title: String = {
+            if resendSecondsLeft > 0 {
+                return "\(L10n.Auth.forgotResend)\n\(resendSecondsLeft)с"
+            }
+            return L10n.Auth.forgotResend
+        }()
+
+        return Button {
+            Task { await sendCode(showPopup: true) }
+        } label: {
+            Text(title)
+                .font(AppFont.interBold(12))
+                .tracking(0.3)
+                .foregroundStyle(.white.opacity(canResend ? 1 : 0.75))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(canResend ? AppTheme.authPrimaryButton : AppTheme.authPrimaryButton.opacity(0.35))
+                )
+        }
+        .buttonStyle(.plain)
+        .disabled(!canResend)
+    }
+
+    // MARK: - New password (Figma 4)
 
     private var newPasswordContent: some View {
         VStack(spacing: 0) {
             Text(L10n.Auth.newPasswordTitle)
-                .font(AppFont.interBold(26))
+                .font(AppFont.interBold(24))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
 
-            passwordField(text: $newPassword, placeholder: L10n.Auth.newPassword)
+            // No eye toggle on this Figma — clean capsules.
+            SecureField("", text: $newPassword, prompt: prompt(L10n.Auth.newPassword))
+                .font(AppFont.interBold(15))
+                .foregroundStyle(.black)
+                .textContentType(.newPassword)
+                .padding(.horizontal, 22)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: fieldHeight)
+                .background(Capsule(style: .continuous).fill(Color.white))
                 .padding(.top, 28)
 
-            passwordField(text: $confirmPassword, placeholder: L10n.Auth.confirmPassword)
+            SecureField("", text: $confirmPassword, prompt: prompt(L10n.Auth.confirmPassword))
+                .font(AppFont.interBold(15))
+                .foregroundStyle(.black)
+                .textContentType(.newPassword)
+                .padding(.horizontal, 22)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: fieldHeight)
+                .background(Capsule(style: .continuous).fill(Color.white))
                 .padding(.top, 14)
 
             if let err = auth.lastError {
                 Text(err)
-                    .font(AppFont.interBold(13))
+                    .font(AppFont.interBold(12))
                     .foregroundStyle(AppTheme.danger)
                     .multilineTextAlignment(.center)
                     .padding(.top, 12)
             }
 
-            actionButton(
-                title: L10n.Auth.savePassword,
-                enabled: canSavePassword && !auth.isBusy
-            ) {
-                Task { await saveNewPassword() }
+            HStack {
+                Spacer(minLength: 40)
+                Button {
+                    Task { await saveNewPassword() }
+                } label: {
+                    Text(L10n.Auth.savePassword)
+                        .font(AppFont.interBold(15))
+                        .tracking(0.6)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 22)
+                        .frame(height: 50)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(canSavePassword ? AppTheme.authPrimaryButton : AppTheme.authPrimaryButton.opacity(0.45))
+                        )
+                }
+                .buttonStyle(.plain)
+                .disabled(!canSavePassword)
             }
             .padding(.top, 28)
         }
     }
 
-    private var canSavePassword: Bool {
-        newPassword.count >= 6 && newPassword == confirmPassword
-    }
+    // MARK: - Popup
 
-    private func passwordField(text: Binding<String>, placeholder: String) -> some View {
-        HStack(spacing: 8) {
-            Group {
-                if isPasswordVisible {
-                    TextField("", text: text, prompt: prompt(placeholder))
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                } else {
-                    SecureField("", text: text, prompt: prompt(placeholder))
+    private var mailSentPopup: some View {
+        ZStack {
+            Color.black.opacity(0.55)
+                .ignoresSafeArea()
+                .onTapGesture { showMailPopup = false }
+
+            VStack(spacing: 16) {
+                Text("TAMYR FLOW")
+                    .font(AppFont.interBold(12))
+                    .tracking(2)
+                    .foregroundStyle(AppTheme.authLink)
+
+                Text(L10n.Auth.mailPopupTitle)
+                    .font(AppFont.interBold(20))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+
+                Text(String(format: L10n.Auth.mailPopupBody, trimmedEmail))
+                    .font(AppFont.interBold(14))
+                    .foregroundStyle(Color.white.opacity(0.88))
+                    .multilineTextAlignment(.center)
+
+                Button {
+                    showMailPopup = false
+                    focusedDigit = 0
+                } label: {
+                    Text(L10n.Auth.mailPopupOK)
+                        .font(AppFont.interBold(15))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(AppTheme.authPrimaryButton)
+                        )
                 }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
             }
-            .font(AppFont.interBold(16))
-            .foregroundStyle(.black)
-            .textContentType(.newPassword)
-
-            Button { isPasswordVisible.toggle() } label: {
-                Image(systemName: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(AppTheme.brandBlue.opacity(0.75))
-                    .frame(width: 28, height: 28)
-            }
-            .buttonStyle(.plain)
+            .padding(24)
+            .frame(maxWidth: 320)
+            .background(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(AppTheme.brandBlueDeep)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .stroke(AppTheme.authLink.opacity(0.35), lineWidth: 1)
+            )
+            .padding(.horizontal, 28)
         }
-        .padding(.leading, 22)
-        .padding(.trailing, 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: fieldHeight)
-        .background(Capsule(style: .continuous).fill(Color.white))
     }
 
-    // MARK: - Shared chrome
+    // MARK: - Chrome
 
     private var authBackground: some View {
         GeometryReader { geo in
@@ -289,22 +389,22 @@ struct ForgotPasswordView: View {
 
     private func prompt(_ text: String) -> Text {
         Text(text)
-            .font(AppFont.interBold(16))
+            .font(AppFont.interBold(15))
             .foregroundStyle(AppTheme.authFieldPlaceholder)
     }
 
     private func actionButton(title: String, enabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(AppFont.interBold(13))
-                .tracking(0.4)
-                .foregroundStyle(.white)
+                .font(AppFont.interBold(12))
+                .tracking(0.3)
+                .foregroundStyle(.white.opacity(enabled ? 1 : 0.7))
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(enabled ? AppTheme.authPrimaryButton : AppTheme.authPrimaryButton.opacity(0.45))
+                        .fill(enabled ? AppTheme.authPrimaryButton : AppTheme.authPrimaryButton.opacity(0.35))
                 )
         }
         .buttonStyle(.plain)
@@ -313,18 +413,21 @@ struct ForgotPasswordView: View {
 
     // MARK: - Actions
 
-    private func resendCode() async {
+    private func sendCode(showPopup: Bool) async {
         auth.lastError = nil
-        infoMessage = nil
         guard !trimmedEmail.isEmpty else {
             auth.lastError = L10n.Auth.forgotNeedEmail
             return
         }
+        guard resendSecondsLeft == 0 else { return }
+
         do {
             try await auth.sendPasswordRecovery(email: trimmedEmail)
-            codeSent = true
-            infoMessage = L10n.Auth.forgotCodeSent
-            focusedDigit = 0
+            resendSecondsLeft = Self.resendCooldown
+            digits = Array(repeating: "", count: Self.codeLength)
+            if showPopup {
+                showMailPopup = true
+            }
         } catch {
             auth.lastError = error.localizedDescription
         }
@@ -332,18 +435,7 @@ struct ForgotPasswordView: View {
 
     private func submitOTP() async {
         auth.lastError = nil
-        infoMessage = nil
-
-        // First press without a full code → send the email OTP.
-        if code.count < 4 {
-            await resendCode()
-            return
-        }
-
-        guard !trimmedEmail.isEmpty else {
-            auth.lastError = L10n.Auth.forgotNeedEmail
-            return
-        }
+        guard canSubmitOTP else { return }
 
         do {
             try await auth.verifyRecoveryOTP(email: trimmedEmail, token: code)

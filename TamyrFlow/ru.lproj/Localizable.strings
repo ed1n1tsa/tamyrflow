@@ -279,14 +279,18 @@
 "auth_confirm_email" = "Проверьте почту и подтвердите регистрацию, затем войдите.";
 
 "auth_forgot_title" = "ВОССТАНОВИТЬ ПАРОЛЬ";
-"auth_forgot_hint_empty" = "Введите почту и нажмите «Отправить», чтобы получить 4-х значный код.";
-"auth_forgot_hint_format" = "Введите 4-х значный код, который отправили вам на почту: %@";
+"auth_forgot_hint_empty" = "Введите почту — мы отправим 8-значный код.";
+"auth_forgot_hint_format" = "Введите 8-значный код, который отправили вам на почту: %@";
 "auth_forgot_resend" = "НЕ ПОЛУЧИЛ КОД";
 "auth_forgot_submit" = "ОТПРАВИТЬ";
 "auth_forgot_code_sent" = "Код отправлен на почту.";
 "auth_forgot_need_email" = "Сначала укажите почту.";
-"auth_new_password_title" = "НОВЫЙ ПАРОЛЬ";
-"auth_new_password" = "НОВЫЙ ПАРОЛЬ";
+"auth_new_password_title" = "ПРИДУМАЙТЕ НОВЫЙ ПАРОЛЬ";
+"auth_new_password" = "ВВЕДИТЕ НОВЫЙ ПАРОЛЬ";
 "auth_confirm_password" = "ПОВТОРИТЕ ПАРОЛЬ";
-"auth_save_password" = "СОХРАНИТЬ";
+"auth_save_password" = "СОХРАНИТЬ И ВОЙТИ";
 "auth_password_mismatch" = "Пароли не совпадают или слишком короткие.";
+"auth_mail_popup_title" = "Проверьте почту";
+"auth_mail_popup_body" = "Мы отправили 8-значный код на %@.
+Откройте письмо и введите код ниже.";
+"auth_mail_popup_ok" = "ХОРОШО";

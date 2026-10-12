@@ -283,14 +283,18 @@
 "auth_confirm_email" = "Check your email to confirm registration, then sign in.";
 
 "auth_forgot_title" = "RESTORE PASSWORD";
-"auth_forgot_hint_empty" = "Enter your email and tap Send to get a 4-digit code.";
-"auth_forgot_hint_format" = "Enter the 4-digit code we sent to: %@";
+"auth_forgot_hint_empty" = "Enter your email — we will send an 8-digit code.";
+"auth_forgot_hint_format" = "Enter the 8-digit code we sent to: %@";
 "auth_forgot_resend" = "DIDN'T GET CODE";
 "auth_forgot_submit" = "SEND";
 "auth_forgot_code_sent" = "Code sent to your email.";
 "auth_forgot_need_email" = "Enter your email first.";
-"auth_new_password_title" = "NEW PASSWORD";
-"auth_new_password" = "NEW PASSWORD";
-"auth_confirm_password" = "CONFIRM PASSWORD";
-"auth_save_password" = "SAVE";
+"auth_new_password_title" = "CREATE A NEW PASSWORD";
+"auth_new_password" = "ENTER NEW PASSWORD";
+"auth_confirm_password" = "REPEAT PASSWORD";
+"auth_save_password" = "SAVE AND SIGN IN";
 "auth_password_mismatch" = "Passwords do not match or are too short.";
+"auth_mail_popup_title" = "Check your email";
+"auth_mail_popup_body" = "We sent an 8-digit code to %@.
+Open the email and enter the code below.";
+"auth_mail_popup_ok" = "OK";

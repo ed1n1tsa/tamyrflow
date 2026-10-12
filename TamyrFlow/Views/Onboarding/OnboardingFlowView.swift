@@ -76,12 +76,7 @@ struct OnboardingFlowView: View {
             case .forgotPassword:
                 ForgotPasswordView(
                     initialEmail: forgotEmail,
-                    onDone: {
-                        auth.lastError = nil
-                        withAnimation(.easeInOut(duration: 0.28)) {
-                            step = .login
-                        }
-                    },
+                    onDone: finish,
                     onBackToLogin: {
                         auth.lastError = nil
                         withAnimation(.easeInOut(duration: 0.28)) {
