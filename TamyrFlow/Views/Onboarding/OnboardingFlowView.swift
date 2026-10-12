@@ -15,7 +15,7 @@ struct OnboardingFlowView: View {
 
     var onFinished: () -> Void
 
-    @State private var step: OnboardingStep = .importantInfo
+    @State private var step: OnboardingStep = OnboardingStorage.hasCompleted ? .login : .importantInfo
     @State private var isAccepted = false
     @State private var forgotEmail = ""
 
