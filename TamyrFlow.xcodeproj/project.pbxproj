@@ -512,6 +512,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Tamyr Flow uses Bluetooth to scan and connect to your wearable device.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Tamyr Flow uses Bluetooth to communicate with your wearable device.";
+				INFOPLIST_KEY_UIAppFonts = "Inter-Bold.ttf";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -553,6 +554,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Tamyr Flow uses Bluetooth to scan and connect to your wearable device.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Tamyr Flow uses Bluetooth to communicate with your wearable device.";
+				INFOPLIST_KEY_UIAppFonts = "Inter-Bold.ttf";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

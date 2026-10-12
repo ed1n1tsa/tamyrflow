@@ -18,14 +18,14 @@ struct WelcomeStartView: View {
                 // Center cluster: title + button (Figma frame)
                 VStack(spacing: 28) {
                     Text("TAMYR FLOW")
-                        .font(.system(size: 34, weight: .bold))
+                        .font(AppFont.interBold(34))
                         .tracking(2.0)
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
 
                     Button(action: onStart) {
                         Text("НАЧАТЬ")
-                            .font(.system(size: 17, weight: .bold))
+                            .font(AppFont.interBold(17))
                             .tracking(1.2)
                             .frame(maxWidth: 280)
                             .frame(height: 54)

@@ -20,6 +20,11 @@ enum AppTheme {
     static let onboardingButtonDisabled = Color(red: 0.86, green: 0.87, blue: 0.90)
     static let onboardingButtonDisabledText = Color(red: 0.45, green: 0.47, blue: 0.52)
 
+    /// Figma auth link / legal accent
+    static let authLink = Color(red: 0, green: 218 / 255, blue: 252 / 255) // #00DAFC
+    static let authFieldPlaceholder = Color(red: 0.70, green: 0.72, blue: 0.76)
+    static let authPrimaryButton = Color(red: 0.18, green: 0.40, blue: 0.92) // login ВОЙТИ
+
     static var backgroundGradient: LinearGradient {
         LinearGradient(
             colors: [

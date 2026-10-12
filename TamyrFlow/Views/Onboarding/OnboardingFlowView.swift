@@ -3,9 +3,10 @@ import SwiftUI
 enum OnboardingStep: Equatable {
     case importantInfo
     case welcome
+    case login
 }
 
-/// Entry flow: Important Info → Welcome «НАЧАТЬ» → main app.
+/// Important Info → Welcome «НАЧАТЬ» → Login (Supabase auth next).
 struct OnboardingFlowView: View {
     var onFinished: () -> Void
 
@@ -29,9 +30,28 @@ struct OnboardingFlowView: View {
 
             case .welcome:
                 WelcomeStartView {
-                    onFinished()
+                    withAnimation(.easeInOut(duration: 0.28)) {
+                        step = .login
+                    }
                 }
-                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                .transition(.opacity)
+
+            case .login:
+                LoginView(
+                    onLogin: { _, _ in
+                        // TODO: Supabase Auth — wire next.
+                        // Temporary: allow continuing into app until auth is connected.
+                        OnboardingStorage.markCompleted()
+                        onFinished()
+                    },
+                    onNoAccount: {
+                        // TODO: registration screen
+                    },
+                    onForgotPassword: {
+                        // TODO: password reset
+                    }
+                )
+                .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.28), value: step)
