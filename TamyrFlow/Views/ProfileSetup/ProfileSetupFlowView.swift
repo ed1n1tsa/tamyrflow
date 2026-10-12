@@ -1,3 +1,4 @@
+import Auth
 import SwiftUI
 
 /// Post-registration wizard: name → gender → age → height → weight.
