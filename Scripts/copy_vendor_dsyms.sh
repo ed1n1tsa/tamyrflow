@@ -5,6 +5,8 @@
 # Place matching dSYM folders in:  TamyrFlow/Vendor/dSYMs/
 # See: Vendor/dSYMs/README.md and Docs/TESTFLIGHT_DSYM.md
 
+# Never fail the Xcode build because of missing vendor symbols.
+set +e
 set -u
 
 if [ -z "${DWARF_DSYM_FOLDER_PATH:-}" ]; then

@@ -337,9 +337,9 @@
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Scripts/copy_vendor_dsyms.sh\"\n";
+			shellScript = "sh \"${SRCROOT}/Scripts/copy_vendor_dsyms.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
