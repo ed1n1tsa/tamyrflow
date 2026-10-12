@@ -6,5 +6,7 @@
 	<array>
 		<string>Inter-Bold.ttf</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>TamyrFlow uses your photo library so you can set a profile picture.</string>
 </dict>
 </plist>

@@ -137,6 +137,20 @@ enum L10n {
         static var stubBody: String { tr("prof_stub_body") }
     }
 
+    enum EditProfile {
+        static var title: String { tr("edit_title") }
+        static var subtitle: String { tr("edit_subtitle") }
+        static var photoTitle: String { tr("edit_photo_title") }
+        static var photoSub: String { tr("edit_photo_sub") }
+        static var photoError: String { tr("edit_photo_error") }
+        static var nameLabel: String { tr("edit_name_label") }
+        static var save: String { tr("edit_save") }
+        static var cancel: String { tr("edit_cancel") }
+        static var successTitle: String { tr("edit_success_title") }
+        static var successBody: String { tr("edit_success_body") }
+        static var successOK: String { tr("edit_success_ok") }
+    }
+
     enum Dashboard {
         static var title: String { tr("dash_title") }
         static var battery: String { tr("dash_battery") }

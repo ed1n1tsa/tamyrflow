@@ -373,3 +373,15 @@ Open the email and enter the code below.";
 "prof_cancel" = "Cancel";
 "prof_stub_title" = "Coming soon";
 "prof_stub_body" = "This section will arrive in a future update.";
+
+"edit_title" = "Edit profile";
+"edit_subtitle" = "Update your details. They help personalize recommendations.";
+"edit_photo_title" = "Profile photo";
+"edit_photo_sub" = "Choose a photo that will appear in your profile";
+"edit_photo_error" = "Could not load the photo. Try another image.";
+"edit_name_label" = "Name";
+"edit_save" = "Save changes";
+"edit_cancel" = "Cancel";
+"edit_success_title" = "Profile updated";
+"edit_success_body" = "Your details were saved successfully.";
+"edit_success_ok" = "OK";

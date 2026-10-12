@@ -10,43 +10,50 @@ struct ProfilePage: View {
     @State private var showLogoutConfirm = false
     @State private var showDeleteConfirm = false
     @State private var stubAlert: String?
+    @State private var showEditProfile = false
 
     private var profile: UserProfile? { auth.profile }
 
     var body: some View {
-        ZStack {
-            ProfileSetupBackground()
+        NavigationStack {
+            ZStack {
+                ProfileSetupBackground()
 
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 14) {
-                    header
-                    userCard
-                    goalsCard
-                    watchCard
-                    menuGroup(items: personalMenu)
-                    menuGroup(items: settingsMenu)
-                    menuGroup(items: legalMenu)
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        header
+                        userCard
+                        goalsCard
+                        watchCard
+                        menuGroup(items: personalMenu)
+                        menuGroup(items: settingsMenu)
+                        menuGroup(items: legalMenu)
 
-                    accountButton(
-                        title: L10n.Profile.logout,
-                        systemImage: "rectangle.portrait.and.arrow.right",
-                        isDestructive: true
-                    ) {
-                        showLogoutConfirm = true
+                        accountButton(
+                            title: L10n.Profile.logout,
+                            systemImage: "rectangle.portrait.and.arrow.right",
+                            isDestructive: true
+                        ) {
+                            showLogoutConfirm = true
+                        }
+                        .padding(.top, 4)
+
+                        accountButton(
+                            title: L10n.Profile.deleteAccount,
+                            systemImage: "trash.fill",
+                            isDestructive: true
+                        ) {
+                            showDeleteConfirm = true
+                        }
                     }
-                    .padding(.top, 4)
-
-                    accountButton(
-                        title: L10n.Profile.deleteAccount,
-                        systemImage: "trash.fill",
-                        isDestructive: true
-                    ) {
-                        showDeleteConfirm = true
-                    }
+                    .padding(.horizontal, ProfileTheme.contentInset)
+                    .padding(.top, 10)
+                    .padding(.bottom, 28)
                 }
-                .padding(.horizontal, ProfileTheme.contentInset)
-                .padding(.top, 10)
-                .padding(.bottom, 28)
+            }
+            .navigationBarHidden(true)
+            .navigationDestination(isPresented: $showEditProfile) {
+                EditProfileView()
             }
         }
         .id(language.code)
@@ -126,11 +133,7 @@ struct ProfilePage: View {
     private var userCard: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .center, spacing: 12) {
-                Image("ProfileAvatar")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 60)
-                    .clipShape(Circle())
+                ProfileAvatarView(urlString: profile?.avatarUrl, size: 60)
 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(profile?.displayName ?? "—")
@@ -145,7 +148,7 @@ struct ProfilePage: View {
                 }
                 Spacer(minLength: 8)
                 Button {
-                    stubAlert = L10n.Profile.stubBody
+                    showEditProfile = true
                 } label: {
                     Image(systemName: "pencil")
                         .font(.system(size: 14, weight: .semibold))

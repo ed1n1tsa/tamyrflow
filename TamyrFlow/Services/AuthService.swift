@@ -211,6 +211,80 @@ final class AuthService: ObservableObject {
 
         await refreshProfile()
     }
+
+    /// Uploads JPEG/PNG bytes to `avatars/{uid}/avatar.jpg` and returns the public URL.
+    func uploadAvatarJPEG(_ data: Data) async throws -> String {
+        guard let uid = session?.user.id else {
+            throw AuthServiceError.notAuthenticated
+        }
+        isBusy = true
+        lastError = nil
+        defer { isBusy = false }
+
+        let path = "\(uid.uuidString.lowercased())/avatar.jpg"
+        // Prefer upsert via update after first upload fails, but `upsert: true` covers replace.
+        try await client.storage
+            .from("avatars")
+            .upload(
+                path: path,
+                file: data,
+                options: FileOptions(
+                    cacheControl: "3600",
+                    contentType: "image/jpeg",
+                    upsert: true
+                )
+            )
+
+        let publicURL = try client.storage
+            .from("avatars")
+            .getPublicURL(path: path)
+        // Cache-bust so UI refreshes after replace.
+        return publicURL.absoluteString + "?t=\(Int(Date().timeIntervalSince1970))"
+    }
+
+    func updateProfile(
+        displayName: String,
+        gender: ProfileGender,
+        age: Int,
+        heightCm: Int,
+        weightKg: Int,
+        avatarURL: String?,
+        locale: String
+    ) async throws {
+        guard let uid = session?.user.id else {
+            throw AuthServiceError.notAuthenticated
+        }
+        isBusy = true
+        lastError = nil
+        defer { isBusy = false }
+
+        struct Payload: Encodable {
+            let display_name: String
+            let gender: String
+            let age: Int
+            let height_cm: Int
+            let weight_kg: Double
+            let locale: String
+            let avatar_url: String?
+        }
+
+        let payload = Payload(
+            display_name: displayName.trimmingCharacters(in: .whitespacesAndNewlines),
+            gender: gender.rawValue,
+            age: age,
+            height_cm: heightCm,
+            weight_kg: Double(weightKg),
+            locale: locale,
+            avatar_url: avatarURL
+        )
+
+        try await client.from("profiles")
+            .update(payload)
+            .eq("id", value: uid.uuidString)
+            .execute()
+
+        await refreshProfile()
+    }
 }
 
 enum AuthServiceError: LocalizedError {
