@@ -431,6 +431,117 @@ enum L10n {
         static var full: String { tr("bat_full") }
         static var normal: String { tr("bat_normal") }
     }
+
+    enum Goals {
+        static var screenTitle: String { tr("goals_screen_title") }
+        static var emptyHeadline: String { tr("goals_empty_headline") }
+        static var emptySub: String { tr("goals_empty_sub") }
+        static var createCTA: String { tr("goals_create_cta") }
+        static var createTitle: String { tr("goals_create_title") }
+        static var editTitle: String { tr("goals_edit_title") }
+        static var save: String { tr("goals_save") }
+        static var done: String { tr("goals_done") }
+        static var ok: String { tr("goals_ok") }
+        static var edit: String { tr("goals_edit") }
+        static var delete: String { tr("goals_delete") }
+        static var errorTitle: String { tr("goals_error_title") }
+        static var categoryTaken: String { tr("goals_category_taken") }
+        static var historyTitle: String { tr("goals_history_title") }
+        static var historyStub: String { tr("goals_history_stub") }
+        static var summaryFormat: String { tr("goals_summary_format") }
+        static var stepCategoryTitle: String { tr("goals_step_category_title") }
+        static var stepCategorySub: String { tr("goals_step_category_sub") }
+        static var stepTargetTitle: String { tr("goals_step_target_title") }
+        static var stepPeriodTitle: String { tr("goals_step_period_title") }
+        static var stepPeriodSub: String { tr("goals_step_period_sub") }
+        static var stepRemindersTitle: String { tr("goals_step_reminders_title") }
+        static var stepRemindersSub: String { tr("goals_step_reminders_sub") }
+        static var remindersToggle: String { tr("goals_reminders_toggle") }
+        static var reminderTime: String { tr("goals_reminder_time") }
+        static var successTitle: String { tr("goals_success_title") }
+        static var successSub: String { tr("goals_success_sub") }
+        static var notificationsDenied: String { tr("goals_notifications_denied") }
+
+        static var notifyWaterTitle: String { tr("goals_notify_water_title") }
+        static var notifyWaterBody: String { tr("goals_notify_water_body") }
+        static var notifyActivityTitle: String { tr("goals_notify_activity_title") }
+        static var notifyActivityBody: String { tr("goals_notify_activity_body") }
+        static var notifySleepTitle: String { tr("goals_notify_sleep_title") }
+        static var notifySleepBody: String { tr("goals_notify_sleep_body") }
+        static var notifyStepsTitle: String { tr("goals_notify_steps_title") }
+        static var notifyStepsBody: String { tr("goals_notify_steps_body") }
+        static var notifyWeightTitle: String { tr("goals_notify_weight_title") }
+        static var notifyWeightBody: String { tr("goals_notify_weight_body") }
+        static var notifyProgressTitle: String { tr("goals_notify_progress_title") }
+        static var notifyProgressBody: String { tr("goals_notify_progress_body") }
+
+        static func title(for category: GoalCategory) -> String {
+            switch category {
+            case .steps: return tr("goals_cat_steps")
+            case .activity: return tr("goals_cat_activity")
+            case .sleep: return tr("goals_cat_sleep")
+            case .water: return tr("goals_cat_water")
+            case .weight: return tr("goals_cat_weight")
+            }
+        }
+
+        static func stepTargetSub(for category: GoalCategory) -> String {
+            switch category {
+            case .steps: return tr("goals_step_target_sub_steps")
+            case .activity: return tr("goals_step_target_sub_activity")
+            case .sleep: return tr("goals_step_target_sub_sleep")
+            case .water: return tr("goals_step_target_sub_water")
+            case .weight: return tr("goals_step_target_sub_weight")
+            }
+        }
+
+        static func unitHint(for category: GoalCategory) -> String {
+            switch category {
+            case .steps: return tr("goals_unit_steps")
+            case .activity: return tr("goals_unit_kcal")
+            case .sleep: return tr("goals_unit_hours")
+            case .water: return tr("goals_unit_liters")
+            case .weight: return tr("goals_unit_kg")
+            }
+        }
+
+        static func periodTitle(_ period: GoalPeriod) -> String {
+            switch period {
+            case .daily: return tr("goals_period_daily")
+            case .weekly: return tr("goals_period_weekly")
+            case .monthly: return tr("goals_period_monthly")
+            }
+        }
+
+        static func weekdayShort(_ isoDay: Int) -> String {
+            switch isoDay {
+            case 1: return tr("goals_day_mon")
+            case 2: return tr("goals_day_tue")
+            case 3: return tr("goals_day_wed")
+            case 4: return tr("goals_day_thu")
+            case 5: return tr("goals_day_fri")
+            case 6: return tr("goals_day_sat")
+            default: return tr("goals_day_sun")
+            }
+        }
+
+        static func progressLabel(current: Double, target: Double, category: GoalCategory) -> String {
+            let cur = formatValue(current, category: category)
+            let tgt = formatValue(target, category: category)
+            let unit = unitHint(for: category)
+            return String(format: tr("goals_progress_format"), cur, tgt, unit)
+        }
+
+        private static func formatValue(_ value: Double, category: GoalCategory) -> String {
+            switch category {
+            case .steps, .activity, .weight:
+                return "\(Int(value.rounded()))"
+            case .sleep, .water:
+                let n = (value * 10).rounded() / 10
+                return n == floor(n) ? "\(Int(n))" : String(format: "%.1f", n)
+            }
+        }
+    }
 }
 
 /// Non-observable access to the active language bundle (set by `LanguageStore`).

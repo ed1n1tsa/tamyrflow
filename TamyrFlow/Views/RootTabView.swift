@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootTabView: View {
     @EnvironmentObject private var vm: BluetoothViewModel
+    @EnvironmentObject private var auth: AuthService
     @State private var tab: MainTab = .home
 
     var body: some View {
@@ -19,11 +20,7 @@ struct RootTabView: View {
                         systemImage: "figure.run"
                     )
                 case .goals:
-                    PlaceholderHubPage(
-                        title: L10n.Tab.goals,
-                        subtitle: L10n.Placeholder.goalsSub,
-                        systemImage: "trophy.fill"
-                    )
+                    GoalsPageView(auth: auth)
                 case .profile:
                     ProfilePage()
                 }
@@ -36,7 +33,7 @@ struct RootTabView: View {
                 .padding(.bottom, 8)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
-            if tab != .profile {
+            if tab != .profile && tab != .goals {
                 ConnectionStatusBar(ble: vm.bleService, health: vm.healthService)
             }
         }
