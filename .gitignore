@@ -1,3 +1,8 @@
 .DS_Store
 **/xcuserdata/
 **/DerivedData/
+
+# secrets — never commit
+.env
+.env.*
+**/supabase-credentials.md
