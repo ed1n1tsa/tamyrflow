@@ -1,4 +1,6 @@
+import Auth
 import SwiftUI
+import VeepooBleSDK
 
 struct ProfilePage: View {
     @EnvironmentObject private var auth: AuthService
