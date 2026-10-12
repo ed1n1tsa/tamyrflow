@@ -1,46 +1,42 @@
 import SwiftUI
 
-/// Figma iPhone 17 — welcome: logo + brand + «НАЧАТЬ».
-/// Resting: white pill. Pressed («горит»): blue pill with white label.
+/// Figma iPhone 17 welcome (frame 4): logo above title, НАЧАТЬ lower.
+/// Resting: white pill. Pressed: blue pill.
 struct WelcomeStartView: View {
     var onStart: () -> Void
 
     var body: some View {
         ZStack {
-            OnboardingBackgroundView(
-                blurred: false,
-                overlayOpacity: 0.35,
-                showTopScrim: true
-            )
+            // Background asset (Figma photo 2) already includes #273151 mood; don't double-tint.
+            OnboardingBackgroundView(blurred: false, applyBrandScrim: false)
 
-            VStack(spacing: 22) {
-                Spacer()
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                    .frame(maxHeight: .infinity)
 
-                Image("BrandLogoTF")
-                    .resizable()
-                    .renderingMode(.template)
-                    .scaledToFit()
-                    .foregroundStyle(.white)
-                    .frame(width: 72, height: 72)
-                    .shadow(color: .black.opacity(0.35), radius: 8, y: 2)
-                    .accessibilityLabel("Tamyr Flow")
+                // Brand block — upper-middle (logo then title), as on device/Figma ref
+                VStack(spacing: 14) {
+                    BrandLogoMark(size: 52)
 
-                Text("TAMYR FLOW")
-                    .font(.system(size: 34, weight: .bold))
-                    .tracking(2.0)
-                    .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.35), radius: 8, y: 2)
+                    Text("TAMYR FLOW")
+                        .font(.system(size: 32, weight: .bold))
+                        .tracking(1.8)
+                        .foregroundStyle(.white)
+                }
+                .shadow(color: .black.opacity(0.28), radius: 6, y: 2)
+
+                Spacer(minLength: 0)
+                    .frame(maxHeight: .infinity)
 
                 Button(action: onStart) {
                     Text("НАЧАТЬ")
                         .font(.system(size: 17, weight: .bold))
                         .tracking(1.2)
-                        .frame(maxWidth: 260)
+                        .frame(maxWidth: 280)
                         .frame(height: 54)
                 }
                 .buttonStyle(WelcomeStartButtonStyle())
-
-                Spacer()
+                .padding(.bottom, 64)
             }
             .padding(.horizontal, 40)
         }
@@ -56,8 +52,8 @@ private struct WelcomeStartButtonStyle: ButtonStyle {
                     .fill(configuration.isPressed ? AppTheme.brandBlue : Color.white)
             )
             .shadow(
-                color: (configuration.isPressed ? AppTheme.brandBlue : Color.black).opacity(0.35),
-                radius: configuration.isPressed ? 16 : 8,
+                color: Color.black.opacity(configuration.isPressed ? 0.2 : 0.28),
+                radius: configuration.isPressed ? 10 : 8,
                 y: 4
             )
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
