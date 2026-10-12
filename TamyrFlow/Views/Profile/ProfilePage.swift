@@ -12,6 +12,7 @@ struct ProfilePage: View {
     @State private var stubAlert: String?
     @State private var showEditProfile = false
     @State private var showPersonalData = false
+    @State private var showAboutApp = false
 
     private var profile: UserProfile? { auth.profile }
 
@@ -58,6 +59,9 @@ struct ProfilePage: View {
             }
             .navigationDestination(isPresented: $showPersonalData) {
                 PersonalDataView()
+            }
+            .navigationDestination(isPresented: $showAboutApp) {
+                AboutAppView()
             }
         }
         .id(language.code)
@@ -341,6 +345,8 @@ struct ProfilePage: View {
                 Button {
                     if item.title == L10n.Profile.menuPersonal {
                         showPersonalData = true
+                    } else if item.title == L10n.Profile.menuAbout {
+                        showAboutApp = true
                     } else {
                         stubAlert = L10n.Profile.stubBody
                     }
@@ -433,17 +439,3 @@ struct ProfilePage: View {
     }
 }
 
-private extension View {
-    func profileCard() -> some View {
-        self
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: ProfileTheme.cardRadius, style: .continuous)
-                    .fill(ProfileTheme.cardFill)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: ProfileTheme.cardRadius, style: .continuous)
-                            .stroke(ProfileTheme.cardBorder, lineWidth: 1)
-                    )
-            )
-    }
-}

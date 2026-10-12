@@ -457,3 +457,24 @@ Open the email and enter the code below.";
 "goals_notify_weight_body" = "Log your current weight in the app.";
 "goals_notify_progress_title" = "Check your progress 🎯";
 "goals_notify_progress_body" = "You have achieved %d of %d goals. Keep it up!";
+
+/* About */
+"about_title" = "About";
+"about_version_format" = "Version %@ (%@)";
+"about_tagline" = "Your progress. Your discipline. Every day.";
+"about_mission_title" = "More than just a tracker";
+"about_mission_body" = "Tamyr Flow helps you build habits and track workouts, activity, and progress. We believe the best results come from discipline, consistency, and a mindful approach to yourself.";
+"about_feat_track_title" = "Track";
+"about_feat_track_body" = "Workouts, activity, and progress";
+"about_feat_achieve_title" = "Achieve";
+"about_feat_achieve_body" = "Set goals and watch your results";
+"about_feat_habits_title" = "Build habits";
+"about_feat_habits_body" = "Consistency today — big results tomorrow";
+"about_feat_motivate_title" = "Stay motivated";
+"about_feat_motivate_body" = "Together toward a better you";
+"about_disclaimer_title" = "Important information";
+"about_disclaimer_body" = "Tamyr Flow is not a medical app and does not provide medical advice, diagnoses, or treatment recommendations. All information is for informational purposes only and does not replace consultation with a qualified professional.";
+"about_disclaimer_warn" = "Do not self-diagnose or make treatment decisions based on app data. For any health-related questions, consult a doctor or other qualified medical professional.";
+"about_contact_title" = "Contact us";
+"about_contact_sub" = "Questions, ideas, or feedback? We're always here.";
+"about_contact_email" = "support@tamyrflow.app";

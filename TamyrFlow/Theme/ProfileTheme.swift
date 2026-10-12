@@ -17,3 +17,18 @@ enum ProfileTheme {
     static let contentInset: CGFloat = 19
     static let tabBarHeight: CGFloat = 58
 }
+
+extension View {
+    func profileCard() -> some View {
+        self
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: ProfileTheme.cardRadius, style: .continuous)
+                    .fill(ProfileTheme.cardFill)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: ProfileTheme.cardRadius, style: .continuous)
+                            .stroke(ProfileTheme.cardBorder, lineWidth: 1)
+                    )
+            )
+    }
+}

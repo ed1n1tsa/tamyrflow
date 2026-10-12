@@ -432,6 +432,28 @@ enum L10n {
         static var normal: String { tr("bat_normal") }
     }
 
+    enum About {
+        static var title: String { tr("about_title") }
+        static var versionFormat: String { tr("about_version_format") }
+        static var tagline: String { tr("about_tagline") }
+        static var missionTitle: String { tr("about_mission_title") }
+        static var missionBody: String { tr("about_mission_body") }
+        static var featureTrackTitle: String { tr("about_feat_track_title") }
+        static var featureTrackBody: String { tr("about_feat_track_body") }
+        static var featureAchieveTitle: String { tr("about_feat_achieve_title") }
+        static var featureAchieveBody: String { tr("about_feat_achieve_body") }
+        static var featureHabitsTitle: String { tr("about_feat_habits_title") }
+        static var featureHabitsBody: String { tr("about_feat_habits_body") }
+        static var featureMotivateTitle: String { tr("about_feat_motivate_title") }
+        static var featureMotivateBody: String { tr("about_feat_motivate_body") }
+        static var disclaimerTitle: String { tr("about_disclaimer_title") }
+        static var disclaimerBody: String { tr("about_disclaimer_body") }
+        static var disclaimerWarn: String { tr("about_disclaimer_warn") }
+        static var contactTitle: String { tr("about_contact_title") }
+        static var contactSub: String { tr("about_contact_sub") }
+        static var contactEmail: String { tr("about_contact_email") }
+    }
+
     enum Goals {
         static var screenTitle: String { tr("goals_screen_title") }
         static var emptyHeadline: String { tr("goals_empty_headline") }
