@@ -14,6 +14,9 @@ enum AppTheme {
     static let cardBorder = Color.white.opacity(0.12)
 
     static let onboardingOverlay = Color(red: 0.07, green: 0.12, blue: 0.28).opacity(0.72)
+    /// Figma top photo scrim: #273151 @ 69%
+    static let onboardingTopScrim = Color(red: 39 / 255, green: 49 / 255, blue: 81 / 255)
+    static let onboardingTopScrimOpacity = 0.69
     static let onboardingButtonDisabled = Color(red: 0.86, green: 0.87, blue: 0.90)
     static let onboardingButtonDisabledText = Color(red: 0.45, green: 0.47, blue: 0.52)
 

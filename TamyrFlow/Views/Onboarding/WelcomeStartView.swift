@@ -1,16 +1,29 @@
 import SwiftUI
 
-/// Figma iPhone 17 — welcome: brand + «НАЧАТЬ».
+/// Figma iPhone 17 — welcome: logo + brand + «НАЧАТЬ».
 /// Resting: white pill. Pressed («горит»): blue pill with white label.
 struct WelcomeStartView: View {
     var onStart: () -> Void
 
     var body: some View {
         ZStack {
-            OnboardingBackgroundView(blurred: false, overlayOpacity: 0.58)
+            OnboardingBackgroundView(
+                blurred: false,
+                overlayOpacity: 0.35,
+                showTopScrim: true
+            )
 
-            VStack(spacing: 28) {
+            VStack(spacing: 22) {
                 Spacer()
+
+                Image("BrandLogoTF")
+                    .resizable()
+                    .renderingMode(.template)
+                    .scaledToFit()
+                    .foregroundStyle(.white)
+                    .frame(width: 72, height: 72)
+                    .shadow(color: .black.opacity(0.35), radius: 8, y: 2)
+                    .accessibilityLabel("Tamyr Flow")
 
                 Text("TAMYR FLOW")
                     .font(.system(size: 34, weight: .bold))
