@@ -7,7 +7,7 @@ struct LoginView: View {
 
     var onLoggedIn: () -> Void
     var onNoAccount: () -> Void
-    var onForgotPassword: () -> Void = {}
+    var onForgotPassword: (String) -> Void = { _ in }
 
     @State private var email = ""
     @State private var password = ""
@@ -50,7 +50,9 @@ struct LoginView: View {
 
                         Spacer()
 
-                        Button(action: onForgotPassword) {
+                        Button {
+                            onForgotPassword(email.trimmingCharacters(in: .whitespacesAndNewlines))
+                        } label: {
                             Text(L10n.Auth.forgotPassword)
                                 .font(AppFont.interBold(14))
                                 .foregroundStyle(AppTheme.authLink)

@@ -25,6 +25,18 @@ enum L10n {
         static var termsSuffix: String { tr("auth_terms_suffix") }
         static var errorGeneric: String { tr("auth_error_generic") }
         static var confirmEmail: String { tr("auth_confirm_email") }
+        static var forgotTitle: String { tr("auth_forgot_title") }
+        static var forgotHintEmpty: String { tr("auth_forgot_hint_empty") }
+        static var forgotHintFormat: String { tr("auth_forgot_hint_format") }
+        static var forgotResend: String { tr("auth_forgot_resend") }
+        static var forgotSubmit: String { tr("auth_forgot_submit") }
+        static var forgotCodeSent: String { tr("auth_forgot_code_sent") }
+        static var forgotNeedEmail: String { tr("auth_forgot_need_email") }
+        static var newPasswordTitle: String { tr("auth_new_password_title") }
+        static var newPassword: String { tr("auth_new_password") }
+        static var confirmPassword: String { tr("auth_confirm_password") }
+        static var savePassword: String { tr("auth_save_password") }
+        static var passwordMismatch: String { tr("auth_password_mismatch") }
     }
 
     enum Tab {

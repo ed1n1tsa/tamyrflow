@@ -50,6 +50,33 @@ final class AuthService: ObservableObject {
         _ = try await client.auth.signIn(email: email, password: password)
     }
 
+    /// Sends recovery email with OTP (`{{ .Token }}` must be in the Supabase email template).
+    func sendPasswordRecovery(email: String) async throws {
+        isBusy = true
+        lastError = nil
+        defer { isBusy = false }
+        try await client.auth.resetPasswordForEmail(email)
+    }
+
+    /// Verifies the 4-digit recovery OTP and establishes a session for password update.
+    func verifyRecoveryOTP(email: String, token: String) async throws {
+        isBusy = true
+        lastError = nil
+        defer { isBusy = false }
+        _ = try await client.auth.verifyOTP(
+            email: email,
+            token: token,
+            type: .recovery
+        )
+    }
+
+    func updatePassword(_ password: String) async throws {
+        isBusy = true
+        lastError = nil
+        defer { isBusy = false }
+        _ = try await client.auth.update(user: UserAttributes(password: password))
+    }
+
     func signOut() async {
         try? await client.auth.signOut()
     }

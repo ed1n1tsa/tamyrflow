@@ -281,3 +281,16 @@
 "auth_terms_suffix" = " of the TamyrFlow app.";
 "auth_error_generic" = "Something went wrong. Please try again.";
 "auth_confirm_email" = "Check your email to confirm registration, then sign in.";
+
+"auth_forgot_title" = "RESTORE PASSWORD";
+"auth_forgot_hint_empty" = "Enter your email and tap Send to get a 4-digit code.";
+"auth_forgot_hint_format" = "Enter the 4-digit code we sent to: %@";
+"auth_forgot_resend" = "DIDN'T GET CODE";
+"auth_forgot_submit" = "SEND";
+"auth_forgot_code_sent" = "Code sent to your email.";
+"auth_forgot_need_email" = "Enter your email first.";
+"auth_new_password_title" = "NEW PASSWORD";
+"auth_new_password" = "NEW PASSWORD";
+"auth_confirm_password" = "CONFIRM PASSWORD";
+"auth_save_password" = "SAVE";
+"auth_password_mismatch" = "Passwords do not match or are too short.";

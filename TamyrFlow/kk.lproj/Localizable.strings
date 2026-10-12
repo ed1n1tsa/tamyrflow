@@ -277,3 +277,16 @@
 "auth_terms_suffix" = " таныстым және келісемін.";
 "auth_error_generic" = "Сұрау орындалмады. Қайта көріңіз.";
 "auth_confirm_email" = "Поштаңызды тексеріп, тіркелуді растаңыз, содан кейін кіріңіз.";
+
+"auth_forgot_title" = "ҚҰПИЯ СӨЗДІ ҚАЛПЫНА КЕЛТІРУ";
+"auth_forgot_hint_empty" = "Поштаны енгізіп, «Жіберу» батырмасын басыңыз — 4 таңбалы код келеді.";
+"auth_forgot_hint_format" = "Поштаңызға жіберілген 4 таңбалы кодты енгізіңіз: %@";
+"auth_forgot_resend" = "КОД КЕЛМЕДІ";
+"auth_forgot_submit" = "ЖІБЕРУ";
+"auth_forgot_code_sent" = "Код поштаға жіберілді.";
+"auth_forgot_need_email" = "Алдымен поштаны енгізіңіз.";
+"auth_new_password_title" = "ЖАҢА ҚҰПИЯ СӨЗ";
+"auth_new_password" = "ЖАҢА ҚҰПИЯ СӨЗ";
+"auth_confirm_password" = "ҚҰПИЯ СӨЗДІ ҚАЙТАЛАҢЫЗ";
+"auth_save_password" = "САҚТАУ";
+"auth_password_mismatch" = "Құпия сөздер сәйкес емес немесе тым қысқа.";

@@ -5,9 +5,10 @@ enum OnboardingStep: Equatable {
     case welcome
     case login
     case register
+    case forgotPassword
 }
 
-/// Important Info → Welcome → Login / Register (Supabase Auth).
+/// Important Info → Welcome → Login / Register / Forgot password (Supabase Auth).
 struct OnboardingFlowView: View {
     @EnvironmentObject private var auth: AuthService
     @EnvironmentObject private var language: LanguageStore
@@ -16,6 +17,7 @@ struct OnboardingFlowView: View {
 
     @State private var step: OnboardingStep = .importantInfo
     @State private var isAccepted = false
+    @State private var forgotEmail = ""
 
     var body: some View {
         ZStack {
@@ -48,6 +50,13 @@ struct OnboardingFlowView: View {
                         withAnimation(.easeInOut(duration: 0.28)) {
                             step = .register
                         }
+                    },
+                    onForgotPassword: { email in
+                        auth.lastError = nil
+                        forgotEmail = email
+                        withAnimation(.easeInOut(duration: 0.28)) {
+                            step = .forgotPassword
+                        }
                     }
                 )
                 .transition(.opacity)
@@ -56,6 +65,24 @@ struct OnboardingFlowView: View {
                 RegisterView(
                     onRegistered: finish,
                     onHaveAccount: {
+                        auth.lastError = nil
+                        withAnimation(.easeInOut(duration: 0.28)) {
+                            step = .login
+                        }
+                    }
+                )
+                .transition(.opacity)
+
+            case .forgotPassword:
+                ForgotPasswordView(
+                    initialEmail: forgotEmail,
+                    onDone: {
+                        auth.lastError = nil
+                        withAnimation(.easeInOut(duration: 0.28)) {
+                            step = .login
+                        }
+                    },
+                    onBackToLogin: {
                         auth.lastError = nil
                         withAnimation(.easeInOut(duration: 0.28)) {
                             step = .login
