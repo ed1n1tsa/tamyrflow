@@ -11,6 +11,7 @@ struct ProfilePage: View {
     @State private var showDeleteConfirm = false
     @State private var stubAlert: String?
     @State private var showEditProfile = false
+    @State private var showPersonalData = false
 
     private var profile: UserProfile? { auth.profile }
 
@@ -54,6 +55,9 @@ struct ProfilePage: View {
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $showEditProfile) {
                 EditProfileView()
+            }
+            .navigationDestination(isPresented: $showPersonalData) {
+                PersonalDataView()
             }
         }
         .id(language.code)
@@ -335,7 +339,11 @@ struct ProfilePage: View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 Button {
-                    stubAlert = L10n.Profile.stubBody
+                    if item.title == L10n.Profile.menuPersonal {
+                        showPersonalData = true
+                    } else {
+                        stubAlert = L10n.Profile.stubBody
+                    }
                 } label: {
                     HStack(spacing: 14) {
                         Image(systemName: item.systemImage)

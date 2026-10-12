@@ -385,3 +385,7 @@ Open the email and enter the code below.";
 "edit_success_title" = "Profile updated";
 "edit_success_body" = "Your details were saved successfully.";
 "edit_success_ok" = "OK";
+
+"pdata_title" = "Personal data";
+"pdata_subtitle" = "Your personal data is used to personalize recommendations and experience.";
+"pdata_email" = "Email";

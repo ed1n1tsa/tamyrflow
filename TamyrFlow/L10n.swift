@@ -151,6 +151,12 @@ enum L10n {
         static var successOK: String { tr("edit_success_ok") }
     }
 
+    enum PersonalData {
+        static var title: String { tr("pdata_title") }
+        static var subtitle: String { tr("pdata_subtitle") }
+        static var emailLabel: String { tr("pdata_email") }
+    }
+
     enum Dashboard {
         static var title: String { tr("dash_title") }
         static var battery: String { tr("dash_battery") }
