@@ -12,15 +12,34 @@ struct ContentView: View {
     @EnvironmentObject private var auth: AuthService
     @Environment(\.scenePhase) private var scenePhase
 
+    /// Animated splash overlays the auth gate once per cold start of this view tree.
+    @State private var showSplash = true
+
     var body: some View {
         ZStack {
+            appRoot
+
+            if showSplash {
+                AnimatedSplashView {
+                    withAnimation(.easeOut(duration: 0.35)) {
+                        showSplash = false
+                    }
+                }
+                .transition(.opacity)
+                .zIndex(100)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: showSplash)
+    }
+
+    @ViewBuilder
+    private var appRoot: some View {
+        ZStack {
             if auth.isBootstrapping {
-                ProfileSetupBackground()
-                ProgressView()
-                    .tint(.white)
+                // Match splash navy while session restores (no white flash).
+                Color("SplashNavy").ignoresSafeArea()
             } else if !auth.isAuthenticated {
                 OnboardingFlowView {
-                    // Session is owned by AuthService; gate switches automatically.
                     OnboardingStorage.markCompleted()
                 }
                 .transition(.opacity)
