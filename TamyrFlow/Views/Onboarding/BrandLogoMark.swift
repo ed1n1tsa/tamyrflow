@@ -1,16 +1,15 @@
 import SwiftUI
 
-/// Combined TF monogram (shared stem) — white mark from Figma logo.
+/// Figma logo — fixed **26×29 pt**, vector `logo.svg` only.
 struct BrandLogoMark: View {
-    var size: CGFloat = 56
-
     var body: some View {
         Image("BrandLogoTF")
             .resizable()
             .renderingMode(.template)
+            .interpolation(.none)
             .scaledToFit()
             .foregroundStyle(.white)
-            .frame(width: size, height: size * (29.0 / 26.0))
+            .frame(width: 26, height: 29)
             .accessibilityLabel("Tamyr Flow")
     }
 }

@@ -1,15 +1,12 @@
 import SwiftUI
 
-/// Full-bleed runner photo. Image asset already includes mood; code adds #273151 @ 69% as in Figma.
+/// Full-bleed photo + full scrim `#273151` @ 69% (Figma welcome).
 struct OnboardingBackgroundView: View {
     var blurred: Bool = false
-    /// When true, applies full-screen #273151 @ 69% (welcome / Figma frame 4).
-    var applyBrandScrim: Bool = true
-    var showTopScrimOnly: Bool = false
 
     var body: some View {
         GeometryReader { geo in
-            ZStack(alignment: .top) {
+            ZStack {
                 Image("OnboardingBackground")
                     .resizable()
                     .scaledToFill()
@@ -17,26 +14,11 @@ struct OnboardingBackgroundView: View {
                     .clipped()
                     .blur(radius: blurred ? 16 : 0)
 
-                if applyBrandScrim && !showTopScrimOnly {
-                    AppTheme.onboardingTopScrim
-                        .opacity(AppTheme.onboardingTopScrimOpacity)
-                }
-
-                if showTopScrimOnly {
-                    LinearGradient(
-                        colors: [
-                            AppTheme.onboardingTopScrim.opacity(AppTheme.onboardingTopScrimOpacity),
-                            AppTheme.onboardingTopScrim.opacity(0)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: max(120, geo.size.height * 0.22))
-                    .allowsHitTesting(false)
-                }
+                AppTheme.onboardingTopScrim
+                    .opacity(AppTheme.onboardingTopScrimOpacity)
 
                 if blurred {
-                    Color.black.opacity(0.25)
+                    Color.black.opacity(0.20)
                 }
             }
         }

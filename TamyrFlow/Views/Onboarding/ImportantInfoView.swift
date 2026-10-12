@@ -17,7 +17,7 @@ struct ImportantInfoView: View {
 
     var body: some View {
         ZStack {
-            OnboardingBackgroundView(blurred: true, applyBrandScrim: true)
+            OnboardingBackgroundView(blurred: true)
 
             VStack {
                 Spacer(minLength: 24)
