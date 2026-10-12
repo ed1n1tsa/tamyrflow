@@ -3,7 +3,28 @@ import Foundation
 /// Centralized keys for `Localizable.strings` (en / ru / kk).
 enum L10n {
     private static func tr(_ key: String) -> String {
-        String(localized: String.LocalizationValue(key))
+        let bundle = LanguageStoreBootstrap.bundle
+        return bundle.localizedString(forKey: key, value: nil, table: nil)
+    }
+
+    enum Auth {
+        static var start: String { tr("auth_start") }
+        static var loginTitle: String { tr("auth_login_title") }
+        static var registerTitle: String { tr("auth_register_title") }
+        static var email: String { tr("auth_email") }
+        static var password: String { tr("auth_password") }
+        static var noAccount: String { tr("auth_no_account") }
+        static var haveAccount: String { tr("auth_have_account") }
+        static var forgotPassword: String { tr("auth_forgot_password") }
+        static var login: String { tr("auth_login") }
+        static var register: String { tr("auth_register") }
+        static var termsPrefix: String { tr("auth_terms_prefix") }
+        static var privacy: String { tr("auth_privacy") }
+        static var termsAnd: String { tr("auth_terms_and") }
+        static var terms: String { tr("auth_terms") }
+        static var termsSuffix: String { tr("auth_terms_suffix") }
+        static var errorGeneric: String { tr("auth_error_generic") }
+        static var confirmEmail: String { tr("auth_confirm_email") }
     }
 
     enum Tab {
@@ -292,4 +313,9 @@ enum L10n {
         static var full: String { tr("bat_full") }
         static var normal: String { tr("bat_normal") }
     }
+}
+
+/// Non-observable access to the active language bundle (set by `LanguageStore`).
+enum LanguageStoreBootstrap {
+    nonisolated(unsafe) static var bundle: Bundle = .main
 }

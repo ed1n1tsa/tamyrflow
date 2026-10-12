@@ -263,3 +263,21 @@
 "bat_charging" = "Charging";
 "bat_full" = "Full";
 "bat_normal" = "Normal";
+
+"auth_start" = "START";
+"auth_login_title" = "SIGN IN TO YOUR ACCOUNT";
+"auth_register_title" = "CREATE AN ACCOUNT";
+"auth_email" = "EMAIL";
+"auth_password" = "PASSWORD";
+"auth_no_account" = "No account?";
+"auth_have_account" = "Already have an account?";
+"auth_forgot_password" = "Forgot password?";
+"auth_login" = "SIGN IN";
+"auth_register" = "SIGN UP";
+"auth_terms_prefix" = "I have read and agree to the ";
+"auth_privacy" = "Privacy Policy";
+"auth_terms_and" = " and ";
+"auth_terms" = "Terms of Use";
+"auth_terms_suffix" = " of the TamyrFlow app.";
+"auth_error_generic" = "Something went wrong. Please try again.";
+"auth_confirm_email" = "Check your email to confirm registration, then sign in.";

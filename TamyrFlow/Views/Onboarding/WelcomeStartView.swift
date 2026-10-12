@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Figma welcome: logo top 26×29, title + НАЧАТЬ centered — Inter Bold / heavy fallback.
+/// Figma welcome: logo top, language top-trailing, title + НАЧАТЬ centered.
 struct WelcomeStartView: View {
+    @EnvironmentObject private var language: LanguageStore
     var onStart: () -> Void
 
     var body: some View {
@@ -9,8 +10,16 @@ struct WelcomeStartView: View {
             OnboardingBackgroundView(blurred: false)
 
             VStack(spacing: 0) {
-                BrandLogoMark()
-                    .padding(.top, 18)
+                ZStack(alignment: .topTrailing) {
+                    HStack {
+                        Spacer()
+                        BrandLogoMark()
+                        Spacer()
+                    }
+                    LanguagePickerView()
+                        .padding(.trailing, 4)
+                }
+                .padding(.top, 18)
 
                 Spacer(minLength: 0)
 
@@ -22,18 +31,19 @@ struct WelcomeStartView: View {
                         .multilineTextAlignment(.center)
 
                     Button(action: onStart) {
-                        Text("НАЧАТЬ")
+                        Text(L10n.Auth.start)
                             .font(AppFont.interBold(18))
                             .tracking(1.2)
                             .frame(maxWidth: 280)
                             .frame(height: 56)
                     }
                     .buttonStyle(WelcomeStartButtonStyle())
+                    .id(language.code)
                 }
 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 40)
+            .padding(.horizontal, 28)
             .padding(.bottom, 24)
         }
     }
@@ -51,8 +61,4 @@ private struct WelcomeStartButtonStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
-}
-
-#Preview {
-    WelcomeStartView(onStart: {})
 }

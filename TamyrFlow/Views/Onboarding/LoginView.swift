@@ -1,9 +1,12 @@
 import SwiftUI
 
-/// Figma login — after «НАЧАТЬ». Layout: logo top, form block mid/lower (not stuck to top).
+/// Figma login — after «НАЧАТЬ». Supabase sign-in wired.
 struct LoginView: View {
-    var onLogin: (_ email: String, _ password: String) -> Void
-    var onNoAccount: () -> Void = {}
+    @EnvironmentObject private var auth: AuthService
+    @EnvironmentObject private var language: LanguageStore
+
+    var onLoggedIn: () -> Void
+    var onNoAccount: () -> Void
     var onForgotPassword: () -> Void = {}
 
     @State private var email = ""
@@ -14,7 +17,7 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            loginBackground
+            authBackground
 
             VStack(spacing: 0) {
                 brandHeader
@@ -22,23 +25,23 @@ struct LoginView: View {
 
                 Spacer(minLength: 24)
 
-                // Mid–lower cluster (matches Figma ref: not packed under the logo)
                 VStack(spacing: 0) {
-                    Text("ВОЙДИТЕ В АККАУНТ")
+                    Text(L10n.Auth.loginTitle)
                         .font(AppFont.interBold(28))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
+                        .id(language.code)
 
                     VStack(spacing: 14) {
-                        authField(placeholder: "ПОЧТА", text: $email, isSecure: false)
-                        authField(placeholder: "ПАРОЛЬ", text: $password, isSecure: true)
+                        authField(placeholder: L10n.Auth.email, text: $email, isSecure: false)
+                        authField(placeholder: L10n.Auth.password, text: $password, isSecure: true)
                     }
                     .padding(.top, 26)
 
                     HStack {
                         Button(action: onNoAccount) {
-                            Text("Нет аккаунта?")
+                            Text(L10n.Auth.noAccount)
                                 .font(AppFont.interBold(14))
                                 .foregroundStyle(AppTheme.authLink)
                         }
@@ -47,7 +50,7 @@ struct LoginView: View {
                         Spacer()
 
                         Button(action: onForgotPassword) {
-                            Text("Забыли пароль?")
+                            Text(L10n.Auth.forgotPassword)
                                 .font(AppFont.interBold(14))
                                 .foregroundStyle(AppTheme.authLink)
                         }
@@ -58,23 +61,35 @@ struct LoginView: View {
                     termsRow
                         .padding(.top, 26)
 
+                    if let err = auth.lastError {
+                        Text(err)
+                            .font(AppFont.interBold(13))
+                            .foregroundStyle(AppTheme.danger)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 12)
+                    }
+
                     Button {
-                        guard canSubmit else { return }
-                        onLogin(email.trimmingCharacters(in: .whitespacesAndNewlines), password)
+                        Task { await submit() }
                     } label: {
-                        Text("ВОЙТИ")
-                            .font(AppFont.interBold(18))
-                            .tracking(1.0)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(
-                                Capsule(style: .continuous)
-                                    .fill(canSubmit ? AppTheme.authPrimaryButton : AppTheme.authPrimaryButton.opacity(0.45))
-                            )
+                        HStack {
+                            if auth.isBusy {
+                                ProgressView().tint(.white)
+                            }
+                            Text(L10n.Auth.login)
+                                .font(AppFont.interBold(18))
+                                .tracking(1.0)
+                                .foregroundStyle(.white)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(canSubmit ? AppTheme.authPrimaryButton : AppTheme.authPrimaryButton.opacity(0.45))
+                        )
                     }
                     .buttonStyle(.plain)
-                    .disabled(!canSubmit)
+                    .disabled(!canSubmit || auth.isBusy)
                     .padding(.top, 28)
                 }
 
@@ -91,7 +106,7 @@ struct LoginView: View {
             && !password.isEmpty
     }
 
-    private var loginBackground: some View {
+    private var authBackground: some View {
         GeometryReader { geo in
             ZStack {
                 Image("LoginBackground")
@@ -99,7 +114,6 @@ struct LoginView: View {
                     .scaledToFill()
                     .frame(width: geo.size.width, height: geo.size.height)
                     .clipped()
-
                 AppTheme.onboardingTopScrim
                     .opacity(AppTheme.onboardingTopScrimOpacity)
             }
@@ -120,9 +134,9 @@ struct LoginView: View {
     private func authField(placeholder: String, text: Binding<String>, isSecure: Bool) -> some View {
         Group {
             if isSecure {
-                SecureField("", text: text, prompt: fieldPrompt(placeholder))
+                SecureField("", text: text, prompt: prompt(placeholder))
             } else {
-                TextField("", text: text, prompt: fieldPrompt(placeholder))
+                TextField("", text: text, prompt: prompt(placeholder))
                     .textInputAutocapitalization(.never)
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled()
@@ -134,13 +148,10 @@ struct LoginView: View {
         .padding(.horizontal, 22)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: fieldHeight)
-        .background(
-            Capsule(style: .continuous)
-                .fill(Color.white)
-        )
+        .background(Capsule(style: .continuous).fill(Color.white))
     }
 
-    private func fieldPrompt(_ text: String) -> Text {
+    private func prompt(_ text: String) -> Text {
         Text(text)
             .font(AppFont.interBold(16))
             .foregroundStyle(AppTheme.authFieldPlaceholder)
@@ -148,17 +159,11 @@ struct LoginView: View {
 
     private var termsRow: some View {
         HStack(alignment: .top, spacing: 12) {
-            Button {
-                acceptedTerms.toggle()
-            } label: {
+            Button { acceptedTerms.toggle() } label: {
                 ZStack {
-                    Circle()
-                        .strokeBorder(Color.white, lineWidth: 2)
-                        .frame(width: 22, height: 22)
+                    Circle().strokeBorder(Color.white, lineWidth: 2).frame(width: 22, height: 22)
                     if acceptedTerms {
-                        Circle()
-                            .fill(AppTheme.authLink)
-                            .frame(width: 12, height: 12)
+                        Circle().fill(AppTheme.authLink).frame(width: 12, height: 12)
                     }
                 }
             }
@@ -166,19 +171,29 @@ struct LoginView: View {
             .padding(.top, 2)
 
             (
-                Text("Я ознакомился(-ась) и согласен(-на) с ").foregroundColor(.white)
-                + Text("Политикой конфиденциальности").foregroundColor(AppTheme.authLink)
-                + Text(" и ").foregroundColor(.white)
-                + Text("Условиями использования").foregroundColor(AppTheme.authLink)
-                + Text(" приложения TamyrFlow.").foregroundColor(.white)
+                Text(L10n.Auth.termsPrefix).foregroundColor(.white)
+                + Text(L10n.Auth.privacy).foregroundColor(AppTheme.authLink)
+                + Text(L10n.Auth.termsAnd).foregroundColor(.white)
+                + Text(L10n.Auth.terms).foregroundColor(AppTheme.authLink)
+                + Text(L10n.Auth.termsSuffix).foregroundColor(.white)
             )
             .font(AppFont.interBold(13))
             .multilineTextAlignment(.leading)
             .fixedSize(horizontal: false, vertical: true)
+            .id(language.code)
         }
     }
-}
 
-#Preview {
-    LoginView(onLogin: { _, _ in })
+    private func submit() async {
+        auth.lastError = nil
+        do {
+            try await auth.signIn(
+                email: email.trimmingCharacters(in: .whitespacesAndNewlines),
+                password: password
+            )
+            onLoggedIn()
+        } catch {
+            auth.lastError = error.localizedDescription
+        }
+    }
 }

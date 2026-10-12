@@ -10,6 +10,8 @@ import SwiftUI
 @main
 struct TamyrFlowApp: App {
     @StateObject private var vm = BluetoothViewModel()
+    @StateObject private var auth = AuthService()
+    @StateObject private var language = LanguageStore()
 
     init() {
         AppFont.register()
@@ -19,6 +21,8 @@ struct TamyrFlowApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(vm)
+                .environmentObject(auth)
+                .environmentObject(language)
         }
     }
 }

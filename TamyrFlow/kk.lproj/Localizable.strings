@@ -259,3 +259,21 @@
 "bat_charging" = "Зарядталуда";
 "bat_full" = "Толық";
 "bat_normal" = "Қалыпты";
+
+"auth_start" = "БАСТАУ";
+"auth_login_title" = "АККАУНТҚА КІРІҢІЗ";
+"auth_register_title" = "АККАУНТ ЖАСАҢЫЗ";
+"auth_email" = "ПОШТА";
+"auth_password" = "ҚҰПИЯ СӨЗ";
+"auth_no_account" = "Аккаунт жоқ па?";
+"auth_have_account" = "Аккаунт бар ма?";
+"auth_forgot_password" = "Құпия сөзді ұмыттыңыз ба?";
+"auth_login" = "КІРУ";
+"auth_register" = "ТІРКЕЛУ";
+"auth_terms_prefix" = "Мен ";
+"auth_privacy" = "Құпиялылық саясатымен";
+"auth_terms_and" = " және ";
+"auth_terms" = "Пайдалану шарттарымен";
+"auth_terms_suffix" = " таныстым және келісемін.";
+"auth_error_generic" = "Сұрау орындалмады. Қайта көріңіз.";
+"auth_confirm_email" = "Поштаңызды тексеріп, тіркелуді растаңыз, содан кейін кіріңіз.";

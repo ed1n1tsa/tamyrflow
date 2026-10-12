@@ -259,3 +259,21 @@
 "bat_charging" = "Зарядка";
 "bat_full" = "Полный";
 "bat_normal" = "Обычный";
+
+"auth_start" = "НАЧАТЬ";
+"auth_login_title" = "ВОЙДИТЕ В АККАУНТ";
+"auth_register_title" = "СОЗДАЙТЕ АККАУНТ";
+"auth_email" = "ПОЧТА";
+"auth_password" = "ПАРОЛЬ";
+"auth_no_account" = "Нет аккаунта?";
+"auth_have_account" = "Уже есть аккаунт?";
+"auth_forgot_password" = "Забыли пароль?";
+"auth_login" = "ВОЙТИ";
+"auth_register" = "ЗАРЕГИСТРИРОВАТЬСЯ";
+"auth_terms_prefix" = "Я ознакомился(-ась) и согласен(-на) с ";
+"auth_privacy" = "Политикой конфиденциальности";
+"auth_terms_and" = " и ";
+"auth_terms" = "Условиями использования";
+"auth_terms_suffix" = " приложения TamyrFlow.";
+"auth_error_generic" = "Не удалось выполнить запрос. Попробуйте ещё раз.";
+"auth_confirm_email" = "Проверьте почту и подтвердите регистрацию, затем войдите.";

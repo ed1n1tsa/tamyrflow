@@ -4,10 +4,14 @@ enum OnboardingStep: Equatable {
     case importantInfo
     case welcome
     case login
+    case register
 }
 
-/// Important Info → Welcome «НАЧАТЬ» → Login (Supabase auth next).
+/// Important Info → Welcome → Login / Register (Supabase Auth).
 struct OnboardingFlowView: View {
+    @EnvironmentObject private var auth: AuthService
+    @EnvironmentObject private var language: LanguageStore
+
     var onFinished: () -> Void
 
     @State private var step: OnboardingStep = .importantInfo
@@ -38,23 +42,36 @@ struct OnboardingFlowView: View {
 
             case .login:
                 LoginView(
-                    onLogin: { _, _ in
-                        // TODO: Supabase Auth — wire next.
-                        // Temporary: allow continuing into app until auth is connected.
-                        OnboardingStorage.markCompleted()
-                        onFinished()
-                    },
+                    onLoggedIn: finish,
                     onNoAccount: {
-                        // TODO: registration screen
-                    },
-                    onForgotPassword: {
-                        // TODO: password reset
+                        auth.lastError = nil
+                        withAnimation(.easeInOut(duration: 0.28)) {
+                            step = .register
+                        }
+                    }
+                )
+                .transition(.opacity)
+
+            case .register:
+                RegisterView(
+                    onRegistered: finish,
+                    onHaveAccount: {
+                        auth.lastError = nil
+                        withAnimation(.easeInOut(duration: 0.28)) {
+                            step = .login
+                        }
                     }
                 )
                 .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.28), value: step)
+        .environmentObject(language)
+    }
+
+    private func finish() {
+        OnboardingStorage.markCompleted()
+        onFinished()
     }
 }
 
