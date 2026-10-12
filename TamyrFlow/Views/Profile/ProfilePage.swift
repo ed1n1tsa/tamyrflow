@@ -18,7 +18,7 @@ struct ProfilePage: View {
             ProfileSetupBackground()
 
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 9) {
+                VStack(alignment: .leading, spacing: 14) {
                     header
                     userCard
                     goalsCard
@@ -34,6 +34,7 @@ struct ProfilePage: View {
                     ) {
                         showLogoutConfirm = true
                     }
+                    .padding(.top, 4)
 
                     accountButton(
                         title: L10n.Profile.deleteAccount,
@@ -44,8 +45,8 @@ struct ProfilePage: View {
                     }
                 }
                 .padding(.horizontal, ProfileTheme.contentInset)
-                .padding(.top, 8)
-                .padding(.bottom, 24)
+                .padding(.top, 10)
+                .padding(.bottom, 28)
             }
         }
         .id(language.code)
@@ -88,19 +89,19 @@ struct ProfilePage: View {
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 HStack(spacing: 8) {
                     BrandLogoMark()
                     Text("TAMYR FLOW")
-                        .font(AppFont.interBold(14))
+                        .font(AppFont.interBold(15))
                         .tracking(1)
                         .foregroundStyle(.white)
                 }
                 Spacer()
                 ZStack(alignment: .topTrailing) {
                     Image(systemName: "bell.fill")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 17, weight: .semibold))
                         .foregroundStyle(.white)
                         .padding(8)
                     Circle()
@@ -111,97 +112,113 @@ struct ProfilePage: View {
             }
 
             Text(L10n.Profile.title)
-                .font(AppFont.interBold(28))
+                .font(AppFont.interBold(30))
                 .foregroundStyle(.white)
             Text(L10n.Profile.subtitle)
-                .font(AppFont.interBold(13))
+                .font(AppFont.interBold(14))
                 .foregroundStyle(ProfileTheme.muted)
         }
-        .padding(.bottom, 4)
+        .padding(.bottom, 6)
     }
 
     // MARK: - Cards
 
     private var userCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top, spacing: 12) {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(alignment: .center, spacing: 12) {
                 Image("ProfileAvatar")
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 56, height: 56)
+                    .frame(width: 60, height: 60)
                     .clipShape(Circle())
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 5) {
                     Text(profile?.displayName ?? "—")
-                        .font(AppFont.interBold(18))
+                        .font(AppFont.interBold(20))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
                     Text(profile?.email ?? auth.session?.user.email ?? "—")
-                        .font(AppFont.interBold(12))
+                        .font(AppFont.interBold(13))
                         .foregroundStyle(ProfileTheme.muted)
                         .lineLimit(1)
+                        .truncationMode(.middle)
                 }
                 Spacer(minLength: 8)
                 Button {
                     stubAlert = L10n.Profile.stubBody
                 } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "pencil")
-                        Text(L10n.Profile.edit)
-                    }
-                    .font(AppFont.interBold(11))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 10)
-                    .frame(height: 26)
-                    .background(Capsule().strokeBorder(ProfileTheme.cardBorder, lineWidth: 1))
+                    Image(systemName: "pencil")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            Circle()
+                                .strokeBorder(ProfileTheme.cardBorder, lineWidth: 1)
+                                .background(Circle().fill(ProfileTheme.accent.opacity(0.12)))
+                        )
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(L10n.Profile.edit)
             }
 
-            HStack(spacing: 0) {
-                metricCell(icon: "person.fill", label: L10n.Profile.gender, value: genderLabel)
-                metricCell(icon: "calendar", label: L10n.Profile.age, value: ageLabel)
-                metricCell(icon: "ruler", label: L10n.Profile.height, value: heightLabel)
-                metricCell(icon: "scalemass.fill", label: L10n.Profile.weight, value: weightLabel)
-            }
+            metricsRow
         }
-        .padding(12)
+        .padding(16)
         .profileCard()
     }
 
-    private func metricCell(icon: String, label: String, value: String) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(ProfileTheme.accent)
-            Text(label)
-                .font(AppFont.interBold(10))
-                .foregroundStyle(ProfileTheme.muted)
-            Text(value)
-                .font(AppFont.interBold(12))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+    private var metricsRow: some View {
+        let items: [(String, String, String)] = [
+            ("person.fill", L10n.Profile.gender, genderLabel),
+            ("calendar", L10n.Profile.age, ageLabel),
+            ("ruler", L10n.Profile.height, heightLabel),
+            ("scalemass.fill", L10n.Profile.weight, weightLabel)
+        ]
+
+        return HStack(alignment: .top, spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                VStack(spacing: 6) {
+                    Image(systemName: item.0)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(ProfileTheme.accent)
+                        .frame(height: 18)
+                    Text(item.1)
+                        .font(AppFont.interBold(11))
+                        .foregroundStyle(ProfileTheme.muted)
+                        .frame(height: 14)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
+                    Text(item.2)
+                        .font(AppFont.interBold(13))
+                        .foregroundStyle(.white)
+                        .frame(height: 16)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center)
+            }
         }
-        .frame(maxWidth: .infinity)
+        .padding(.top, 2)
     }
 
     private var goalsCard: some View {
         Button {
             stubAlert = L10n.Profile.stubBody
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
                 Image(systemName: "target")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(ProfileTheme.accent)
-                    .frame(width: 36, height: 36)
+                    .frame(width: 40, height: 40)
                     .background(Circle().fill(ProfileTheme.accent.opacity(0.18)))
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(L10n.Profile.goalsTitle)
-                        .font(AppFont.interBold(14))
+                        .font(AppFont.interBold(15))
                         .foregroundStyle(.white)
                     Text(L10n.Profile.goalsSubMock)
-                        .font(AppFont.interBold(11))
+                        .font(AppFont.interBold(12))
                         .foregroundStyle(ProfileTheme.muted)
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
@@ -211,16 +228,16 @@ struct ProfilePage: View {
                                 .frame(width: geo.size.width * 0.6)
                         }
                     }
-                    .frame(height: 6)
+                    .frame(height: 7)
                 }
 
                 Text("60%")
-                    .font(AppFont.interBold(13))
+                    .font(AppFont.interBold(14))
                     .foregroundStyle(ProfileTheme.accent)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(ProfileTheme.muted)
             }
-            .padding(12)
+            .padding(16)
             .profileCard()
         }
         .buttonStyle(.plain)
@@ -234,45 +251,45 @@ struct ProfilePage: View {
         return Button {
             stubAlert = L10n.Profile.stubBody
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
                 Image("ProfileWatch")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 64, height: 72)
+                    .frame(width: 68, height: 76)
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(L10n.Profile.myWatch)
-                        .font(AppFont.interBold(11))
+                        .font(AppFont.interBold(12))
                         .foregroundStyle(ProfileTheme.muted)
                     Text(vm.bleService.connectedDevice?.deviceName ?? "SyncWatch Pro")
-                        .font(AppFont.interBold(15))
+                        .font(AppFont.interBold(16))
                         .foregroundStyle(.white)
 
                     HStack(spacing: 10) {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 5) {
                             Circle()
                                 .fill(connected ? ProfileTheme.connected : AppTheme.danger)
-                                .frame(width: 7, height: 7)
+                                .frame(width: 8, height: 8)
                             Text(connected ? L10n.Profile.connected : L10n.Profile.disconnected)
-                                .font(AppFont.interBold(11))
+                                .font(AppFont.interBold(12))
                                 .foregroundStyle(.white.opacity(0.85))
                         }
                         if let battery {
                             Label("\(battery)%", systemImage: "battery.75")
-                                .font(AppFont.interBold(11))
+                                .font(AppFont.interBold(12))
                                 .foregroundStyle(.white.opacity(0.85))
                         }
                     }
 
                     Label(L10n.Profile.lastSyncMock, systemImage: "arrow.triangle.2.circlepath")
-                        .font(AppFont.interBold(10))
+                        .font(AppFont.interBold(11))
                         .foregroundStyle(ProfileTheme.accentSoft)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
                     .foregroundStyle(ProfileTheme.muted)
             }
-            .padding(12)
+            .padding(16)
             .profileCard()
         }
         .buttonStyle(.plain)
@@ -317,27 +334,27 @@ struct ProfilePage: View {
                 Button {
                     stubAlert = L10n.Profile.stubBody
                 } label: {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 14) {
                         Image(systemName: item.systemImage)
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(ProfileTheme.accent)
-                            .frame(width: 32, height: 32)
+                            .frame(width: 36, height: 36)
                             .background(Circle().fill(ProfileTheme.accent.opacity(0.16)))
-                        VStack(alignment: .leading, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 4) {
                             Text(item.title)
-                                .font(AppFont.interBold(14))
+                                .font(AppFont.interBold(15))
                                 .foregroundStyle(.white)
                             Text(item.subtitle)
-                                .font(AppFont.interBold(11))
+                                .font(AppFont.interBold(12))
                                 .foregroundStyle(ProfileTheme.muted)
                         }
                         Spacer()
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(ProfileTheme.muted)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 13)
                 }
                 .buttonStyle(.plain)
 
@@ -345,7 +362,7 @@ struct ProfilePage: View {
                     Rectangle()
                         .fill(ProfileTheme.rowDivider)
                         .frame(height: 0.5)
-                        .padding(.leading, 56)
+                        .padding(.leading, 64)
                 }
             }
         }
@@ -358,10 +375,10 @@ struct ProfilePage: View {
                 Image(systemName: systemImage)
                 Text(title)
             }
-            .font(AppFont.interBold(14))
+            .font(AppFont.interBold(15))
             .foregroundStyle(isDestructive ? AppTheme.danger : .white)
             .frame(maxWidth: .infinity)
-            .frame(height: 44)
+            .frame(height: 48)
             .background(
                 Capsule(style: .continuous)
                     .fill(isDestructive ? ProfileTheme.dangerFill : ProfileTheme.cardFill)
