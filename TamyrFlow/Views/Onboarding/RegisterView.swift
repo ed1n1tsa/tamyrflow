@@ -10,6 +10,7 @@ struct RegisterView: View {
 
     @State private var email = ""
     @State private var password = ""
+    @State private var isPasswordVisible = false
     @State private var acceptedTerms = false
     @State private var infoMessage: String?
 
@@ -34,8 +35,8 @@ struct RegisterView: View {
                         .id(language.code)
 
                     VStack(spacing: 14) {
-                        authField(placeholder: L10n.Auth.email, text: $email, isSecure: false)
-                        authField(placeholder: L10n.Auth.password, text: $password, isSecure: true)
+                        authField(placeholder: L10n.Auth.email, text: $email)
+                        passwordField
                     }
                     .padding(.top, 26)
 
@@ -131,21 +132,49 @@ struct RegisterView: View {
         }
     }
 
-    private func authField(placeholder: String, text: Binding<String>, isSecure: Bool) -> some View {
-        Group {
-            if isSecure {
-                SecureField("", text: text, prompt: prompt(placeholder))
-            } else {
-                TextField("", text: text, prompt: prompt(placeholder))
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.emailAddress)
-                    .autocorrectionDisabled()
+    private func authField(placeholder: String, text: Binding<String>) -> some View {
+        TextField("", text: text, prompt: prompt(placeholder))
+            .textInputAutocapitalization(.never)
+            .keyboardType(.emailAddress)
+            .autocorrectionDisabled()
+            .font(AppFont.interBold(16))
+            .foregroundStyle(.black)
+            .multilineTextAlignment(.leading)
+            .padding(.horizontal, 22)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: fieldHeight)
+            .background(Capsule(style: .continuous).fill(Color.white))
+    }
+
+    private var passwordField: some View {
+        HStack(spacing: 8) {
+            Group {
+                if isPasswordVisible {
+                    TextField("", text: $password, prompt: prompt(L10n.Auth.password))
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                } else {
+                    SecureField("", text: $password, prompt: prompt(L10n.Auth.password))
+                }
             }
+            .font(AppFont.interBold(16))
+            .foregroundStyle(.black)
+            .textContentType(.password)
+
+            Button {
+                isPasswordVisible.toggle()
+            } label: {
+                Image(systemName: isPasswordVisible ? "eye.slash.fill" : "eye.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(AppTheme.brandBlue.opacity(0.75))
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isPasswordVisible ? "Hide password" : "Show password")
         }
-        .font(AppFont.interBold(16))
-        .foregroundStyle(.black)
-        .multilineTextAlignment(.leading)
-        .padding(.horizontal, 22)
+        .padding(.leading, 22)
+        .padding(.trailing, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: fieldHeight)
         .background(Capsule(style: .continuous).fill(Color.white))
