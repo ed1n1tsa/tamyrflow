@@ -134,7 +134,11 @@ final class BluetoothViewModel: ObservableObject {
 
         guard healthService.operation == .idle else { return }
         healthService.readAllDailyData()
-        await healthService.waitUntilOperationIdle(timeoutSeconds: 55)
+        await healthService.waitUntilOperationIdle(timeoutSeconds: 45)
+        // If SDK never finished, force-clear stuck sync HUD.
+        if healthService.measurementHUD != nil {
+            healthService.dismissMeasurementOverlay()
+        }
     }
 
     /// Call from views with `scenePhase == .active` (and onAppear) so Auto-HR pulse runs only in foreground.

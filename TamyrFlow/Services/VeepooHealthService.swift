@@ -168,6 +168,8 @@ final class VeepooHealthService: ObservableObject {
         ensureLiveMeasurementChannel()
         syncProgressHistory.removeAll()
         measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: 0.05)
+        // SDK sometimes never sends completion (state 2) — always clear HUD after timeout.
+        scheduleManualMeasurementTimeout(for: .readingDailyData, seconds: 45)
         manager?.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
             Task { @MainActor in
                 guard let self else { return }
