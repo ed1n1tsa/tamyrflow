@@ -104,7 +104,13 @@ final class WatchPermissionService: NSObject, ObservableObject, CLLocationManage
             try await store.requestAuthorization(toShare: [], read: read)
             statuses[.health] = .granted
         } catch {
-            statuses[.health] = .denied
+            // Missing HealthKit entitlement shows up here — treat as unavailable, not user-deny.
+            let ns = error as NSError
+            if ns.domain == "com.apple.healthkit", ns.code == 4 {
+                statuses[.health] = .unavailable
+            } else {
+                statuses[.health] = .denied
+            }
         }
     }
 
