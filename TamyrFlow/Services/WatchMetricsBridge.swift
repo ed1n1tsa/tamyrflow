@@ -19,7 +19,6 @@ enum WatchMetricsBridge {
         let dayStart = cal.startOfDay(for: day)
         // Stable timestamp inside the local day so re-sync updates the same logical row.
         let recordedAt = cal.date(byAdding: .hour, value: 12, to: dayStart) ?? dayStart
-        let dayKey = GoalPeriodMath.dateOnlyString(dayStart)
 
         if let steps, steps > 0 {
             await upsertDayMeasurement(
@@ -29,8 +28,7 @@ enum WatchMetricsBridge {
                 value: Double(steps),
                 unit: "steps",
                 recordedAt: recordedAt,
-                dayStart: dayStart,
-                dayKey: dayKey
+                dayStart: dayStart
             )
             await setGoalProgressAbsolute(
                 auth: auth,
@@ -49,8 +47,7 @@ enum WatchMetricsBridge {
                 value: Double(sleepMinutes),
                 unit: "minutes",
                 recordedAt: recordedAt,
-                dayStart: dayStart,
-                dayKey: dayKey
+                dayStart: dayStart
             )
             let hours = Double(sleepMinutes) / 60.0
             await setGoalProgressAbsolute(
@@ -72,8 +69,7 @@ enum WatchMetricsBridge {
         value: Double,
         unit: String,
         recordedAt: Date,
-        dayStart: Date,
-        dayKey: String
+        dayStart: Date
     ) async {
         let cal = Calendar.current
         let dayEnd = cal.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(86_400)
@@ -103,7 +99,6 @@ enum WatchMetricsBridge {
                 let value: Double
                 let unit: String
                 let recorded_at: String
-                let meta: [String: String]
             }
             try? await auth.client
                 .from("measurements")
@@ -111,8 +106,7 @@ enum WatchMetricsBridge {
                     Patch(
                         value: next,
                         unit: unit,
-                        recorded_at: iso.string(from: recordedAt),
-                        meta: ["bridge": "veepoo", "day": dayKey]
+                        recorded_at: iso.string(from: recordedAt)
                     )
                 )
                 .eq("id", value: row.id.uuidString)
@@ -127,7 +121,6 @@ enum WatchMetricsBridge {
             let unit: String
             let recorded_at: String
             let source: String
-            let meta: [String: String]
         }
         try? await auth.client
             .from("measurements")
@@ -138,8 +131,7 @@ enum WatchMetricsBridge {
                     value: value,
                     unit: unit,
                     recorded_at: iso.string(from: recordedAt),
-                    source: "device",
-                    meta: ["bridge": "veepoo", "day": dayKey]
+                    source: "device"
                 )
             )
             .execute()
