@@ -569,6 +569,75 @@ enum L10n {
         }
     }
 
+    enum Watch {
+        static var screenTitle: String { tr("watch_screen_title") }
+        static var connect: String { tr("watch_connect") }
+        static var disconnect: String { tr("watch_disconnect") }
+        static var lastSync: String { tr("watch_last_sync") }
+        static var battery: String { tr("watch_battery") }
+        static var todayTime: String { tr("watch_today_time") }
+        static var neverSynced: String { tr("watch_never_synced") }
+        static var bannerDisconnectedTitle: String { tr("watch_banner_off_title") }
+        static var bannerDisconnectedSub: String { tr("watch_banner_off_sub") }
+        static var bannerConnectedTitle: String { tr("watch_banner_on_title") }
+        static var bannerConnectedSub: String { tr("watch_banner_on_sub") }
+        static var functionsTitle: String { tr("watch_functions_title") }
+        static var featActivity: String { tr("watch_feat_activity") }
+        static var featActivitySub: String { tr("watch_feat_activity_sub") }
+        static var featHeart: String { tr("watch_feat_heart") }
+        static var featHeartSub: String { tr("watch_feat_heart_sub") }
+        static var featSleep: String { tr("watch_feat_sleep") }
+        static var featSleepSub: String { tr("watch_feat_sleep_sub") }
+        static var featWater: String { tr("watch_feat_water") }
+        static var featWaterSub: String { tr("watch_feat_water_sub") }
+        static var settingsTitle: String { tr("watch_settings_title") }
+        static var setFaces: String { tr("watch_set_faces") }
+        static var setNotifications: String { tr("watch_set_notifications") }
+        static var setNotificationsSub: String { tr("watch_set_notifications_sub") }
+        static var setSync: String { tr("watch_set_sync") }
+        static var setSyncSub: String { tr("watch_set_sync_sub") }
+        static var setMore: String { tr("watch_set_more") }
+        static var setMoreSub: String { tr("watch_set_more_sub") }
+
+        static var flowTitle: String { tr("watch_flow_title") }
+        static var flowSearchTitle: String { tr("watch_flow_search_title") }
+        static var flowConnectingTitle: String { tr("watch_flow_connecting_title") }
+        static var flowPermissionsTitle: String { tr("watch_flow_permissions_title") }
+        static var flowSuccessTitle: String { tr("watch_flow_success_title") }
+        static var prepHeadline: String { tr("watch_prep_headline") }
+        static var prepSub: String { tr("watch_prep_sub") }
+        static var prepPower: String { tr("watch_prep_power") }
+        static var prepBluetooth: String { tr("watch_prep_bluetooth") }
+        static var prepNearby: String { tr("watch_prep_nearby") }
+        static var searchHeadline: String { tr("watch_search_headline") }
+        static var searchSub: String { tr("watch_search_sub") }
+        static var foundDevices: String { tr("watch_found_devices") }
+        static var searching: String { tr("watch_searching") }
+        static var dontSeeWatch: String { tr("watch_dont_see") }
+        static var connectingHeadline: String { tr("watch_connecting_headline") }
+        static var connectingSub: String { tr("watch_connecting_sub") }
+        static var phaseFound: String { tr("watch_phase_found") }
+        static var phaseLink: String { tr("watch_phase_link") }
+        static var phasePermissions: String { tr("watch_phase_permissions") }
+        static var phaseSync: String { tr("watch_phase_sync") }
+        static var phaseFinish: String { tr("watch_phase_finish") }
+        static var connectFailed: String { tr("watch_connect_failed") }
+        static var retry: String { tr("watch_retry") }
+        static var permissionsHeadline: String { tr("watch_perm_headline") }
+        static var permissionsSub: String { tr("watch_perm_sub") }
+        static var permBluetooth: String { tr("watch_perm_bt") }
+        static var permBluetoothSub: String { tr("watch_perm_bt_sub") }
+        static var permNotifications: String { tr("watch_perm_notif") }
+        static var permNotificationsSub: String { tr("watch_perm_notif_sub") }
+        static var permHealth: String { tr("watch_perm_health") }
+        static var permHealthSub: String { tr("watch_perm_health_sub") }
+        static var permLocation: String { tr("watch_perm_location") }
+        static var permLocationSub: String { tr("watch_perm_location_sub") }
+        static var successSub: String { tr("watch_success_sub") }
+        static var goToMyWatch: String { tr("watch_go_my") }
+        static var setupLater: String { tr("watch_setup_later") }
+    }
+
     enum About {
         static var title: String { tr("about_title") }
         static var versionFormat: String { tr("about_version_format") }

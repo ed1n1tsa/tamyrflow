@@ -8,6 +8,12 @@
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>TamyrFlow uses your photo library so you can set a profile picture.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TamyrFlow uses your location to find nearby wearable devices over Bluetooth.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>TamyrFlow reads wellness data such as steps, heart rate, and sleep to show your progress.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>TamyrFlow may save wellness data you choose to track in the app.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 </dict>

@@ -13,6 +13,7 @@ struct ProfilePage: View {
     @State private var showEditProfile = false
     @State private var showPersonalData = false
     @State private var showAboutApp = false
+    @State private var showMyWatch = false
 
     private var profile: UserProfile? { auth.profile }
 
@@ -62,6 +63,9 @@ struct ProfilePage: View {
             }
             .navigationDestination(isPresented: $showAboutApp) {
                 AboutAppView()
+            }
+            .navigationDestination(isPresented: $showMyWatch) {
+                MyWatchPage()
             }
         }
         .id(language.code)
@@ -260,7 +264,7 @@ struct ProfilePage: View {
         let battery = vm.bleService.batteryInfo.map(\.battery)
 
         return Button {
-            stubAlert = L10n.Profile.stubBody
+            showMyWatch = true
         } label: {
             HStack(spacing: 14) {
                 Image("ProfileWatch")

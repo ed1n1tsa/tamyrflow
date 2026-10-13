@@ -516,6 +516,9 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Tamyr Flow uses Bluetooth to scan and connect to your wearable device.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Tamyr Flow uses Bluetooth to communicate with your wearable device.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "TamyrFlow uses your location to find nearby wearable devices over Bluetooth.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "TamyrFlow reads wellness data such as steps, heart rate, and sleep to show your progress.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "TamyrFlow may save wellness data you choose to track in the app.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
@@ -559,6 +562,9 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Tamyr Flow uses Bluetooth to scan and connect to your wearable device.";
 				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "Tamyr Flow uses Bluetooth to communicate with your wearable device.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "TamyrFlow uses your location to find nearby wearable devices over Bluetooth.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "TamyrFlow reads wellness data such as steps, heart rate, and sleep to show your progress.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "TamyrFlow may save wellness data you choose to track in the app.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = NO;
