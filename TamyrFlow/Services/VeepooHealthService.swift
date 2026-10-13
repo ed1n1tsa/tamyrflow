@@ -281,14 +281,7 @@ final class VeepooHealthService: ObservableObject {
                 cont.resume(returning: (segments, minutes))
             }
             mgr.veepooSDK_readSleepData(withDayNumber: dayNumber, result: { sleepOneDayArray in
-                let arr: [Any]
-                if let a = sleepOneDayArray as? [Any] {
-                    arr = a
-                } else if let a = sleepOneDayArray as? NSArray {
-                    arr = a as [Any]
-                } else {
-                    arr = []
-                }
+                let arr: [Any] = ((sleepOneDayArray as NSArray?) ?? []).map { $0 as Any }
                 finish(arr.count, Self.parseSleepMinutes(from: arr))
             })
             Task { @MainActor in
