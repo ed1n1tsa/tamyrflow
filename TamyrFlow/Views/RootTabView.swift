@@ -43,9 +43,11 @@ struct RootTabView: View {
             }
         }
         .animation(.easeOut(duration: 0.2), value: vm.healthService.measurementHUD != nil)
-        .refreshable {
+        // Watch daily-sync pull only on Home — on Activity/Goals it left the sync HUD stuck.
+        .refreshable(action: {
+            guard tab == .home || tab == .metrics else { return }
             await vm.performPullToRefresh()
-        }
+        })
         .overlay(alignment: .bottom) {
             if let err = vm.healthService.lastError ?? vm.bleService.errorText, tab != .profile {
                 HStack(spacing: 10) {

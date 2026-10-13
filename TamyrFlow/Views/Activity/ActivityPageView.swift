@@ -45,6 +45,9 @@ struct ActivityPageView: View {
             }
         }
         .task { await service.refresh() }
+        .refreshable {
+            await service.refresh()
+        }
         .fullScreenCover(isPresented: $showAdd) {
             AddActivityFlowView(service: service) {
                 showAdd = false

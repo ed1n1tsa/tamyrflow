@@ -86,35 +86,39 @@ struct ActivityDashboardView: View {
     }
 
     private var metricsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            metricCard(
-                asset: "GoalIconActivity",
-                value: "\(formatInt(service.metrics.calories)) \(L10n.Goals.unitHint(for: .activity))",
-                sub: String(format: L10n.Activity.outOf, formatInt(service.metrics.caloriesTarget)),
-                ratio: ratio(service.metrics.calories, service.metrics.caloriesTarget),
-                tint: Color.orange
-            )
-            metricCard(
-                asset: "GoalIconSleep",
-                value: String(format: L10n.Activity.sleepValue, formatDec(service.metrics.sleepHours)),
-                sub: String(format: L10n.Activity.outOfHours, formatDec(service.metrics.sleepTarget)),
-                ratio: ratio(service.metrics.sleepHours, service.metrics.sleepTarget),
-                tint: Color.purple
-            )
-            metricCard(
-                asset: "GoalIconWater",
-                value: String(format: L10n.Activity.waterValue, formatDec(service.metrics.waterLiters)),
-                sub: String(format: L10n.Activity.outOfLiters, formatDec(service.metrics.waterTarget)),
-                ratio: ratio(service.metrics.waterLiters, service.metrics.waterTarget),
-                tint: Color.cyan
-            )
-            metricCard(
-                asset: "GoalIconWeight",
-                value: String(format: L10n.Activity.weightValue, formatDec(service.metrics.weightKg)),
-                sub: String(format: L10n.Activity.weightGoal, formatDec(service.metrics.weightTarget)),
-                ratio: weightRatio(),
-                tint: Color.green
-            )
+        Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+            GridRow {
+                metricCard(
+                    asset: "GoalIconActivity",
+                    value: "\(formatInt(service.metrics.calories)) \(L10n.Goals.unitHint(for: .activity))",
+                    sub: String(format: L10n.Activity.outOf, formatInt(service.metrics.caloriesTarget)),
+                    ratio: ratio(service.metrics.calories, service.metrics.caloriesTarget),
+                    tint: Color.orange
+                )
+                metricCard(
+                    asset: "GoalIconSleep",
+                    value: String(format: L10n.Activity.sleepValue, formatDec(service.metrics.sleepHours)),
+                    sub: String(format: L10n.Activity.outOfHours, formatDec(service.metrics.sleepTarget)),
+                    ratio: ratio(service.metrics.sleepHours, service.metrics.sleepTarget),
+                    tint: Color.purple
+                )
+            }
+            GridRow {
+                metricCard(
+                    asset: "GoalIconWater",
+                    value: String(format: L10n.Activity.waterValue, formatDec(service.metrics.waterLiters)),
+                    sub: String(format: L10n.Activity.outOfLiters, formatDec(service.metrics.waterTarget)),
+                    ratio: ratio(service.metrics.waterLiters, service.metrics.waterTarget),
+                    tint: Color.cyan
+                )
+                metricCard(
+                    asset: "GoalIconWeight",
+                    value: String(format: L10n.Activity.weightValue, formatDec(service.metrics.weightKg)),
+                    sub: String(format: L10n.Activity.weightGoal, formatDec(service.metrics.weightTarget)),
+                    ratio: weightRatio(),
+                    tint: Color.green
+                )
+            }
         }
     }
 
@@ -129,9 +133,12 @@ struct ActivityDashboardView: View {
                 .foregroundStyle(.white)
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity, minHeight: 38, alignment: .topLeading)
             Text(sub)
                 .font(AppFont.interBold(11))
                 .foregroundStyle(ProfileTheme.muted)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(Color.white.opacity(0.1))
@@ -141,7 +148,9 @@ struct ActivityDashboardView: View {
             .frame(height: 6)
         }
         .padding(14)
+        .frame(maxWidth: .infinity, minHeight: 132, alignment: .topLeading)
         .profileCard()
+        .gridCellUnsizedAxes([.vertical])
     }
 
     private var chartCard: some View {

@@ -237,12 +237,18 @@ struct MyWatchPage: View {
             Text(L10n.Watch.functionsTitle)
                 .font(AppFont.interBold(16))
                 .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                stubFeature(asset: "GoalIconSteps", title: L10n.Watch.featActivity, sub: L10n.Watch.featActivitySub)
-                stubFeature(systemImage: "heart.fill", tint: .red, title: L10n.Watch.featHeart, sub: L10n.Watch.featHeartSub)
-                stubFeature(asset: "GoalIconSleep", title: L10n.Watch.featSleep, sub: L10n.Watch.featSleepSub)
-                stubFeature(asset: "GoalIconWater", title: L10n.Watch.featWater, sub: L10n.Watch.featWaterSub)
+            // Fixed equal cells so columns/rows stay level.
+            Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+                GridRow {
+                    stubFeature(asset: "GoalIconSteps", title: L10n.Watch.featActivity, sub: L10n.Watch.featActivitySub)
+                    stubFeature(systemImage: "heart.fill", tint: .red, title: L10n.Watch.featHeart, sub: L10n.Watch.featHeartSub)
+                }
+                GridRow {
+                    stubFeature(asset: "GoalIconSleep", title: L10n.Watch.featSleep, sub: L10n.Watch.featSleepSub)
+                    stubFeature(asset: "GoalIconWater", title: L10n.Watch.featWater, sub: L10n.Watch.featWaterSub)
+                }
             }
         }
     }
@@ -260,24 +266,33 @@ struct MyWatchPage: View {
                             .frame(width: 36, height: 36)
                             .background(Circle().fill(tint.opacity(0.18)))
                     }
-                    Spacer()
+                    Spacer(minLength: 0)
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(ProfileTheme.muted)
                 }
+                .frame(height: 36)
+
                 Text(title)
                     .font(AppFont.interBold(13))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, minHeight: 34, alignment: .topLeading)
+
                 Text(sub)
                     .font(AppFont.interBold(11))
                     .foregroundStyle(ProfileTheme.muted)
                     .multilineTextAlignment(.leading)
+                    .lineLimit(2)
+                    .frame(maxWidth: .infinity, minHeight: 30, alignment: .topLeading)
             }
             .padding(12)
+            .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
             .profileCard()
         }
         .buttonStyle(.plain)
+        .gridCellUnsizedAxes([.vertical])
     }
 
     private var settingsSection: some View {
