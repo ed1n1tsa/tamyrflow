@@ -36,29 +36,18 @@ struct DashboardPage: View {
                         VStack(spacing: 10) {
                             TFSecondaryButton(L10n.Hub.steps) {
                                 Task {
-                                    vm.healthService.userStatureCm = UInt(Int(vm.height) ?? 175)
-                                    let steps = await vm.healthService.fetchTodayStepsSnapshot(
-                                        showHUD: true,
-                                        pullDailyIfNeeded: false
-                                    )
-                                    await WatchMetricsBridge.persistStepsAndSleep(
+                                    let totals = await vm.healthService.fetchRealtimeStepTotals()
+                                    await WatchMetricsBridge.persistBandDayTotals(
                                         auth: auth,
-                                        steps: steps,
+                                        steps: totals.steps,
+                                        caloriesKcal: totals.caloriesKcal,
                                         sleepMinutes: nil
                                     )
                                 }
                             }
                             TFSecondaryButton(L10n.Hub.sleep) {
                                 Task {
-                                    let sleep = await vm.healthService.fetchSleepMinutesSnapshot(
-                                        showHUD: true,
-                                        pullDailyIfNeeded: false
-                                    )
-                                    await WatchMetricsBridge.persistStepsAndSleep(
-                                        auth: auth,
-                                        steps: nil,
-                                        sleepMinutes: sleep
-                                    )
+                                    await vm.syncActivityMetricsToCloud(auth: auth)
                                 }
                             }
                         }

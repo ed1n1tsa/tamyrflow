@@ -41,6 +41,9 @@ final class BleService: ObservableObject {
         didConfigureSDK = true
         bleManager = manager
 
+        // Official persistence path (wiki): assign VPPeripheralManage before any data APIs.
+        manager.peripheralManage = VPPeripheralManage.shareVPPeripheralManager()
+
         manager.isLogEnable = true
         manager.automaticConnection = false
         // If YES, Veepoo SDK only shows devices with their manufacturer ID — easy to see "no devices".

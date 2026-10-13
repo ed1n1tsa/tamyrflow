@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ActivityPageView: View {
+    @EnvironmentObject private var vm: BluetoothViewModel
+    @EnvironmentObject private var auth: AuthService
     @Binding var selectedTab: MainTab
     @StateObject private var service: ActivityService
     @State private var showAdd = false
@@ -44,8 +46,12 @@ struct ActivityPageView: View {
                 }
             }
         }
-        .task { await service.refresh() }
+        .task {
+            await vm.syncActivityMetricsToCloud(auth: auth)
+            await service.refresh()
+        }
         .refreshable {
+            await vm.syncActivityMetricsToCloud(auth: auth)
             await service.refresh()
         }
         .fullScreenCover(isPresented: $showAdd) {

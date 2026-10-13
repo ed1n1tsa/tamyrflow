@@ -1,23 +1,24 @@
 import Foundation
 import Supabase
 
-/// Persists Veepoo steps/sleep into Supabase for Activity + Goals (source = device).
+/// Persists Veepoo band day totals into Supabase for Activity + Goals (source = device).
 @MainActor
 enum WatchMetricsBridge {
-    /// Upsert today’s device steps (count) and sleep (minutes) into `measurements`,
-    /// and refresh matching active `goal_progress` rows (steps / sleep hours).
-    static func persistStepsAndSleep(
+    static func persistBandDayTotals(
         auth: AuthService,
         steps: Int?,
+        caloriesKcal: Double?,
         sleepMinutes: Int?,
         day: Date = Date()
     ) async {
         guard let userId = auth.session?.user.id else { return }
-        guard (steps ?? 0) > 0 || (sleepMinutes ?? 0) > 0 else { return }
+        let hasSteps = (steps ?? 0) > 0
+        let hasCal = (caloriesKcal ?? 0) > 0
+        let hasSleep = (sleepMinutes ?? 0) > 0
+        guard hasSteps || hasCal || hasSleep else { return }
 
         let cal = Calendar.current
         let dayStart = cal.startOfDay(for: day)
-        // Stable timestamp inside the local day so re-sync updates the same logical row.
         let recordedAt = cal.date(byAdding: .hour, value: 12, to: dayStart) ?? dayStart
 
         if let steps, steps > 0 {
@@ -39,6 +40,25 @@ enum WatchMetricsBridge {
             )
         }
 
+        if let caloriesKcal, caloriesKcal > 0 {
+            await upsertDayMeasurement(
+                auth: auth,
+                userId: userId,
+                metric: "calories",
+                value: caloriesKcal,
+                unit: "kcal",
+                recordedAt: recordedAt,
+                dayStart: dayStart
+            )
+            await setGoalProgressAbsolute(
+                auth: auth,
+                userId: userId,
+                category: .activity,
+                value: caloriesKcal,
+                day: dayStart
+            )
+        }
+
         if let sleepMinutes, sleepMinutes > 0 {
             await upsertDayMeasurement(
                 auth: auth,
@@ -49,15 +69,30 @@ enum WatchMetricsBridge {
                 recordedAt: recordedAt,
                 dayStart: dayStart
             )
-            let hours = Double(sleepMinutes) / 60.0
             await setGoalProgressAbsolute(
                 auth: auth,
                 userId: userId,
                 category: .sleep,
-                value: hours,
+                value: Double(sleepMinutes) / 60.0,
                 day: dayStart
             )
         }
+    }
+
+    /// Backward-compatible wrapper used by older call sites.
+    static func persistStepsAndSleep(
+        auth: AuthService,
+        steps: Int?,
+        sleepMinutes: Int?,
+        day: Date = Date()
+    ) async {
+        await persistBandDayTotals(
+            auth: auth,
+            steps: steps,
+            caloriesKcal: nil,
+            sleepMinutes: sleepMinutes,
+            day: day
+        )
     }
 
     // MARK: - measurements
@@ -93,7 +128,6 @@ enum WatchMetricsBridge {
             .limit(1)
             .execute(),
            let row = response.value.first {
-            // Keep the higher device reading for the day (band totals only grow during the day).
             let next = max(row.value, value)
             struct Patch: Encodable {
                 let value: Double

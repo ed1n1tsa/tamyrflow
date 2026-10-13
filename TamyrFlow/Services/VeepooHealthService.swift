@@ -16,6 +16,10 @@ final class VeepooHealthService: ObservableObject {
     @Published private(set) var lastError: String?
     /// Today’s total steps from the band (best-effort parse of SDK dictionary).
     @Published private(set) var todaySteps: Int?
+    /// Today’s calories (kcal) from Veepoo step dictionary `Cal`.
+    @Published private(set) var todayCaloriesKcal: Double?
+    /// Today’s distance (km) from Veepoo step dictionary `Dis`.
+    @Published private(set) var todayDistanceKm: Double?
     /// Number of sleep segments returned for the last successful sleep read.
     @Published private(set) var sleepSegmentsToday: Int?
     /// Total sleep duration in minutes (last night / day-1 preferred, then day-0).
@@ -190,7 +194,7 @@ final class VeepooHealthService: ObservableObject {
 
         await waitUntilOperationIdle(timeoutSeconds: 2)
         guard canStart(.readingDailyData) else { return false }
-        ensureLiveMeasurementChannel()
+        // Do not poke AutoHR here — wiki forbids concurrent cmds while reading daily data.
         guard let mgr = manager else {
             lastError = L10n.Err.deviceNotConnected
             finishOperation()
@@ -304,18 +308,70 @@ final class VeepooHealthService: ObservableObject {
         return todaySleepMinutes
     }
 
-    /// Steps + sleep for Activity/Goals.
-    /// Default is light reads only — full daily dump is opt-in and skipped on accurate-sleep bands.
+    /// Wiki realtime step totals (`Step` / `Dis` / `Cal`) — matches the watch face, no daily dump required.
+    struct BandDayTotals: Equatable {
+        var steps: Int?
+        var caloriesKcal: Double?
+        var distanceKm: Double?
+        var sleepMinutes: Int?
+    }
+
+    /// Official demo path: `VPDataBaseOperation.veepooSDKGetStepData` for today.
+    @discardableResult
+    func fetchRealtimeStepTotals() async -> BandDayTotals {
+        applyStatureFromDeviceIfAvailable()
+        var totals = BandDayTotals()
+        guard let dict = await loadStepDictionaryFromSDKDatabase(dayOffset: 0) else {
+            return totals
+        }
+        if let steps = Self.parseTotalSteps(from: dict) {
+            todaySteps = steps
+            totals.steps = steps
+        }
+        if let cal = Self.parseDouble(from: dict, keys: ["Cal", "cal", "CAL", "calorie", "calories"]) {
+            todayCaloriesKcal = cal
+            totals.caloriesKcal = cal
+        }
+        if let dis = Self.parseDouble(from: dict, keys: ["Dis", "dis", "DIS", "distance"]) {
+            todayDistanceKm = dis
+            totals.distanceKm = dis
+        }
+        return totals
+    }
+
+    /// Activity sync: realtime steps/kcal first, then safe ordinary sleep (never accurate-sleep API).
+    func syncActivityMetricsFromBand(includeSleep: Bool = true) async -> BandDayTotals {
+        var totals = await fetchRealtimeStepTotals()
+        guard includeSleep else { return totals }
+
+        // Ordinary sleep DB only. Accurate dump/parse crashes some bands — skip dump when sleepType != 0.
+        if !deviceUsesAccurateSleep {
+            _ = await pullDailyDataFromBand(showHUD: false)
+        }
+        if let sleep = await fetchSleepMinutesSnapshot(showHUD: false, pullDailyIfNeeded: false) {
+            totals.sleepMinutes = sleep
+        }
+        return totals
+    }
+
+    /// Steps + sleep for Activity/Goals (legacy entry — prefers realtime steps).
     func syncStepsAndSleepFromBand(
         showHUD: Bool = false,
         pullDailyFirst: Bool = false
     ) async -> (steps: Int?, sleepMinutes: Int?) {
+        _ = showHUD
         if pullDailyFirst, !deviceUsesAccurateSleep {
             _ = await pullDailyDataFromBand(showHUD: showHUD)
         }
-        let steps = await fetchTodayStepsSnapshot(showHUD: false, pullDailyIfNeeded: false)
-        let sleep = await fetchSleepMinutesSnapshot(showHUD: false, pullDailyIfNeeded: false)
-        return (steps, sleep)
+        let totals = await syncActivityMetricsFromBand(includeSleep: true)
+        return (totals.steps, totals.sleepMinutes)
+    }
+
+    private func applyStatureFromDeviceIfAvailable() {
+        let deviceStature = bleService.connectedDevice?.deviceStature ?? 0
+        if deviceStature > 0 {
+            userStatureCm = deviceStature
+        }
     }
 
     private func ensureRecentDailySync(showHUD: Bool) async {
@@ -344,13 +400,18 @@ final class VeepooHealthService: ObservableObject {
     }
 
     private func loadStepsFromSDKDatabase(dayOffset: Int) async -> Int? {
+        Self.parseTotalSteps(from: await loadStepDictionaryFromSDKDatabase(dayOffset: dayOffset))
+    }
+
+    private func loadStepDictionaryFromSDKDatabase(dayOffset: Int) async -> NSDictionary? {
         guard let tableID = deviceTableID else { return nil }
+        applyStatureFromDeviceIfAvailable()
         let dateStr = Self.sdkDateString(dayOffset: dayOffset)
         let stature = userStatureCm
 
-        return await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+        return await withCheckedContinuation { (cont: CheckedContinuation<NSDictionary?, Never>) in
             var resumed = false
-            let finish: (Int?) -> Void = { value in
+            let finish: (NSDictionary?) -> Void = { value in
                 guard !resumed else { return }
                 resumed = true
                 cont.resume(returning: value)
@@ -361,7 +422,13 @@ final class VeepooHealthService: ObservableObject {
                     andTableID: tableID,
                     changeUserStature: stature
                 ) { stepDict in
-                    finish(Self.parseTotalSteps(from: stepDict))
+                    if let d = stepDict as NSDictionary? {
+                        finish(d)
+                    } else if let d = stepDict as? [AnyHashable: Any] {
+                        finish(d as NSDictionary)
+                    } else {
+                        finish(nil)
+                    }
                 }
             }
             if !ok {
@@ -895,30 +962,38 @@ final class VeepooHealthService: ObservableObject {
     }
 
     private static func parseTotalSteps(from dict: Any?) -> Int? {
+        guard let n = parseDouble(
+            from: dict,
+            keys: [
+                "Step", "totalStep", "step", "steps", "TotalStep",
+                "stepValue", "value", "stepTotal", "StepValue"
+            ]
+        ) else { return nil }
+        return max(0, Int(n.rounded()))
+    }
+
+    private static func parseDouble(from dict: Any?, keys: [String]) -> Double? {
         guard let dict else { return nil }
-        // Official Veepoo keys: Step / Dis / Cal (see VPDataBaseOperation + VPStepChangTool).
-        let keys = [
-            "Step", "totalStep", "step", "steps", "TotalStep",
-            "stepValue", "value", "stepTotal", "StepValue"
-        ]
         if let d = dict as? NSDictionary {
             for k in keys {
-                if let n = d.object(forKey: k) as? NSNumber { return max(0, n.intValue) }
+                if let n = d.object(forKey: k) as? NSNumber { return n.doubleValue }
                 if let s = d.object(forKey: k) as? String,
-                   let v = Double(s.replacingOccurrences(of: ",", with: ".")) {
-                    return max(0, Int(v.rounded()))
+                   let v = Double(s.trimmingCharacters(in: .whitespacesAndNewlines)
+                    .replacingOccurrences(of: ",", with: ".")) {
+                    return v
                 }
             }
             return nil
         }
         if let d = dict as? [AnyHashable: Any] {
             for k in keys {
-                if let n = d[k] as? NSNumber { return max(0, n.intValue) }
-                if let n = d[k] as? Int { return max(0, n) }
-                if let n = d[k] as? Double { return max(0, Int(n.rounded())) }
+                if let n = d[k] as? NSNumber { return n.doubleValue }
+                if let n = d[k] as? Double { return n }
+                if let n = d[k] as? Int { return Double(n) }
                 if let s = d[k] as? String,
-                   let v = Double(s.replacingOccurrences(of: ",", with: ".")) {
-                    return max(0, Int(v.rounded()))
+                   let v = Double(s.trimmingCharacters(in: .whitespacesAndNewlines)
+                    .replacingOccurrences(of: ",", with: ".")) {
+                    return v
                 }
             }
         }
