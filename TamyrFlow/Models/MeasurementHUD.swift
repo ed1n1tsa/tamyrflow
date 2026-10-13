@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// Full-screen “measuring” overlay (official-app style feedback).
