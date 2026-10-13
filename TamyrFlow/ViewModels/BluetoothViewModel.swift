@@ -21,6 +21,9 @@ final class BluetoothViewModel: ObservableObject {
     private var healthBootstrapTask: Task<Void, Never>?
     /// Invisible Auto-HR off→on every 7s while app is foreground (keeps SpO₂/health pipe on some bands).
     private var autoHRPulseTask: Task<Void, Never>?
+    private var postConnectMetricsTask: Task<Void, Never>?
+    /// Set from the authenticated shell so post-connect / pull sync can write Supabase.
+    private weak var authService: AuthService?
 
     init(bleService: BleService? = nil) {
         let resolvedBleService = bleService ?? BleService()
@@ -35,11 +38,13 @@ final class BluetoothViewModel: ObservableObject {
                 switch status {
                 case .disconnected, .failed, .timeout:
                     self.healthBootstrapTask?.cancel()
+                    self.postConnectMetricsTask?.cancel()
                     self.stopAutoHRPulseLoop()
                 case .verified:
                     self.autoHR = true
                     self.healthService.bootstrapHealthChannelAfterVerification()
                     self.scheduleStaggeredHealthBootstrap()
+                    self.schedulePostConnectStepsSleepSync()
                 default:
                     break
                 }
@@ -118,8 +123,13 @@ final class BluetoothViewModel: ObservableObject {
         healthService.setAutoTemperature(autoTemperature)
     }
 
+    func attachAuth(_ auth: AuthService) {
+        authService = auth
+    }
+
     /// Pull-to-refresh: wake BLE stack, re-open health pipe, time sync, battery, then daily data if idle.
-    func performPullToRefresh() async {
+    func performPullToRefresh(auth: AuthService? = nil) async {
+        if let auth { authService = auth }
         bleService.configureSDKIfNeeded()
         bleService.refreshBluetoothStateIfConfigured()
         try? await Task.sleep(nanoseconds: 250_000_000)
@@ -138,6 +148,33 @@ final class BluetoothViewModel: ObservableObject {
         // If SDK never finished, force-clear stuck sync HUD.
         if healthService.measurementHUD != nil {
             healthService.dismissMeasurementOverlay()
+        }
+
+        await syncStepsAndSleepToCloud(auth: auth ?? authService)
+    }
+
+    /// Read steps + sleep from the band and upsert into Supabase (Activity / Goals).
+    func syncStepsAndSleepToCloud(auth: AuthService? = nil) async {
+        let resolvedAuth = auth ?? authService
+        guard let resolvedAuth, resolvedAuth.session != nil else { return }
+        guard bleService.connectionStatus == .verified, healthService.isConnected else { return }
+
+        let snapshot = await healthService.syncStepsAndSleepFromBand(showHUD: false)
+        await WatchMetricsBridge.persistStepsAndSleep(
+            auth: resolvedAuth,
+            steps: snapshot.steps,
+            sleepMinutes: snapshot.sleepMinutes
+        )
+    }
+
+    private func schedulePostConnectStepsSleepSync() {
+        postConnectMetricsTask?.cancel()
+        postConnectMetricsTask = Task { [weak self] in
+            // Let the health pipe settle after verify (same window as bootstrap kicks).
+            try? await Task.sleep(nanoseconds: 3_500_000_000)
+            guard !Task.isCancelled, let self else { return }
+            guard self.bleService.connectionStatus == .verified else { return }
+            await self.syncStepsAndSleepToCloud()
         }
     }
 
@@ -183,7 +220,8 @@ final class BluetoothViewModel: ObservableObject {
     }
 
     /// Cold start / return: if watch already verified, align like official “auto” flow.
-    func performLaunchWatchSyncIfPossible() async {
+    func performLaunchWatchSyncIfPossible(auth: AuthService? = nil) async {
+        if let auth { authService = auth }
         bleService.configureSDKIfNeeded()
         bleService.refreshBluetoothStateIfConfigured()
         try? await Task.sleep(nanoseconds: 500_000_000)
@@ -196,6 +234,8 @@ final class BluetoothViewModel: ObservableObject {
         healthService.ensureLiveMeasurementChannel()
         healthService.syncTime()
         await bleService.readBatteryAsync()
-        // Full day sync is heavy — use pull-to-refresh for that to avoid blocking first open.
+        // Full day sync is heavy — pull-to-refresh still does that.
+        // Light steps/sleep bridge so Activity/Goals have numbers after launch.
+        await syncStepsAndSleepToCloud(auth: auth ?? authService)
     }
 }

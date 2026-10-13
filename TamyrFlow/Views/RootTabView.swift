@@ -46,7 +46,7 @@ struct RootTabView: View {
         // Watch daily-sync pull only on Home — on Activity/Goals it left the sync HUD stuck.
         .refreshable(action: {
             guard tab == .home || tab == .metrics else { return }
-            await vm.performPullToRefresh()
+            await vm.performPullToRefresh(auth: auth)
         })
         .overlay(alignment: .bottom) {
             if let err = vm.healthService.lastError ?? vm.bleService.errorText, tab != .profile {

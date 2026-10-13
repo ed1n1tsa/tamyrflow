@@ -16,8 +16,10 @@ final class VeepooHealthService: ObservableObject {
     @Published private(set) var lastError: String?
     /// Today’s total steps from the band (best-effort parse of SDK dictionary).
     @Published private(set) var todaySteps: Int?
-    /// Number of sleep segments returned for day 0 (today).
+    /// Number of sleep segments returned for the last successful sleep read.
     @Published private(set) var sleepSegmentsToday: Int?
+    /// Total sleep duration in minutes (last night / day-1 preferred, then day-0).
+    @Published private(set) var todaySleepMinutes: Int?
     /// Full-screen overlay while measuring / syncing (official-app style).
     @Published private(set) var measurementHUD: MeasurementHUDState?
 
@@ -187,47 +189,117 @@ final class VeepooHealthService: ObservableObject {
     }
 
     func readTodaySteps() {
-        guard canStart(.readingSteps) else { return }
-        ensureLiveMeasurementChannel()
-        guard let mgr = manager else {
-            lastError = L10n.Err.deviceNotConnected
-            finishOperation()
-            return
-        }
-        measurementHUD = MeasurementHUDState(kind: .stepsSnapshot, progress01: nil)
-        scheduleManualMeasurementTimeout(for: .readingSteps, seconds: defaultManualMeasurementSeconds)
-        mgr.veepooSDK_readStepData(withDayNumber: 0, result: { [weak self] stepDict in
-            Task { @MainActor in
-                guard let self else { return }
-                self.todaySteps = Self.parseTotalSteps(from: stepDict)
-                self.finishOperation()
-            }
-        })
+        Task { _ = await fetchTodayStepsSnapshot(showHUD: true) }
     }
 
     func readTodaySleep() {
-        guard canStart(.readingSleep) else { return }
+        Task { _ = await fetchSleepMinutesSnapshot(showHUD: true) }
+    }
+
+    /// Quiet/async read of today’s step total from the band. Returns parsed steps (nil if unavailable).
+    @discardableResult
+    func fetchTodayStepsSnapshot(showHUD: Bool = false) async -> Int? {
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        guard canStart(.readingSteps) else { return todaySteps }
         ensureLiveMeasurementChannel()
         guard let mgr = manager else {
             lastError = L10n.Err.deviceNotConnected
             finishOperation()
-            return
+            return todaySteps
         }
-        measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
-        scheduleManualMeasurementTimeout(for: .readingSleep, seconds: defaultManualMeasurementSeconds)
-        mgr.veepooSDK_readSleepData(withDayNumber: 0, result: { [weak self] sleepOneDayArray in
-            Task { @MainActor in
-                guard let self else { return }
-                if let arr = sleepOneDayArray as? [Any] {
-                    self.sleepSegmentsToday = arr.count
-                } else if let arr = sleepOneDayArray as? NSArray {
-                    self.sleepSegmentsToday = arr.count
-                } else {
-                    self.sleepSegmentsToday = 0
-                }
-                self.finishOperation()
+        if showHUD {
+            measurementHUD = MeasurementHUDState(kind: .stepsSnapshot, progress01: nil)
+        }
+        scheduleManualMeasurementTimeout(for: .readingSteps, seconds: defaultManualMeasurementSeconds)
+
+        let steps: Int? = await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+            var resumed = false
+            let finish: (Int?) -> Void = { value in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: value)
             }
-        })
+            mgr.veepooSDK_readStepData(withDayNumber: 0, result: { stepDict in
+                finish(Self.parseTotalSteps(from: stepDict))
+            })
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: self.defaultManualMeasurementSeconds * 1_000_000_000)
+                finish(nil)
+            }
+        }
+
+        if let steps, steps >= 0 {
+            todaySteps = steps
+        }
+        finishOperation()
+        return todaySteps
+    }
+
+    /// Reads sleep for wellness “last night” (SDK day 1), falling back to day 0.
+    @discardableResult
+    func fetchSleepMinutesSnapshot(showHUD: Bool = false) async -> Int? {
+        // Veepoo: sleep shown “today” is usually yesterday’s night → dayNumber 1.
+        if let minutes = await readOneSleepDay(dayNumber: 1, showHUD: showHUD), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        if let minutes = await readOneSleepDay(dayNumber: 0, showHUD: showHUD) {
+            if minutes > 0 {
+                todaySleepMinutes = minutes
+            }
+            return todaySleepMinutes
+        }
+        return todaySleepMinutes
+    }
+
+    /// Steps + sleep from the band (no full daily dump). Used for Activity/Goals bridge.
+    func syncStepsAndSleepFromBand(showHUD: Bool = false) async -> (steps: Int?, sleepMinutes: Int?) {
+        let steps = await fetchTodayStepsSnapshot(showHUD: showHUD)
+        let sleep = await fetchSleepMinutesSnapshot(showHUD: showHUD)
+        return (steps, sleep)
+    }
+
+    private func readOneSleepDay(dayNumber: Int, showHUD: Bool) async -> Int? {
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        guard canStart(.readingSleep) else { return nil }
+        ensureLiveMeasurementChannel()
+        guard let mgr = manager else {
+            lastError = L10n.Err.deviceNotConnected
+            finishOperation()
+            return nil
+        }
+        if showHUD {
+            measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
+        }
+        scheduleManualMeasurementTimeout(for: .readingSleep, seconds: defaultManualMeasurementSeconds)
+
+        let parsed: (segments: Int, minutes: Int?) = await withCheckedContinuation { cont in
+            var resumed = false
+            let finish: (Int, Int?) -> Void = { segments, minutes in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: (segments, minutes))
+            }
+            mgr.veepooSDK_readSleepData(withDayNumber: dayNumber, result: { sleepOneDayArray in
+                let arr: [Any]
+                if let a = sleepOneDayArray as? [Any] {
+                    arr = a
+                } else if let a = sleepOneDayArray as? NSArray {
+                    arr = a as [Any]
+                } else {
+                    arr = []
+                }
+                finish(arr.count, Self.parseSleepMinutes(from: arr))
+            })
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: self.defaultManualMeasurementSeconds * 1_000_000_000)
+                finish(0, nil)
+            }
+        }
+
+        sleepSegmentsToday = parsed.segments
+        finishOperation()
+        return parsed.minutes
     }
 
     func startHeartTest() {
@@ -691,20 +763,128 @@ final class VeepooHealthService: ObservableObject {
 
     private static func parseTotalSteps(from dict: Any?) -> Int? {
         guard let dict else { return nil }
-        let keys = ["totalStep", "step", "steps", "TotalStep", "stepValue", "value", "stepTotal"]
+        // Official Veepoo keys: Step / Dis / Cal (see VPDataBaseOperation + VPStepChangTool).
+        let keys = [
+            "Step", "totalStep", "step", "steps", "TotalStep",
+            "stepValue", "value", "stepTotal", "StepValue"
+        ]
         if let d = dict as? NSDictionary {
             for k in keys {
-                if let n = d.object(forKey: k) as? NSNumber { return n.intValue }
-                if let s = d.object(forKey: k) as? String, let v = Int(s) { return v }
+                if let n = d.object(forKey: k) as? NSNumber { return max(0, n.intValue) }
+                if let s = d.object(forKey: k) as? String,
+                   let v = Double(s.replacingOccurrences(of: ",", with: ".")) {
+                    return max(0, Int(v.rounded()))
+                }
             }
             return nil
         }
         if let d = dict as? [AnyHashable: Any] {
             for k in keys {
-                if let n = d[k] as? NSNumber { return n.intValue }
-                if let n = d[k] as? Int { return n }
-                if let s = d[k] as? String, let v = Int(s) { return v }
+                if let n = d[k] as? NSNumber { return max(0, n.intValue) }
+                if let n = d[k] as? Int { return max(0, n) }
+                if let n = d[k] as? Double { return max(0, Int(n.rounded())) }
+                if let s = d[k] as? String,
+                   let v = Double(s.replacingOccurrences(of: ",", with: ".")) {
+                    return max(0, Int(v.rounded()))
+                }
             }
+        }
+        return nil
+    }
+
+    /// Sums ordinary sleep dicts (`SLE_HOUR`/`SLE_MINUTE`) and accurate-sleep objects (`sleepDuration` via KVC).
+    private static func parseSleepMinutes(from segments: [Any]) -> Int? {
+        guard !segments.isEmpty else { return nil }
+        var total = 0
+        var sawValue = false
+
+        for item in segments {
+            if let obj = item as? NSObject,
+               !(obj is NSDictionary),
+               !(item is [AnyHashable: Any]) {
+                if let m = intFromAny(obj.value(forKey: "sleepDuration")), m > 0 {
+                    total += m
+                    sawValue = true
+                    continue
+                }
+                let deep = intFromAny(obj.value(forKey: "deepDuration")) ?? 0
+                let light = intFromAny(obj.value(forKey: "lightDuration")) ?? 0
+                let other = intFromAny(obj.value(forKey: "otherDuration")) ?? 0
+                let sum = deep + light + other
+                if sum > 0 {
+                    total += sum
+                    sawValue = true
+                    continue
+                }
+            }
+
+            let dict: NSDictionary?
+            if let d = item as? NSDictionary {
+                dict = d
+            } else if let d = item as? [AnyHashable: Any] {
+                dict = d as NSDictionary
+            } else {
+                dict = nil
+            }
+
+            guard let dict else { continue }
+
+            if let sleHour = doubleFromAny(dict["SLE_HOUR"]),
+               let sleMin = doubleFromAny(dict["SLE_MINUTE"]) {
+                let minutes = Int((sleHour * 60.0 + sleMin).rounded())
+                if minutes > 0 {
+                    total += minutes
+                    sawValue = true
+                    continue
+                }
+            }
+
+            if let deep = doubleFromAny(dict["DEEP_HOUR"]),
+               let light = doubleFromAny(dict["LIGHT_HOUR"]) {
+                let minutes = Int(((deep + light) * 60.0).rounded())
+                if minutes > 0 {
+                    total += minutes
+                    sawValue = true
+                    continue
+                }
+            }
+
+            if doubleFromAny(dict["SLE_HOUR"]) == nil,
+               let m = intFromAny(dict["SLE_MINUTE"] ?? dict["sleepDuration"] ?? dict["SleepDuration"]),
+               m > 0 {
+                // Only raw minutes when hour field is absent (avoid double-count).
+                total += m
+                sawValue = true
+            }
+        }
+
+        guard sawValue else { return nil }
+        // Clamp to a plausible single-day total (0…24h).
+        return min(total, 24 * 60)
+    }
+
+    private static func intFromAny(_ value: Any?) -> Int? {
+        guard let value else { return nil }
+        if let n = value as? NSNumber { return n.intValue }
+        if let n = value as? Int { return n }
+        if let n = value as? Double { return Int(n.rounded()) }
+        if let s = value as? String {
+            let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let v = Int(trimmed) { return v }
+            if let v = Double(trimmed.replacingOccurrences(of: ",", with: ".")) {
+                return Int(v.rounded())
+            }
+        }
+        return nil
+    }
+
+    private static func doubleFromAny(_ value: Any?) -> Double? {
+        guard let value else { return nil }
+        if let n = value as? NSNumber { return n.doubleValue }
+        if let n = value as? Double { return n }
+        if let n = value as? Int { return Double(n) }
+        if let s = value as? String {
+            return Double(s.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: ",", with: "."))
         }
         return nil
     }

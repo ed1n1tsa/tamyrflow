@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DashboardPage: View {
     @EnvironmentObject private var vm: BluetoothViewModel
+    @EnvironmentObject private var auth: AuthService
     @Binding var selectedTab: MainTab
 
     var body: some View {
@@ -34,10 +35,24 @@ struct DashboardPage: View {
 
                         VStack(spacing: 10) {
                             TFSecondaryButton(L10n.Hub.steps) {
-                                vm.healthService.readTodaySteps()
+                                Task {
+                                    let steps = await vm.healthService.fetchTodayStepsSnapshot(showHUD: true)
+                                    await WatchMetricsBridge.persistStepsAndSleep(
+                                        auth: auth,
+                                        steps: steps,
+                                        sleepMinutes: nil
+                                    )
+                                }
                             }
                             TFSecondaryButton(L10n.Hub.sleep) {
-                                vm.healthService.readTodaySleep()
+                                Task {
+                                    let sleep = await vm.healthService.fetchSleepMinutesSnapshot(showHUD: true)
+                                    await WatchMetricsBridge.persistStepsAndSleep(
+                                        auth: auth,
+                                        steps: nil,
+                                        sleepMinutes: sleep
+                                    )
+                                }
                             }
                         }
                         .padding(.top, 6)
@@ -124,7 +139,7 @@ struct DashboardPage: View {
             }
             .scrollContentBackground(.hidden)
             .refreshable {
-                await vm.performPullToRefresh()
+                await vm.performPullToRefresh(auth: auth)
             }
             .navigationTitle(L10n.Dashboard.title)
             .navigationBarTitleDisplayMode(.large)
@@ -138,6 +153,10 @@ struct DashboardPage: View {
     }
 
     private var sleepValue: String {
+        if let minutes = vm.healthService.todaySleepMinutes, minutes > 0 {
+            let hours = Double(minutes) / 60.0
+            return String(format: "%.1fh", hours)
+        }
         if let n = vm.healthService.sleepSegmentsToday { return "\(n)" }
         return "—"
     }

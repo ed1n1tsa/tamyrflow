@@ -60,11 +60,13 @@ struct ContentView: View {
                 .preferredColorScheme(.dark)
                 .tint(AppTheme.accent)
                 .task {
+                    vm.attachAuth(auth)
                     try? await Task.sleep(nanoseconds: 400_000_000)
-                    await vm.performLaunchWatchSyncIfPossible()
+                    await vm.performLaunchWatchSyncIfPossible(auth: auth)
                     syncBandPersonalFromProfile()
                 }
                 .onAppear {
+                    vm.attachAuth(auth)
                     vm.handleAppForegroundActive(scenePhase == .active)
                 }
                 .onChange(of: scenePhase) { _, phase in
