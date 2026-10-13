@@ -432,6 +432,143 @@ enum L10n {
         static var normal: String { tr("bat_normal") }
     }
 
+    enum Activity {
+        static var screenTitle: String { tr("act_screen_title") }
+        static var subtitleEmpty: String { tr("act_subtitle_empty") }
+        static var subtitleFilled: String { tr("act_subtitle_filled") }
+        static var emptyTitle: String { tr("act_empty_title") }
+        static var emptySub: String { tr("act_empty_sub") }
+        static var addFirst: String { tr("act_add_first") }
+        static var addTitle: String { tr("act_add_title") }
+        static var addCTA: String { tr("act_add_cta") }
+        static var continueCTA: String { tr("act_continue") }
+        static var pickDate: String { tr("act_pick_date") }
+        static var trackableTitle: String { tr("act_trackable_title") }
+        static var trackableSub: String { tr("act_trackable_sub") }
+        static var trackWorkouts: String { tr("act_track_workouts") }
+        static var trackWorkoutsSub: String { tr("act_track_workouts_sub") }
+        static var trackCalories: String { tr("act_track_calories") }
+        static var trackCaloriesSub: String { tr("act_track_calories_sub") }
+        static var trackSleep: String { tr("act_track_sleep") }
+        static var trackSleepSub: String { tr("act_track_sleep_sub") }
+        static var trackWater: String { tr("act_track_water") }
+        static var trackWaterSub: String { tr("act_track_water_sub") }
+        static var setGoalsTitle: String { tr("act_set_goals_title") }
+        static var setGoalsSub: String { tr("act_set_goals_sub") }
+        static var activeGoalsTitle: String { tr("act_active_goals_title") }
+        static var openGoals: String { tr("act_open_goals") }
+        static var stepsOf: String { tr("act_steps_of") }
+        static var outOf: String { tr("act_out_of") }
+        static var outOfHours: String { tr("act_out_of_hours") }
+        static var outOfLiters: String { tr("act_out_of_liters") }
+        static var sleepValue: String { tr("act_sleep_value") }
+        static var waterValue: String { tr("act_water_value") }
+        static var weightValue: String { tr("act_weight_value") }
+        static var weightGoal: String { tr("act_weight_goal") }
+        static var chartTitle: String { tr("act_chart_title") }
+        static var achievementsTitle: String { tr("act_achievements_title") }
+        static var recentTitle: String { tr("act_recent_title") }
+        static var recentEmpty: String { tr("act_recent_empty") }
+        static var recentMeta: String { tr("act_recent_meta") }
+        static var todayTime: String { tr("act_today_time") }
+        static var todayDate: String { tr("act_today_date") }
+        static var stepCategoryTitle: String { tr("act_step_cat_title") }
+        static var stepCategorySub: String { tr("act_step_cat_sub") }
+        static var stepTypeTitle: String { tr("act_step_type_title") }
+        static var stepTypeSub: String { tr("act_step_type_sub") }
+        static var stepDetailsTitle: String { tr("act_step_details_title") }
+        static var stepDetailsSub: String { tr("act_step_details_sub") }
+        static var stepReviewTitle: String { tr("act_step_review_title") }
+        static var stepReviewSub: String { tr("act_step_review_sub") }
+        static var searchPlaceholder: String { tr("act_search") }
+        static var change: String { tr("act_change") }
+        static var duration: String { tr("act_duration") }
+        static var minUnit: String { tr("act_min") }
+        static var dateTime: String { tr("act_datetime") }
+        static var intensity: String { tr("act_intensity") }
+        static var notes: String { tr("act_notes") }
+        static var notesPlaceholder: String { tr("act_notes_ph") }
+        static var activityLabel: String { tr("act_activity_label") }
+        static var successTitle: String { tr("act_success_title") }
+        static var successSub: String { tr("act_success_sub") }
+        static var viewInActivity: String { tr("act_view_in") }
+        static var addAnother: String { tr("act_add_another") }
+
+        static func weekdayShort(_ calendarWeekday: Int) -> String {
+            // Calendar: 1=Sun … 7=Sat
+            switch calendarWeekday {
+            case 2: return tr("goals_day_mon")
+            case 3: return tr("goals_day_tue")
+            case 4: return tr("goals_day_wed")
+            case 5: return tr("goals_day_thu")
+            case 6: return tr("goals_day_fri")
+            case 7: return tr("goals_day_sat")
+            default: return tr("goals_day_sun")
+            }
+        }
+
+        static func categoryTitle(_ c: ActivityCategory) -> String {
+            switch c {
+            case .workouts: return tr("act_cat_workouts")
+            case .walkRun: return tr("act_cat_walk_run")
+            case .adaptive: return tr("act_cat_adaptive")
+            case .sport: return tr("act_cat_sport")
+            case .everyday: return tr("act_cat_everyday")
+            }
+        }
+
+        static func categorySub(_ c: ActivityCategory) -> String {
+            switch c {
+            case .workouts: return tr("act_cat_workouts_sub")
+            case .walkRun: return tr("act_cat_walk_run_sub")
+            case .adaptive: return tr("act_cat_adaptive_sub")
+            case .sport: return tr("act_cat_sport_sub")
+            case .everyday: return tr("act_cat_everyday_sub")
+            }
+        }
+
+        static func typeTitle(_ t: ActivityTypeKey) -> String {
+            switch t {
+            case .strength: return tr("act_type_strength")
+            case .cardio: return tr("act_type_cardio")
+            case .run: return tr("act_type_run")
+            case .bike: return tr("act_type_bike")
+            case .swim: return tr("act_type_swim")
+            case .yoga: return tr("act_type_yoga")
+            case .other: return tr("act_type_other")
+            }
+        }
+
+        static func filterTitle(_ key: String) -> String {
+            switch key {
+            case "strength": return tr("act_filter_strength")
+            case "cardio": return tr("act_filter_cardio")
+            case "sport": return tr("act_filter_sport")
+            default: return tr("act_filter_all")
+            }
+        }
+
+        static func intensityTitle(_ i: ActivityIntensity) -> String {
+            switch i {
+            case .light: return tr("act_intensity_light")
+            case .medium: return tr("act_intensity_medium")
+            case .high: return tr("act_intensity_high")
+            }
+        }
+
+        static func achievementLabel(_ def: AchievementDef) -> String {
+            switch def.id {
+            case "steps_7000": return tr("act_ach_steps")
+            case "kcal_300": return tr("act_ach_kcal")
+            case "water_2l": return tr("act_ach_water")
+            case "sleep_8h": return tr("act_ach_sleep")
+            case "weight_goal": return tr("act_ach_weight")
+            case "workout_1": return tr("act_ach_workout")
+            default: return def.id
+            }
+        }
+    }
+
     enum About {
         static var title: String { tr("about_title") }
         static var versionFormat: String { tr("about_version_format") }

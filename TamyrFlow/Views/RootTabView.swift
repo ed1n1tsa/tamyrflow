@@ -14,11 +14,7 @@ struct RootTabView: View {
                 case .metrics:
                     HeartRatePage()
                 case .activity:
-                    PlaceholderHubPage(
-                        title: L10n.Tab.activity,
-                        subtitle: L10n.Placeholder.activitySub,
-                        systemImage: "figure.run"
-                    )
+                    ActivityPageView(auth: auth, selectedTab: $tab)
                 case .goals:
                     GoalsPageView(auth: auth)
                 case .profile:
@@ -33,7 +29,7 @@ struct RootTabView: View {
                 .padding(.bottom, 8)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
-            if tab != .profile && tab != .goals {
+            if tab != .profile && tab != .goals && tab != .activity {
                 ConnectionStatusBar(ble: vm.bleService, health: vm.healthService)
             }
         }
