@@ -7,19 +7,23 @@ struct RootTabView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Group {
-                switch tab {
-                case .home:
-                    DashboardPage(selectedTab: $tab)
-                case .metrics:
-                    HeartRatePage()
-                case .activity:
-                    ActivityPageView(auth: auth, selectedTab: $tab)
-                case .goals:
-                    GoalsPageView(auth: auth)
-                case .profile:
-                    ProfilePage()
-                }
+            // Keep tab roots alive so Activity/Goals don’t reset to empty on every switch.
+            ZStack {
+                DashboardPage(selectedTab: $tab)
+                    .opacity(tab == .home ? 1 : 0)
+                    .allowsHitTesting(tab == .home)
+                HeartRatePage()
+                    .opacity(tab == .metrics ? 1 : 0)
+                    .allowsHitTesting(tab == .metrics)
+                ActivityPageView(auth: auth, selectedTab: $tab)
+                    .opacity(tab == .activity ? 1 : 0)
+                    .allowsHitTesting(tab == .activity)
+                GoalsPageView(auth: auth)
+                    .opacity(tab == .goals ? 1 : 0)
+                    .allowsHitTesting(tab == .goals)
+                ProfilePage()
+                    .opacity(tab == .profile ? 1 : 0)
+                    .allowsHitTesting(tab == .profile)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.bottom, ProfileTheme.tabBarHeight + 18)

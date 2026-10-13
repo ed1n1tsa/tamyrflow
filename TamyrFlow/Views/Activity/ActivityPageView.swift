@@ -8,6 +8,8 @@ struct ActivityPageView: View {
     @State private var showAdd = false
     @State private var showCalendar = false
     @State private var calendarDate = Date()
+    /// Avoid flashing the empty hero while Supabase/band sync is still in flight after tab recreate.
+    @State private var didFinishInitialLoad = false
 
     init(auth: AuthService, selectedTab: Binding<MainTab>) {
         _service = StateObject(wrappedValue: ActivityService(auth: auth))
@@ -27,7 +29,7 @@ struct ActivityPageView: View {
                     .padding(.top, 14)
 
                 Group {
-                    if service.isLoading && service.entries.isEmpty && service.isEmptyDay {
+                    if !didFinishInitialLoad || (service.isLoading && service.isEmptyDay) {
                         ProgressView().tint(.white).frame(maxHeight: .infinity)
                     } else if service.isEmptyDay {
                         ActivityEmptyStateView(
@@ -47,12 +49,17 @@ struct ActivityPageView: View {
             }
         }
         .task {
+            // 1) Paint cached Supabase day first (steps/kcal already saved).
+            await service.refresh()
+            didFinishInitialLoad = true
+            // 2) Then quietly refresh from the band and reload.
             await vm.syncActivityMetricsToCloud(auth: auth)
             await service.refresh()
         }
         .refreshable {
             await vm.syncActivityMetricsToCloud(auth: auth)
             await service.refresh()
+            didFinishInitialLoad = true
         }
         .fullScreenCover(isPresented: $showAdd) {
             AddActivityFlowView(service: service) {
