@@ -39,7 +39,7 @@ struct DashboardPage: View {
                                     vm.healthService.userStatureCm = UInt(Int(vm.height) ?? 175)
                                     let steps = await vm.healthService.fetchTodayStepsSnapshot(
                                         showHUD: true,
-                                        pullDailyIfNeeded: true
+                                        pullDailyIfNeeded: false
                                     )
                                     await WatchMetricsBridge.persistStepsAndSleep(
                                         auth: auth,
@@ -52,7 +52,7 @@ struct DashboardPage: View {
                                 Task {
                                     let sleep = await vm.healthService.fetchSleepMinutesSnapshot(
                                         showHUD: true,
-                                        pullDailyIfNeeded: true
+                                        pullDailyIfNeeded: false
                                     )
                                     await WatchMetricsBridge.persistStepsAndSleep(
                                         auth: auth,

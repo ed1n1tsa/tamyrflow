@@ -173,13 +173,25 @@ final class VeepooHealthService: ObservableObject {
         Task { _ = await pullDailyDataFromBand(showHUD: true) }
     }
 
-    /// `VPPeripheralManage` path: dump band → SDK DB, then Activity/Goals can read steps/sleep.
+    /// True when the band reports accurate sleep — Veepoo's full daily dump can crash in `VPAccurateSleepModel`.
+    private var deviceUsesAccurateSleep: Bool {
+        (bleService.connectedDevice?.sleepType ?? 0) != 0
+    }
+
+    /// `VPPeripheralManage` path: dump band → SDK DB.
+    /// Skipped on accurate-sleep bands (SDK crash). Safe path uses light step/sleep reads instead.
     @discardableResult
     func pullDailyDataFromBand(showHUD: Bool = true) async -> Bool {
+        // Hard avoid: StartReadDeviceAllData parses accurate sleep and can kill the process.
+        if deviceUsesAccurateSleep {
+            readProgressText = "daily dump skipped (accurate sleep band)"
+            return false
+        }
+
         await waitUntilOperationIdle(timeoutSeconds: 2)
         guard canStart(.readingDailyData) else { return false }
         ensureLiveMeasurementChannel()
-        guard manager != nil else {
+        guard let mgr = manager else {
             lastError = L10n.Err.deviceNotConnected
             finishOperation()
             return false
@@ -191,19 +203,10 @@ final class VeepooHealthService: ObservableObject {
         }
         scheduleManualMeasurementTimeout(for: .readingDailyData, seconds: 45)
 
-        let completed: Bool = await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
-            var resumed = false
-            let finish: (Bool) -> Void = { ok in
-                guard !resumed else { return }
-                resumed = true
-                cont.resume(returning: ok)
-            }
-            manager?.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
+        let startOK = TFTryObjC {
+            mgr.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
                 Task { @MainActor in
-                    guard let self else {
-                        finish(false)
-                        return
-                    }
+                    guard let self else { return }
                     self.readProgressText = "state: \(state.rawValue), day \(current)/\(max(total, 1)), progress \(progress)%"
                     self.appendChart(Double(progress), to: &self.syncProgressHistory)
                     let p = Double(progress) / 100.0
@@ -213,23 +216,24 @@ final class VeepooHealthService: ObservableObject {
                     if state.rawValue == 2 {
                         self.lastDailySyncAt = Date()
                         self.finishOperation()
-                        finish(true)
                     } else if state.rawValue == 0 || state.rawValue == 1 {
                         self.operation = .readingDailyData
                     }
                 }
             }
-            Task { @MainActor in
-                try? await Task.sleep(nanoseconds: 45_000_000_000)
-                // Timed out — still try DB in case partial data arrived.
-                if self.operation == .readingDailyData {
-                    self.lastDailySyncAt = Date()
-                    self.finishOperation()
-                }
-                finish(self.lastDailySyncAt != nil)
-            }
         }
-        return completed
+
+        guard startOK else {
+            lastError = L10n.Err.opBusy
+            finishOperation()
+            return false
+        }
+
+        await waitUntilOperationIdle(timeoutSeconds: 45)
+        if measurementHUD != nil, operation == .readingDailyData {
+            finishOperation()
+        }
+        return lastDailySyncAt != nil || operation == .idle
     }
 
     func readTodaySteps() {
@@ -300,14 +304,13 @@ final class VeepooHealthService: ObservableObject {
         return todaySleepMinutes
     }
 
-    /// Steps + sleep for Activity/Goals. Uses official VPPeripheralManage flow: daily dump → SDK DB.
+    /// Steps + sleep for Activity/Goals.
+    /// Default is light reads only — full daily dump is opt-in and skipped on accurate-sleep bands.
     func syncStepsAndSleepFromBand(
         showHUD: Bool = false,
-        pullDailyFirst: Bool = true
+        pullDailyFirst: Bool = false
     ) async -> (steps: Int?, sleepMinutes: Int?) {
-        if pullDailyFirst {
-            _ = await pullDailyDataFromBand(showHUD: showHUD)
-        } else if lastDailySyncAt == nil {
+        if pullDailyFirst, !deviceUsesAccurateSleep {
             _ = await pullDailyDataFromBand(showHUD: showHUD)
         }
         let steps = await fetchTodayStepsSnapshot(showHUD: false, pullDailyIfNeeded: false)
@@ -316,6 +319,8 @@ final class VeepooHealthService: ObservableObject {
     }
 
     private func ensureRecentDailySync(showHUD: Bool) async {
+        // Never auto-dump on accurate-sleep devices (connect crash).
+        guard !deviceUsesAccurateSleep else { return }
         if let last = lastDailySyncAt, Date().timeIntervalSince(last) < 90 {
             return
         }
@@ -350,12 +355,18 @@ final class VeepooHealthService: ObservableObject {
                 resumed = true
                 cont.resume(returning: value)
             }
-            VPDataBaseOperation.veepooSDKGetStepData(
-                withDate: dateStr,
-                andTableID: tableID,
-                changeUserStature: stature
-            ) { stepDict in
-                finish(Self.parseTotalSteps(from: stepDict))
+            let ok = TFTryObjC {
+                VPDataBaseOperation.veepooSDKGetStepData(
+                    withDate: dateStr,
+                    andTableID: tableID,
+                    changeUserStature: stature
+                ) { stepDict in
+                    finish(Self.parseTotalSteps(from: stepDict))
+                }
+            }
+            if !ok {
+                finish(nil)
+                return
             }
             Task {
                 try? await Task.sleep(nanoseconds: 8_000_000_000)
@@ -368,14 +379,15 @@ final class VeepooHealthService: ObservableObject {
         guard let tableID = deviceTableID else { return nil }
         let dateStr = Self.sdkDateString(dayOffset: dayOffset)
 
-        // IMPORTANT: never call `veepooSDKGetAccurateSleepData` — on some bands it crashes inside
-        // VPAccurateSleepModel (`-[__NSCFString year]`). Ordinary sleep dicts are enough for wellness.
+        // IMPORTANT: never call `veepooSDKGetAccurateSleepData` — crashes in VPAccurateSleepModel.
         var segments: [Any] = []
-        if let arr = VPDataBaseOperation.veepooSDKGetSleepData(
-            withDate: dateStr,
-            andTableID: tableID
-        ) as? NSArray, arr.count > 0 {
-            segments = arr.map { $0 as Any }
+        _ = TFTryObjC {
+            if let arr = VPDataBaseOperation.veepooSDKGetSleepData(
+                withDate: dateStr,
+                andTableID: tableID
+            ) as? NSArray, arr.count > 0 {
+                segments = arr.map { $0 as Any }
+            }
         }
 
         sleepSegmentsToday = segments.count
