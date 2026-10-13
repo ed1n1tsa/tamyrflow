@@ -390,6 +390,7 @@ struct WatchConnectFlowView: View {
                     if isLinked || permissions.allGrantedOrUnavailable {
                         connectPhase = 4
                         step = 5
+                        // Fire-and-forget battery; never block this button on SDK callback.
                         Task { await vm.bleService.readBatteryAsync() }
                     }
                 }
@@ -543,6 +544,8 @@ struct WatchConnectFlowView: View {
     private func cleanupAndDismiss() {
         vm.bleService.stopScan()
         onFinished()
+        // Heavy daily dump / DB read after leaving this screen — avoids freezing success UI.
+        vm.scheduleDeferredStepsSleepSync()
     }
 
     private func permissionSymbol(_ kind: WatchPermissionService.Kind) -> String {

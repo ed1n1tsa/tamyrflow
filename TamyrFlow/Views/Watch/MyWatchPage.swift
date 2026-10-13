@@ -51,7 +51,12 @@ struct MyWatchPage: View {
             vm.bleService.configureSDKIfNeeded()
             refreshSyncLabel()
             if isConnected {
-                Task { await vm.bleService.readBatteryAsync() }
+                Task {
+                    await vm.bleService.readBatteryAsync()
+                    // Refresh steps/sleep once when returning to My Watch while linked.
+                    await vm.syncStepsAndSleepToCloud(pullDailyFirst: true, showHUD: false)
+                    refreshSyncLabel()
+                }
             }
         }
         .onChange(of: isConnected) { _, on in

@@ -367,29 +367,15 @@ final class VeepooHealthService: ObservableObject {
     private func loadSleepMinutesFromSDKDatabase(dayOffset: Int) -> Int? {
         guard let tableID = deviceTableID else { return nil }
         let dateStr = Self.sdkDateString(dayOffset: dayOffset)
-        let sleepType = bleService.connectedDevice?.sleepType ?? 0
 
+        // IMPORTANT: never call `veepooSDKGetAccurateSleepData` — on some bands it crashes inside
+        // VPAccurateSleepModel (`-[__NSCFString year]`). Ordinary sleep dicts are enough for wellness.
         var segments: [Any] = []
-        func appendSleepArray(_ value: Any?) {
-            guard let arr = value as? NSArray, arr.count > 0 else { return }
-            segments.append(contentsOf: arr.map { $0 as Any })
-        }
-
-        // sleepType 0 = ordinary, 1/3 = accurate — try the matching API first, then the other.
-        if sleepType != 0 {
-            appendSleepArray(
-                VPDataBaseOperation.veepooSDKGetAccurateSleepData(withDate: dateStr, andTableID: tableID)
-            )
-        }
-        if segments.isEmpty {
-            appendSleepArray(
-                VPDataBaseOperation.veepooSDKGetSleepData(withDate: dateStr, andTableID: tableID)
-            )
-        }
-        if segments.isEmpty {
-            appendSleepArray(
-                VPDataBaseOperation.veepooSDKGetAccurateSleepData(withDate: dateStr, andTableID: tableID)
-            )
+        if let arr = VPDataBaseOperation.veepooSDKGetSleepData(
+            withDate: dateStr,
+            andTableID: tableID
+        ) as? NSArray, arr.count > 0 {
+            segments = arr.map { $0 as Any }
         }
 
         sleepSegmentsToday = segments.count

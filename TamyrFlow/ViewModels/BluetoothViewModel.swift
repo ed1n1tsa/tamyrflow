@@ -44,7 +44,8 @@ final class BluetoothViewModel: ObservableObject {
                     self.autoHR = true
                     self.healthService.bootstrapHealthChannelAfterVerification()
                     self.scheduleStaggeredHealthBootstrap()
-                    self.schedulePostConnectStepsSleepSync()
+                    // Do NOT start daily dump here — connect success UI must stay responsive.
+                    // Metrics sync runs after the pairing flow dismisses / My Watch appears.
                 default:
                     break
                 }
@@ -177,11 +178,11 @@ final class BluetoothViewModel: ObservableObject {
         healthService.userStatureCm = UInt(Int(height) ?? 175)
     }
 
-    private func schedulePostConnectStepsSleepSync() {
+    /// Call after the connect flow is dismissed so the success screen never blocks on SDK I/O.
+    func scheduleDeferredStepsSleepSync(delayNanoseconds: UInt64 = 1_200_000_000) {
         postConnectMetricsTask?.cancel()
         postConnectMetricsTask = Task { [weak self] in
-            // Let the health pipe settle after verify (same window as bootstrap kicks).
-            try? await Task.sleep(nanoseconds: 3_500_000_000)
+            try? await Task.sleep(nanoseconds: delayNanoseconds)
             guard !Task.isCancelled, let self else { return }
             guard self.bleService.connectionStatus == .verified else { return }
             await self.syncStepsAndSleepToCloud(pullDailyFirst: true, showHUD: false)
