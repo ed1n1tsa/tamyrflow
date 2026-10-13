@@ -142,29 +142,39 @@ final class BluetoothViewModel: ObservableObject {
         healthService.syncTime()
         await bleService.readBatteryAsync()
 
-        guard healthService.operation == .idle else { return }
-        healthService.readAllDailyData()
-        await healthService.waitUntilOperationIdle(timeoutSeconds: 45)
-        // If SDK never finished, force-clear stuck sync HUD.
+        applyStatureToHealthService()
+        // Daily dump fills SDK DB; then we read steps/sleep from VPDataBaseOperation (not AddManage APIs).
+        await syncStepsAndSleepToCloud(auth: auth ?? authService, pullDailyFirst: true, showHUD: true)
         if healthService.measurementHUD != nil {
             healthService.dismissMeasurementOverlay()
         }
-
-        await syncStepsAndSleepToCloud(auth: auth ?? authService)
     }
 
     /// Read steps + sleep from the band and upsert into Supabase (Activity / Goals).
-    func syncStepsAndSleepToCloud(auth: AuthService? = nil) async {
+    func syncStepsAndSleepToCloud(
+        auth: AuthService? = nil,
+        pullDailyFirst: Bool = true,
+        showHUD: Bool = false
+    ) async {
         let resolvedAuth = auth ?? authService
-        guard let resolvedAuth, resolvedAuth.session != nil else { return }
         guard bleService.connectionStatus == .verified, healthService.isConnected else { return }
+        applyStatureToHealthService()
 
-        let snapshot = await healthService.syncStepsAndSleepFromBand(showHUD: false)
+        let snapshot = await healthService.syncStepsAndSleepFromBand(
+            showHUD: showHUD,
+            pullDailyFirst: pullDailyFirst
+        )
+
+        guard let resolvedAuth, resolvedAuth.session != nil else { return }
         await WatchMetricsBridge.persistStepsAndSleep(
             auth: resolvedAuth,
             steps: snapshot.steps,
             sleepMinutes: snapshot.sleepMinutes
         )
+    }
+
+    private func applyStatureToHealthService() {
+        healthService.userStatureCm = UInt(Int(height) ?? 175)
     }
 
     private func schedulePostConnectStepsSleepSync() {
@@ -174,7 +184,7 @@ final class BluetoothViewModel: ObservableObject {
             try? await Task.sleep(nanoseconds: 3_500_000_000)
             guard !Task.isCancelled, let self else { return }
             guard self.bleService.connectionStatus == .verified else { return }
-            await self.syncStepsAndSleepToCloud()
+            await self.syncStepsAndSleepToCloud(pullDailyFirst: true, showHUD: false)
         }
     }
 
@@ -234,8 +244,7 @@ final class BluetoothViewModel: ObservableObject {
         healthService.ensureLiveMeasurementChannel()
         healthService.syncTime()
         await bleService.readBatteryAsync()
-        // Full day sync is heavy — pull-to-refresh still does that.
-        // Light steps/sleep bridge so Activity/Goals have numbers after launch.
-        await syncStepsAndSleepToCloud(auth: auth ?? authService)
+        // Dump band → SDK DB → steps/sleep (needed on VPPeripheralManage).
+        await syncStepsAndSleepToCloud(auth: auth ?? authService, pullDailyFirst: true, showHUD: false)
     }
 }

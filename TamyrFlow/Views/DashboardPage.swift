@@ -36,7 +36,11 @@ struct DashboardPage: View {
                         VStack(spacing: 10) {
                             TFSecondaryButton(L10n.Hub.steps) {
                                 Task {
-                                    let steps = await vm.healthService.fetchTodayStepsSnapshot(showHUD: true)
+                                    vm.healthService.userStatureCm = UInt(Int(vm.height) ?? 175)
+                                    let steps = await vm.healthService.fetchTodayStepsSnapshot(
+                                        showHUD: true,
+                                        pullDailyIfNeeded: true
+                                    )
                                     await WatchMetricsBridge.persistStepsAndSleep(
                                         auth: auth,
                                         steps: steps,
@@ -46,7 +50,10 @@ struct DashboardPage: View {
                             }
                             TFSecondaryButton(L10n.Hub.sleep) {
                                 Task {
-                                    let sleep = await vm.healthService.fetchSleepMinutesSnapshot(showHUD: true)
+                                    let sleep = await vm.healthService.fetchSleepMinutesSnapshot(
+                                        showHUD: true,
+                                        pullDailyIfNeeded: true
+                                    )
                                     await WatchMetricsBridge.persistStepsAndSleep(
                                         auth: auth,
                                         steps: nil,

@@ -51,6 +51,10 @@ final class VeepooHealthService: ObservableObject {
     /// Heart rate: same pattern as SpO₂ (`VPTestHeartStateStart` after testing).
     private var heartSawNonStartState = false
     private var isAutoHRPulseInFlight = false
+    /// Used by `VPDataBaseOperation` step→distance/kcal conversion (must match band personal info).
+    var userStatureCm: UInt = 175
+    /// Last successful `veepooSdkStartReadDeviceAllData` finish (SDK local DB is filled from the band).
+    private var lastDailySyncAt: Date?
 
     /// Only valid after `BleService.configureSDKIfNeeded()` — calling `shareVPPeripheralManager()` earlier can crash inside the SDK.
     private var manager: VPPeripheralBaseManage? {
@@ -166,26 +170,66 @@ final class VeepooHealthService: ObservableObject {
     }
 
     func readAllDailyData() {
-        guard canStart(.readingDailyData) else { return }
+        Task { _ = await pullDailyDataFromBand(showHUD: true) }
+    }
+
+    /// `VPPeripheralManage` path: dump band → SDK DB, then Activity/Goals can read steps/sleep.
+    @discardableResult
+    func pullDailyDataFromBand(showHUD: Bool = true) async -> Bool {
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        guard canStart(.readingDailyData) else { return false }
         ensureLiveMeasurementChannel()
+        guard manager != nil else {
+            lastError = L10n.Err.deviceNotConnected
+            finishOperation()
+            return false
+        }
+
         syncProgressHistory.removeAll()
-        measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: 0.05)
-        // SDK sometimes never sends completion (state 2) — always clear HUD after timeout.
+        if showHUD {
+            measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: 0.05)
+        }
         scheduleManualMeasurementTimeout(for: .readingDailyData, seconds: 45)
-        manager?.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
-            Task { @MainActor in
-                guard let self else { return }
-                self.readProgressText = "state: \(state.rawValue), day \(current)/\(max(total, 1)), progress \(progress)%"
-                self.appendChart(Double(progress), to: &self.syncProgressHistory)
-                let p = Double(progress) / 100.0
-                self.measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: max(0.05, min(1, p)))
-                if state.rawValue == 2 {
-                    self.finishOperation()
-                } else if state.rawValue == 0 || state.rawValue == 1 {
-                    self.operation = .readingDailyData
+
+        let completed: Bool = await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
+            var resumed = false
+            let finish: (Bool) -> Void = { ok in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: ok)
+            }
+            manager?.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
+                Task { @MainActor in
+                    guard let self else {
+                        finish(false)
+                        return
+                    }
+                    self.readProgressText = "state: \(state.rawValue), day \(current)/\(max(total, 1)), progress \(progress)%"
+                    self.appendChart(Double(progress), to: &self.syncProgressHistory)
+                    let p = Double(progress) / 100.0
+                    if showHUD {
+                        self.measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: max(0.05, min(1, p)))
+                    }
+                    if state.rawValue == 2 {
+                        self.lastDailySyncAt = Date()
+                        self.finishOperation()
+                        finish(true)
+                    } else if state.rawValue == 0 || state.rawValue == 1 {
+                        self.operation = .readingDailyData
+                    }
                 }
             }
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 45_000_000_000)
+                // Timed out — still try DB in case partial data arrived.
+                if self.operation == .readingDailyData {
+                    self.lastDailySyncAt = Date()
+                    self.finishOperation()
+                }
+                finish(self.lastDailySyncAt != nil)
+            }
         }
+        return completed
     }
 
     func readTodaySteps() {
@@ -196,103 +240,201 @@ final class VeepooHealthService: ObservableObject {
         Task { _ = await fetchSleepMinutesSnapshot(showHUD: true) }
     }
 
-    /// Quiet/async read of today’s step total from the band. Returns parsed steps (nil if unavailable).
+    /// Load today’s steps from the Veepoo SDK local DB (filled by daily sync).
     @discardableResult
-    func fetchTodayStepsSnapshot(showHUD: Bool = false) async -> Int? {
-        await waitUntilOperationIdle(timeoutSeconds: 2)
-        guard canStart(.readingSteps) else { return todaySteps }
-        ensureLiveMeasurementChannel()
-        guard let mgr = manager else {
-            lastError = L10n.Err.deviceNotConnected
-            finishOperation()
-            return todaySteps
+    func fetchTodayStepsSnapshot(showHUD: Bool = false, pullDailyIfNeeded: Bool = true) async -> Int? {
+        if pullDailyIfNeeded {
+            await ensureRecentDailySync(showHUD: showHUD)
         }
         if showHUD {
             measurementHUD = MeasurementHUDState(kind: .stepsSnapshot, progress01: nil)
         }
-        scheduleManualMeasurementTimeout(for: .readingSteps, seconds: defaultManualMeasurementSeconds)
 
-        let steps: Int? = await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        operation = .readingSteps
+        defer { finishOperation() }
+
+        if let steps = await loadStepsFromSDKDatabase(dayOffset: 0), steps >= 0 {
+            todaySteps = steps
+            return steps
+        }
+        // Last resort: AddManage-style API (often empty on VPPeripheralManage).
+        if let steps = await readStepsViaDirectSDK(dayNumber: 0), steps >= 0 {
+            todaySteps = steps
+            return steps
+        }
+        return todaySteps
+    }
+
+    /// Load last-night sleep minutes from the SDK local DB.
+    @discardableResult
+    func fetchSleepMinutesSnapshot(showHUD: Bool = false, pullDailyIfNeeded: Bool = true) async -> Int? {
+        if pullDailyIfNeeded {
+            await ensureRecentDailySync(showHUD: showHUD)
+        }
+        if showHUD {
+            measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
+        }
+
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        operation = .readingSleep
+        defer { finishOperation() }
+
+        // Veepoo: “today’s sleep” UI is usually yesterday’s night.
+        if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: 1), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: 0), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        if let minutes = await readSleepViaDirectSDK(dayNumber: 1), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        if let minutes = await readSleepViaDirectSDK(dayNumber: 0), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        return todaySleepMinutes
+    }
+
+    /// Steps + sleep for Activity/Goals. Uses official VPPeripheralManage flow: daily dump → SDK DB.
+    func syncStepsAndSleepFromBand(
+        showHUD: Bool = false,
+        pullDailyFirst: Bool = true
+    ) async -> (steps: Int?, sleepMinutes: Int?) {
+        if pullDailyFirst {
+            _ = await pullDailyDataFromBand(showHUD: showHUD)
+        } else if lastDailySyncAt == nil {
+            _ = await pullDailyDataFromBand(showHUD: showHUD)
+        }
+        let steps = await fetchTodayStepsSnapshot(showHUD: false, pullDailyIfNeeded: false)
+        let sleep = await fetchSleepMinutesSnapshot(showHUD: false, pullDailyIfNeeded: false)
+        return (steps, sleep)
+    }
+
+    private func ensureRecentDailySync(showHUD: Bool) async {
+        if let last = lastDailySyncAt, Date().timeIntervalSince(last) < 90 {
+            return
+        }
+        _ = await pullDailyDataFromBand(showHUD: showHUD)
+    }
+
+    private var deviceTableID: String? {
+        let mac = bleService.connectedDevice?.deviceAddress?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return mac.isEmpty ? nil : mac
+    }
+
+    private static func sdkDateString(dayOffset: Int, from date: Date = Date()) -> String {
+        let cal = Calendar.current
+        let day = cal.date(byAdding: .day, value: -dayOffset, to: cal.startOfDay(for: date)) ?? date
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = cal.timeZone
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: day)
+    }
+
+    private func loadStepsFromSDKDatabase(dayOffset: Int) async -> Int? {
+        guard let tableID = deviceTableID else { return nil }
+        let dateStr = Self.sdkDateString(dayOffset: dayOffset)
+        let stature = userStatureCm
+
+        return await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
             var resumed = false
             let finish: (Int?) -> Void = { value in
                 guard !resumed else { return }
                 resumed = true
                 cont.resume(returning: value)
             }
-            mgr.veepooSDK_readStepData(withDayNumber: 0, result: { stepDict in
+            VPDataBaseOperation.veepooSDKGetStepData(
+                withDate: dateStr,
+                andTableID: tableID,
+                changeUserStature: stature
+            ) { stepDict in
                 finish(Self.parseTotalSteps(from: stepDict))
-            })
-            Task { @MainActor in
-                try? await Task.sleep(nanoseconds: self.defaultManualMeasurementSeconds * 1_000_000_000)
+            }
+            Task {
+                try? await Task.sleep(nanoseconds: 8_000_000_000)
                 finish(nil)
             }
         }
-
-        if let steps, steps >= 0 {
-            todaySteps = steps
-        }
-        finishOperation()
-        return todaySteps
     }
 
-    /// Reads sleep for wellness “last night” (SDK day 1), falling back to day 0.
-    @discardableResult
-    func fetchSleepMinutesSnapshot(showHUD: Bool = false) async -> Int? {
-        // Veepoo: sleep shown “today” is usually yesterday’s night → dayNumber 1.
-        if let minutes = await readOneSleepDay(dayNumber: 1, showHUD: showHUD), minutes > 0 {
-            todaySleepMinutes = minutes
-            return minutes
+    private func loadSleepMinutesFromSDKDatabase(dayOffset: Int) -> Int? {
+        guard let tableID = deviceTableID else { return nil }
+        let dateStr = Self.sdkDateString(dayOffset: dayOffset)
+        let sleepType = bleService.connectedDevice?.sleepType ?? 0
+
+        var segments: [Any] = []
+        func appendSleepArray(_ value: Any?) {
+            guard let arr = value as? NSArray, arr.count > 0 else { return }
+            segments.append(contentsOf: arr.map { $0 as Any })
         }
-        if let minutes = await readOneSleepDay(dayNumber: 0, showHUD: showHUD) {
-            if minutes > 0 {
-                todaySleepMinutes = minutes
-            }
-            return todaySleepMinutes
+
+        // sleepType 0 = ordinary, 1/3 = accurate — try the matching API first, then the other.
+        if sleepType != 0 {
+            appendSleepArray(
+                VPDataBaseOperation.veepooSDKGetAccurateSleepData(withDate: dateStr, andTableID: tableID)
+            )
         }
-        return todaySleepMinutes
+        if segments.isEmpty {
+            appendSleepArray(
+                VPDataBaseOperation.veepooSDKGetSleepData(withDate: dateStr, andTableID: tableID)
+            )
+        }
+        if segments.isEmpty {
+            appendSleepArray(
+                VPDataBaseOperation.veepooSDKGetAccurateSleepData(withDate: dateStr, andTableID: tableID)
+            )
+        }
+
+        sleepSegmentsToday = segments.count
+        return Self.parseSleepMinutes(from: segments)
     }
 
-    /// Steps + sleep from the band (no full daily dump). Used for Activity/Goals bridge.
-    func syncStepsAndSleepFromBand(showHUD: Bool = false) async -> (steps: Int?, sleepMinutes: Int?) {
-        let steps = await fetchTodayStepsSnapshot(showHUD: showHUD)
-        let sleep = await fetchSleepMinutesSnapshot(showHUD: showHUD)
-        return (steps, sleep)
-    }
-
-    private func readOneSleepDay(dayNumber: Int, showHUD: Bool) async -> Int? {
-        await waitUntilOperationIdle(timeoutSeconds: 2)
-        guard canStart(.readingSleep) else { return nil }
-        ensureLiveMeasurementChannel()
-        guard let mgr = manager else {
-            lastError = L10n.Err.deviceNotConnected
-            finishOperation()
-            return nil
-        }
-        if showHUD {
-            measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
-        }
-        scheduleManualMeasurementTimeout(for: .readingSleep, seconds: defaultManualMeasurementSeconds)
-
-        let parsed: (segments: Int, minutes: Int?) = await withCheckedContinuation { cont in
+    private func readStepsViaDirectSDK(dayNumber: Int) async -> Int? {
+        await waitUntilOperationIdle(timeoutSeconds: 1)
+        guard let mgr = manager, isConnected else { return nil }
+        return await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
             var resumed = false
-            let finish: (Int, Int?) -> Void = { segments, minutes in
+            let finish: (Int?) -> Void = { value in
                 guard !resumed else { return }
                 resumed = true
-                cont.resume(returning: (segments, minutes))
+                cont.resume(returning: value)
+            }
+            mgr.veepooSDK_readStepData(withDayNumber: dayNumber, result: { stepDict in
+                finish(Self.parseTotalSteps(from: stepDict))
+            })
+            Task {
+                try? await Task.sleep(nanoseconds: 6_000_000_000)
+                finish(nil)
+            }
+        }
+    }
+
+    private func readSleepViaDirectSDK(dayNumber: Int) async -> Int? {
+        await waitUntilOperationIdle(timeoutSeconds: 1)
+        guard let mgr = manager, isConnected else { return nil }
+        return await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+            var resumed = false
+            let finish: (Int?) -> Void = { value in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: value)
             }
             mgr.veepooSDK_readSleepData(withDayNumber: dayNumber, result: { sleepOneDayArray in
                 let arr: [Any] = ((sleepOneDayArray as NSArray?) ?? []).map { $0 as Any }
-                finish(arr.count, Self.parseSleepMinutes(from: arr))
+                finish(Self.parseSleepMinutes(from: arr))
             })
-            Task { @MainActor in
-                try? await Task.sleep(nanoseconds: self.defaultManualMeasurementSeconds * 1_000_000_000)
-                finish(0, nil)
+            Task {
+                try? await Task.sleep(nanoseconds: 6_000_000_000)
+                finish(nil)
             }
         }
-
-        sleepSegmentsToday = parsed.segments
-        finishOperation()
-        return parsed.minutes
     }
 
     func startHeartTest() {
