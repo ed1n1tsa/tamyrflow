@@ -1,4 +1,5 @@
 import SwiftUI
+import VeepooBleSDK
 
 struct MyWatchPage: View {
     @EnvironmentObject private var vm: BluetoothViewModel
