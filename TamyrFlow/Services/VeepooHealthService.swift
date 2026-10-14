@@ -16,8 +16,14 @@ final class VeepooHealthService: ObservableObject {
     @Published private(set) var lastError: String?
     /// Today’s total steps from the band (best-effort parse of SDK dictionary).
     @Published private(set) var todaySteps: Int?
-    /// Number of sleep segments returned for day 0 (today).
+    /// Today’s calories (kcal) from Veepoo step dictionary `Cal`.
+    @Published private(set) var todayCaloriesKcal: Double?
+    /// Today’s distance (km) from Veepoo step dictionary `Dis`.
+    @Published private(set) var todayDistanceKm: Double?
+    /// Number of sleep segments returned for the last successful sleep read.
     @Published private(set) var sleepSegmentsToday: Int?
+    /// Total sleep duration in minutes (last night / day-1 preferred, then day-0).
+    @Published private(set) var todaySleepMinutes: Int?
     /// Full-screen overlay while measuring / syncing (official-app style).
     @Published private(set) var measurementHUD: MeasurementHUDState?
 
@@ -49,6 +55,10 @@ final class VeepooHealthService: ObservableObject {
     /// Heart rate: same pattern as SpO₂ (`VPTestHeartStateStart` after testing).
     private var heartSawNonStartState = false
     private var isAutoHRPulseInFlight = false
+    /// Used by `VPDataBaseOperation` step→distance/kcal conversion (must match band personal info).
+    var userStatureCm: UInt = 175
+    /// Last successful `veepooSdkStartReadDeviceAllData` finish (SDK local DB is filled from the band).
+    private var lastDailySyncAt: Date?
 
     /// Only valid after `BleService.configureSDKIfNeeded()` — calling `shareVPPeripheralManager()` earlier can crash inside the SDK.
     private var manager: VPPeripheralBaseManage? {
@@ -164,68 +174,419 @@ final class VeepooHealthService: ObservableObject {
     }
 
     func readAllDailyData() {
-        guard canStart(.readingDailyData) else { return }
-        ensureLiveMeasurementChannel()
+        Task { _ = await pullDailyDataFromBand(showHUD: true) }
+    }
+
+    /// True when the band reports accurate sleep — Veepoo's full daily dump can crash in `VPAccurateSleepModel`.
+    private var deviceUsesAccurateSleep: Bool {
+        (bleService.connectedDevice?.sleepType ?? 0) != 0
+    }
+
+    /// `VPPeripheralManage` path: dump band → SDK DB.
+    /// By default skipped on accurate-sleep bands (SDK can crash). Pass `forceDespiteAccurateSleep`
+    /// only from explicit Activity sleep sync after the UI is already showing steps.
+    @discardableResult
+    func pullDailyDataFromBand(showHUD: Bool = true, forceDespiteAccurateSleep: Bool = false) async -> Bool {
+        if deviceUsesAccurateSleep, !forceDespiteAccurateSleep {
+            readProgressText = "daily dump skipped (accurate sleep band)"
+            return false
+        }
+
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        guard canStart(.readingDailyData) else { return false }
+        // Do not poke AutoHR here — wiki forbids concurrent cmds while reading daily data.
+        guard let mgr = manager else {
+            lastError = L10n.Err.deviceNotConnected
+            finishOperation()
+            return false
+        }
+
         syncProgressHistory.removeAll()
-        measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: 0.05)
-        manager?.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
-            Task { @MainActor in
-                guard let self else { return }
-                self.readProgressText = "state: \(state.rawValue), day \(current)/\(max(total, 1)), progress \(progress)%"
-                self.appendChart(Double(progress), to: &self.syncProgressHistory)
-                let p = Double(progress) / 100.0
-                self.measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: max(0.05, min(1, p)))
-                if state.rawValue == 2 {
-                    self.finishOperation()
-                } else if state.rawValue == 0 || state.rawValue == 1 {
-                    self.operation = .readingDailyData
+        if showHUD {
+            measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: 0.05)
+        }
+        scheduleManualMeasurementTimeout(for: .readingDailyData, seconds: 45)
+
+        let startOK = TFTryObjC {
+            mgr.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.readProgressText = "state: \(state.rawValue), day \(current)/\(max(total, 1)), progress \(progress)%"
+                    self.appendChart(Double(progress), to: &self.syncProgressHistory)
+                    let p = Double(progress) / 100.0
+                    if showHUD {
+                        self.measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: max(0.05, min(1, p)))
+                    }
+                    if state.rawValue == 2 {
+                        self.lastDailySyncAt = Date()
+                        self.finishOperation()
+                    } else if state.rawValue == 0 || state.rawValue == 1 {
+                        self.operation = .readingDailyData
+                    }
                 }
             }
         }
+
+        guard startOK else {
+            lastError = L10n.Err.opBusy
+            finishOperation()
+            return false
+        }
+
+        await waitUntilOperationIdle(timeoutSeconds: 45)
+        if measurementHUD != nil, operation == .readingDailyData {
+            finishOperation()
+        }
+        return lastDailySyncAt != nil || operation == .idle
     }
 
     func readTodaySteps() {
-        guard canStart(.readingSteps) else { return }
-        ensureLiveMeasurementChannel()
-        guard let mgr = manager else {
-            lastError = L10n.Err.deviceNotConnected
-            finishOperation()
-            return
-        }
-        measurementHUD = MeasurementHUDState(kind: .stepsSnapshot, progress01: nil)
-        scheduleManualMeasurementTimeout(for: .readingSteps, seconds: defaultManualMeasurementSeconds)
-        mgr.veepooSDK_readStepData(withDayNumber: 0, result: { [weak self] stepDict in
-            Task { @MainActor in
-                guard let self else { return }
-                self.todaySteps = Self.parseTotalSteps(from: stepDict)
-                self.finishOperation()
-            }
-        })
+        Task { _ = await fetchTodayStepsSnapshot(showHUD: true) }
     }
 
     func readTodaySleep() {
-        guard canStart(.readingSleep) else { return }
-        ensureLiveMeasurementChannel()
-        guard let mgr = manager else {
-            lastError = L10n.Err.deviceNotConnected
-            finishOperation()
+        Task { _ = await fetchSleepMinutesSnapshot(showHUD: true) }
+    }
+
+    /// Load today’s steps from the Veepoo SDK local DB (filled by daily sync).
+    @discardableResult
+    func fetchTodayStepsSnapshot(showHUD: Bool = false, pullDailyIfNeeded: Bool = true) async -> Int? {
+        if pullDailyIfNeeded {
+            await ensureRecentDailySync(showHUD: showHUD)
+        }
+        if showHUD {
+            measurementHUD = MeasurementHUDState(kind: .stepsSnapshot, progress01: nil)
+        }
+
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        operation = .readingSteps
+        defer { finishOperation() }
+
+        if let steps = await loadStepsFromSDKDatabase(dayOffset: 0), steps >= 0 {
+            todaySteps = steps
+            return steps
+        }
+        // Last resort: AddManage-style API (often empty on VPPeripheralManage).
+        if let steps = await readStepsViaDirectSDK(dayNumber: 0), steps >= 0 {
+            todaySteps = steps
+            return steps
+        }
+        return todaySteps
+    }
+
+    /// Load last-night sleep minutes from the SDK local DB.
+    @discardableResult
+    func fetchSleepMinutesSnapshot(showHUD: Bool = false, pullDailyIfNeeded: Bool = true) async -> Int? {
+        if pullDailyIfNeeded {
+            await ensureRecentDailySync(showHUD: showHUD)
+        }
+        if showHUD {
+            measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
+        }
+
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        operation = .readingSleep
+        defer { finishOperation() }
+
+        // Veepoo: “today’s sleep” UI is usually yesterday’s night.
+        if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: 1), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: 0), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        if let minutes = await readSleepViaDirectSDK(dayNumber: 1), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        if let minutes = await readSleepViaDirectSDK(dayNumber: 0), minutes > 0 {
+            todaySleepMinutes = minutes
+            return minutes
+        }
+        return todaySleepMinutes
+    }
+
+    /// Wiki realtime step totals (`Step` / `Dis` / `Cal`) — matches the watch face, no daily dump required.
+    struct BandDayTotals: Equatable {
+        var steps: Int?
+        var caloriesKcal: Double?
+        var distanceKm: Double?
+        var sleepMinutes: Int?
+    }
+
+    /// Official demo path: `VPDataBaseOperation.veepooSDKGetStepData` for today.
+    @discardableResult
+    func fetchRealtimeStepTotals() async -> BandDayTotals {
+        applyStatureFromDeviceIfAvailable()
+        var totals = BandDayTotals()
+        guard let dict = await loadStepDictionaryFromSDKDatabase(dayOffset: 0) else {
+            return totals
+        }
+        if let steps = Self.parseTotalSteps(from: dict) {
+            todaySteps = steps
+            totals.steps = steps
+        }
+        if let cal = Self.parseDouble(from: dict, keys: ["Cal", "cal", "CAL", "calorie", "calories"]) {
+            todayCaloriesKcal = cal
+            totals.caloriesKcal = cal
+        }
+        if let dis = Self.parseDouble(from: dict, keys: ["Dis", "dis", "DIS", "distance"]) {
+            todayDistanceKm = dis
+            totals.distanceKm = dis
+        }
+        return totals
+    }
+
+    /// Activity sync: realtime steps/kcal first, then robust sleep (band → DB → HealthKit).
+    func syncActivityMetricsFromBand(includeSleep: Bool = true) async -> BandDayTotals {
+        var totals = await fetchRealtimeStepTotals()
+        guard includeSleep else { return totals }
+
+        if let sleep = await fetchSleepMinutesRobust(), sleep > 0 {
+            todaySleepMinutes = sleep
+            totals.sleepMinutes = sleep
+        }
+        return totals
+    }
+
+    /// Multi-source sleep for “last night” (wiki: sleep day index starts at 1 = yesterday).
+    @discardableResult
+    func fetchSleepMinutesRobust() async -> Int? {
+        // 1) Direct device read (works even before/without full daily dump on many bands).
+        for day in [1, 2, 0] {
+            if let minutes = await readSleepViaDirectSDK(dayNumber: day), minutes > 0 {
+                todaySleepMinutes = minutes
+                return minutes
+            }
+        }
+
+        // 2) Ordinary sleep already in SDK DB.
+        for dayOffset in [1, 0, 2] {
+            if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: dayOffset), minutes > 0 {
+                todaySleepMinutes = minutes
+                return minutes
+            }
+        }
+
+        // 3) Quiet daily dump — fills SDK DB. Skip on accurate-sleep bands (dump/parse can kill process).
+        if !deviceUsesAccurateSleep {
+            _ = await pullDailyDataFromBand(showHUD: false)
+            for dayOffset in [1, 0, 2] {
+                if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: dayOffset), minutes > 0 {
+                    todaySleepMinutes = minutes
+                    return minutes
+                }
+            }
+        } else {
+            // Accurate bands: never auto daily-dump (can kill process). Read accurate DB in @try only.
+            for dayOffset in [1, 0, 2] {
+                if let minutes = loadAccurateSleepMinutesSafely(dayOffset: dayOffset), minutes > 0 {
+                    todaySleepMinutes = minutes
+                    return minutes
+                }
+            }
+            try? await Task.sleep(nanoseconds: 800_000_000)
+            for day in [1, 2, 0] {
+                if let minutes = await readSleepViaDirectSDK(dayNumber: day), minutes > 0 {
+                    todaySleepMinutes = minutes
+                    return minutes
+                }
+            }
+        }
+
+        // 4) Apple Health fallback (entitlement + permission required).
+        if let hkSleep = await HealthKitWellnessService.fetchRecentSleepMinutes(), hkSleep > 0 {
+            todaySleepMinutes = hkSleep
+            return hkSleep
+        }
+        return todaySleepMinutes
+    }
+
+    /// Steps + sleep for Activity/Goals (legacy entry — prefers realtime steps).
+    func syncStepsAndSleepFromBand(
+        showHUD: Bool = false,
+        pullDailyFirst: Bool = false
+    ) async -> (steps: Int?, sleepMinutes: Int?) {
+        _ = showHUD
+        if pullDailyFirst, !deviceUsesAccurateSleep {
+            _ = await pullDailyDataFromBand(showHUD: showHUD)
+        }
+        let totals = await syncActivityMetricsFromBand(includeSleep: true)
+        return (totals.steps, totals.sleepMinutes)
+    }
+
+    private func applyStatureFromDeviceIfAvailable() {
+        let deviceStature = bleService.connectedDevice?.deviceStature ?? 0
+        if deviceStature > 0 {
+            userStatureCm = deviceStature
+        }
+    }
+
+    private func ensureRecentDailySync(showHUD: Bool) async {
+        // Never auto-dump on accurate-sleep devices (connect crash).
+        guard !deviceUsesAccurateSleep else { return }
+        if let last = lastDailySyncAt, Date().timeIntervalSince(last) < 90 {
             return
         }
-        measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
-        scheduleManualMeasurementTimeout(for: .readingSleep, seconds: defaultManualMeasurementSeconds)
-        mgr.veepooSDK_readSleepData(withDayNumber: 0, result: { [weak self] sleepOneDayArray in
-            Task { @MainActor in
-                guard let self else { return }
-                if let arr = sleepOneDayArray as? [Any] {
-                    self.sleepSegmentsToday = arr.count
-                } else if let arr = sleepOneDayArray as? NSArray {
-                    self.sleepSegmentsToday = arr.count
-                } else {
-                    self.sleepSegmentsToday = 0
-                }
-                self.finishOperation()
+        _ = await pullDailyDataFromBand(showHUD: showHUD)
+    }
+
+    private var deviceTableID: String? {
+        let mac = bleService.connectedDevice?.deviceAddress?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return mac.isEmpty ? nil : mac
+    }
+
+    private static func sdkDateString(dayOffset: Int, from date: Date = Date()) -> String {
+        let cal = Calendar.current
+        let day = cal.date(byAdding: .day, value: -dayOffset, to: cal.startOfDay(for: date)) ?? date
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = cal.timeZone
+        f.dateFormat = "yyyy-MM-dd"
+        return f.string(from: day)
+    }
+
+    private func loadStepsFromSDKDatabase(dayOffset: Int) async -> Int? {
+        Self.parseTotalSteps(from: await loadStepDictionaryFromSDKDatabase(dayOffset: dayOffset))
+    }
+
+    private func loadStepDictionaryFromSDKDatabase(dayOffset: Int) async -> NSDictionary? {
+        guard let tableID = deviceTableID else { return nil }
+        applyStatureFromDeviceIfAvailable()
+        let dateStr = Self.sdkDateString(dayOffset: dayOffset)
+        let stature = userStatureCm
+
+        return await withCheckedContinuation { (cont: CheckedContinuation<NSDictionary?, Never>) in
+            var resumed = false
+            let finish: (NSDictionary?) -> Void = { value in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: value)
             }
-        })
+            let ok = TFTryObjC {
+                VPDataBaseOperation.veepooSDKGetStepData(
+                    withDate: dateStr,
+                    andTableID: tableID,
+                    changeUserStature: stature
+                ) { stepDict in
+                    if let d = stepDict as NSDictionary? {
+                        finish(d)
+                    } else if let d = stepDict as? [AnyHashable: Any] {
+                        finish(d as NSDictionary)
+                    } else {
+                        finish(nil)
+                    }
+                }
+            }
+            if !ok {
+                finish(nil)
+                return
+            }
+            Task {
+                try? await Task.sleep(nanoseconds: 8_000_000_000)
+                finish(nil)
+            }
+        }
+    }
+
+    private func loadSleepMinutesFromSDKDatabase(dayOffset: Int) -> Int? {
+        guard let tableID = deviceTableID else { return nil }
+        let dateStr = Self.sdkDateString(dayOffset: dayOffset)
+
+        var segments: [Any] = []
+        _ = TFTryObjC {
+            if let arr = VPDataBaseOperation.veepooSDKGetSleepData(
+                withDate: dateStr,
+                andTableID: tableID
+            ) as? NSArray, arr.count > 0 {
+                segments = arr.map { $0 as Any }
+            }
+        }
+
+        sleepSegmentsToday = segments.count
+        return Self.parseSleepMinutes(from: segments)
+    }
+
+    /// Accurate-sleep DB read — always inside TFTryObjC (SDK can throw NSCFString year).
+    private func loadAccurateSleepMinutesSafely(dayOffset: Int) -> Int? {
+        guard let tableID = deviceTableID else { return nil }
+        let dateStr = Self.sdkDateString(dayOffset: dayOffset)
+        var minutes: Int?
+        _ = TFTryObjC {
+            let raw = VPDataBaseOperation.veepooSDKGetAccurateSleepData(
+                withDate: dateStr,
+                andTableID: tableID
+            )
+            let arr: [Any]
+            if let a = raw as? [Any] {
+                arr = a
+            } else if let a = raw as? NSArray {
+                arr = a.map { $0 as Any }
+            } else {
+                arr = []
+            }
+            if !arr.isEmpty {
+                minutes = Self.parseSleepMinutes(from: arr)
+            }
+        }
+        if let minutes, minutes > 0 {
+            sleepSegmentsToday = max(sleepSegmentsToday ?? 0, 1)
+        }
+        return minutes
+    }
+
+    private func readStepsViaDirectSDK(dayNumber: Int) async -> Int? {
+        await waitUntilOperationIdle(timeoutSeconds: 1)
+        guard let mgr = manager, isConnected else { return nil }
+        return await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+            var resumed = false
+            let finish: (Int?) -> Void = { value in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: value)
+            }
+            mgr.veepooSDK_readStepData(withDayNumber: dayNumber, result: { stepDict in
+                finish(Self.parseTotalSteps(from: stepDict))
+            })
+            Task {
+                try? await Task.sleep(nanoseconds: 6_000_000_000)
+                finish(nil)
+            }
+        }
+    }
+
+    private func readSleepViaDirectSDK(dayNumber: Int) async -> Int? {
+        await waitUntilOperationIdle(timeoutSeconds: 1)
+        guard let mgr = manager, isConnected else { return nil }
+        return await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+            var resumed = false
+            let finish: (Int?) -> Void = { value in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: value)
+            }
+            let started = TFTryObjC {
+                mgr.veepooSDK_readSleepData(withDayNumber: dayNumber, result: { sleepOneDayArray in
+                    var minutes: Int?
+                    _ = TFTryObjC {
+                        let arr: [Any] = ((sleepOneDayArray as NSArray?) ?? []).map { $0 as Any }
+                        minutes = Self.parseSleepMinutes(from: arr)
+                    }
+                    finish(minutes)
+                })
+            }
+            if !started {
+                finish(nil)
+                return
+            }
+            Task {
+                try? await Task.sleep(nanoseconds: 8_000_000_000)
+                finish(nil)
+            }
+        }
     }
 
     func startHeartTest() {
@@ -688,20 +1049,169 @@ final class VeepooHealthService: ObservableObject {
     }
 
     private static func parseTotalSteps(from dict: Any?) -> Int? {
+        guard let n = parseDouble(
+            from: dict,
+            keys: [
+                "Step", "totalStep", "step", "steps", "TotalStep",
+                "stepValue", "value", "stepTotal", "StepValue"
+            ]
+        ) else { return nil }
+        return max(0, Int(n.rounded()))
+    }
+
+    private static func parseDouble(from dict: Any?, keys: [String]) -> Double? {
         guard let dict else { return nil }
-        let keys = ["totalStep", "step", "steps", "TotalStep", "stepValue", "value", "stepTotal"]
         if let d = dict as? NSDictionary {
             for k in keys {
-                if let n = d.object(forKey: k) as? NSNumber { return n.intValue }
-                if let s = d.object(forKey: k) as? String, let v = Int(s) { return v }
+                if let n = d.object(forKey: k) as? NSNumber { return n.doubleValue }
+                if let s = d.object(forKey: k) as? String,
+                   let v = Double(s.trimmingCharacters(in: .whitespacesAndNewlines)
+                    .replacingOccurrences(of: ",", with: ".")) {
+                    return v
+                }
             }
             return nil
         }
         if let d = dict as? [AnyHashable: Any] {
             for k in keys {
-                if let n = d[k] as? NSNumber { return n.intValue }
-                if let n = d[k] as? Int { return n }
-                if let s = d[k] as? String, let v = Int(s) { return v }
+                if let n = d[k] as? NSNumber { return n.doubleValue }
+                if let n = d[k] as? Double { return n }
+                if let n = d[k] as? Int { return Double(n) }
+                if let s = d[k] as? String,
+                   let v = Double(s.trimmingCharacters(in: .whitespacesAndNewlines)
+                    .replacingOccurrences(of: ",", with: ".")) {
+                    return v
+                }
+            }
+        }
+        return nil
+    }
+
+    /// Sums ordinary sleep dicts (`SLE_HOUR`/`SLE_MINUTE`) and accurate-sleep objects (`sleepDuration` via KVC).
+    private static func parseSleepMinutes(from segments: [Any]) -> Int? {
+        guard !segments.isEmpty else { return nil }
+        var total = 0
+        var sawValue = false
+
+        for item in segments {
+            if let obj = item as? NSObject,
+               !(obj is NSDictionary),
+               !(item is [AnyHashable: Any]) {
+                if let m = intFromAny(obj.value(forKey: "sleepDuration")), m > 0 {
+                    total += m
+                    sawValue = true
+                    continue
+                }
+                let deep = intFromAny(obj.value(forKey: "deepDuration")) ?? 0
+                let light = intFromAny(obj.value(forKey: "lightDuration")) ?? 0
+                let other = intFromAny(obj.value(forKey: "otherDuration")) ?? 0
+                let sum = deep + light + other
+                if sum > 0 {
+                    total += sum
+                    sawValue = true
+                    continue
+                }
+                if let mins = minutesBetweenSleepStrings(
+                    obj.value(forKey: "sleepTime") as? String,
+                    obj.value(forKey: "wakeTime") as? String
+                ), mins > 0 {
+                    total += mins
+                    sawValue = true
+                    continue
+                }
+            }
+
+            let dict: NSDictionary?
+            if let d = item as? NSDictionary {
+                dict = d
+            } else if let d = item as? [AnyHashable: Any] {
+                dict = d as NSDictionary
+            } else {
+                dict = nil
+            }
+
+            guard let dict else { continue }
+
+            if let sleHour = doubleFromAny(dict["SLE_HOUR"]),
+               let sleMin = doubleFromAny(dict["SLE_MINUTE"]) {
+                let minutes = Int((sleHour * 60.0 + sleMin).rounded())
+                if minutes > 0 {
+                    total += minutes
+                    sawValue = true
+                    continue
+                }
+            }
+
+            if let deep = doubleFromAny(dict["DEEP_HOUR"]),
+               let light = doubleFromAny(dict["LIGHT_HOUR"]) {
+                let minutes = Int(((deep + light) * 60.0).rounded())
+                if minutes > 0 {
+                    total += minutes
+                    sawValue = true
+                    continue
+                }
+            }
+
+            if let mins = minutesBetweenSleepStrings(
+                dict["SLEEP_TIME"] as? String ?? dict["sleepTime"] as? String,
+                dict["WAKE_TIME"] as? String ?? dict["wakeTime"] as? String
+            ), mins > 0 {
+                total += mins
+                sawValue = true
+                continue
+            }
+
+            if doubleFromAny(dict["SLE_HOUR"]) == nil,
+               let m = intFromAny(dict["SLE_MINUTE"] ?? dict["sleepDuration"] ?? dict["SleepDuration"]),
+               m > 0 {
+                // Only raw minutes when hour field is absent (avoid double-count).
+                total += m
+                sawValue = true
+            }
+        }
+
+        guard sawValue else { return nil }
+        // Clamp to a plausible single-day total (0…24h).
+        return min(total, 24 * 60)
+    }
+
+    private static func intFromAny(_ value: Any?) -> Int? {
+        guard let value else { return nil }
+        if let n = value as? NSNumber { return n.intValue }
+        if let n = value as? Int { return n }
+        if let n = value as? Double { return Int(n.rounded()) }
+        if let s = value as? String {
+            let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let v = Int(trimmed) { return v }
+            if let v = Double(trimmed.replacingOccurrences(of: ",", with: ".")) {
+                return Int(v.rounded())
+            }
+        }
+        return nil
+    }
+
+    private static func doubleFromAny(_ value: Any?) -> Double? {
+        guard let value else { return nil }
+        if let n = value as? NSNumber { return n.doubleValue }
+        if let n = value as? Double { return n }
+        if let n = value as? Int { return Double(n) }
+        if let s = value as? String {
+            return Double(s.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: ",", with: "."))
+        }
+        return nil
+    }
+
+    /// Veepoo ordinary sleep timestamps look like `2017/02/09 01:15`.
+    private static func minutesBetweenSleepStrings(_ start: String?, _ end: String?) -> Int? {
+        guard let start, let end else { return nil }
+        let formats = ["yyyy/MM/dd HH:mm", "yyyy-MM-dd HH:mm", "yyyy/MM/dd HH:mm:ss"]
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        for format in formats {
+            formatter.dateFormat = format
+            if let s = formatter.date(from: start), let e = formatter.date(from: end), e > s {
+                let mins = Int(e.timeIntervalSince(s) / 60.0)
+                if mins > 0, mins <= 24 * 60 { return mins }
             }
         }
         return nil

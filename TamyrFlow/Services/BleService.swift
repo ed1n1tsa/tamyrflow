@@ -41,6 +41,9 @@ final class BleService: ObservableObject {
         didConfigureSDK = true
         bleManager = manager
 
+        // Official persistence path (wiki): assign VPPeripheralManage before any data APIs.
+        manager.peripheralManage = VPPeripheralManage.shareVPPeripheralManager()
+
         manager.isLogEnable = true
         manager.automaticConnection = false
         // If YES, Veepoo SDK only shows devices with their manufacturer ID — easy to see "no devices".
@@ -286,6 +289,12 @@ final class BleService: ObservableObject {
         configureSDKIfNeeded()
         guard bleManager?.isConnected == true else { return }
         await withCheckedContinuation { (cont: CheckedContinuation<Void, Never>) in
+            var resumed = false
+            let finish: () -> Void = {
+                guard !resumed else { return }
+                resumed = true
+                cont.resume()
+            }
             bleManager?.peripheralManage.veepooSDKReadDeviceBatteryAndChargeInfo { [weak self] isPercent, chargeState, lowBat, battery in
                 Task { @MainActor in
                     self?.batteryInfo = BatteryInfo(
@@ -294,8 +303,13 @@ final class BleService: ObservableObject {
                         battery: Int(battery),
                         chargeState: chargeState
                     )
-                    cont.resume()
+                    finish()
                 }
+            }
+            // SDK sometimes never calls back — do not leak the continuation (freezes awaiters).
+            Task {
+                try? await Task.sleep(nanoseconds: 8_000_000_000)
+                finish()
             }
         }
     }

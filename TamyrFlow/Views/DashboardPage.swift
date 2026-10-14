@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DashboardPage: View {
     @EnvironmentObject private var vm: BluetoothViewModel
+    @EnvironmentObject private var auth: AuthService
     @Binding var selectedTab: MainTab
 
     var body: some View {
@@ -17,20 +18,44 @@ struct DashboardPage: View {
 
                     TFCard(title: L10n.Hub.section, subtitle: L10n.Hub.sectionSub) {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                            hubTile(title: L10n.Tab.heart, icon: "heart.fill", tab: .heart)
-                            hubTile(title: L10n.Tab.spo2, icon: "lungs.fill", tab: .spo2)
-                            hubTile(title: L10n.Tab.temp, icon: "thermometer.medium", tab: .temp)
-                            hubTile(title: L10n.Tab.ecg, icon: "waveform.path.ecg", tab: .ecg)
-                            hubTile(title: L10n.Tab.micro, icon: "cross.case.fill", tab: .micro)
-                            hubTile(title: L10n.Hub.vitals, icon: "heart.text.square.fill", tab: .vitals)
+                            hubNav(title: L10n.Tab.heart, icon: "heart.fill") { HeartRatePage() }
+                            hubNav(title: L10n.Tab.spo2, icon: "lungs.fill") { OxygenPage() }
+                            hubNav(title: L10n.Tab.temp, icon: "thermometer.medium") { TemperaturePage() }
+                            hubNav(title: L10n.Tab.ecg, icon: "waveform.path.ecg") { ECGPage() }
+                            hubNav(title: L10n.Tab.micro, icon: "cross.case.fill") { MicroTestPage() }
+                            hubNav(title: L10n.Hub.vitals, icon: "heart.text.square.fill") { VitalsPage() }
+                            hubNav(title: L10n.Tab.scan, icon: "antenna.radiowaves.left.and.right") { DeviceScanPage() }
+                            Button {
+                                selectedTab = .metrics
+                            } label: {
+                                hubLabel(title: L10n.Tab.metrics, icon: "chart.bar.fill")
+                            }
+                            .buttonStyle(.plain)
                         }
 
                         VStack(spacing: 10) {
                             TFSecondaryButton(L10n.Hub.steps) {
-                                vm.healthService.readTodaySteps()
+                                Task {
+                                    let totals = await vm.healthService.fetchRealtimeStepTotals()
+                                    await WatchMetricsBridge.persistBandDayTotals(
+                                        auth: auth,
+                                        steps: totals.steps,
+                                        caloriesKcal: totals.caloriesKcal,
+                                        sleepMinutes: nil
+                                    )
+                                }
                             }
                             TFSecondaryButton(L10n.Hub.sleep) {
-                                vm.healthService.readTodaySleep()
+                                Task {
+                                    if let minutes = await vm.healthService.fetchSleepMinutesRobust(), minutes > 0 {
+                                        await WatchMetricsBridge.persistBandDayTotals(
+                                            auth: auth,
+                                            steps: nil,
+                                            caloriesKcal: nil,
+                                            sleepMinutes: minutes
+                                        )
+                                    }
+                                }
                             }
                         }
                         .padding(.top, 6)
@@ -117,7 +142,7 @@ struct DashboardPage: View {
             }
             .scrollContentBackground(.hidden)
             .refreshable {
-                await vm.performPullToRefresh()
+                await vm.performPullToRefresh(auth: auth)
             }
             .navigationTitle(L10n.Dashboard.title)
             .navigationBarTitleDisplayMode(.large)
@@ -131,37 +156,45 @@ struct DashboardPage: View {
     }
 
     private var sleepValue: String {
+        if let minutes = vm.healthService.todaySleepMinutes, minutes > 0 {
+            let hours = Double(minutes) / 60.0
+            return String(format: "%.1fh", hours)
+        }
         if let n = vm.healthService.sleepSegmentsToday { return "\(n)" }
         return "—"
     }
 
-    private func hubTile(title: String, icon: String, tab: MainTab) -> some View {
-        Button {
-            selectedTab = tab
+    private func hubNav<Dest: View>(title: String, icon: String, @ViewBuilder destination: () -> Dest) -> some View {
+        NavigationLink {
+            destination()
         } label: {
-            VStack(alignment: .leading, spacing: 8) {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(AppTheme.accent)
-                Text(title)
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.45))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                Spacer(minLength: 0)
-            }
-            .frame(maxWidth: .infinity, minHeight: 72, alignment: .topLeading)
-            .padding(12)
-            .background {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(AppTheme.cardBackground)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(AppTheme.cardBorder, lineWidth: 1)
-                    }
-            }
+            hubLabel(title: title, icon: icon)
         }
         .buttonStyle(.plain)
+    }
+
+    private func hubLabel(title: String, icon: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(AppTheme.accent)
+            Text(title)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.45))
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, minHeight: 72, alignment: .topLeading)
+        .padding(12)
+        .background {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(AppTheme.cardBackground)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                }
+        }
     }
 
     private func miniStat(title: String, value: String, icon: String) -> some View {

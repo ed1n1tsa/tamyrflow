@@ -18,9 +18,10 @@ final class BluetoothViewModel: ObservableObject {
     let healthService: VeepooHealthService
 
     private var cancellables = Set<AnyCancellable>()
-    private var healthBootstrapTask: Task<Void, Never>?
-    /// Invisible Auto-HR off→on every 7s while app is foreground (keeps SpO₂/health pipe on some bands).
-    private var autoHRPulseTask: Task<Void, Never>?
+    private var postConnectMetricsTask: Task<Void, Never>?
+    private var realtimeStepPollTask: Task<Void, Never>?
+    /// Set from the authenticated shell so post-connect / pull sync can write Supabase.
+    private weak var authService: AuthService?
 
     init(bleService: BleService? = nil) {
         let resolvedBleService = bleService ?? BleService()
@@ -34,12 +35,12 @@ final class BluetoothViewModel: ObservableObject {
                 guard let self else { return }
                 switch status {
                 case .disconnected, .failed, .timeout:
-                    self.healthBootstrapTask?.cancel()
-                    self.stopAutoHRPulseLoop()
+                    self.postConnectMetricsTask?.cancel()
+                    self.stopRealtimeStepPolling()
                 case .verified:
-                    self.autoHR = true
-                    self.healthService.bootstrapHealthChannelAfterVerification()
-                    self.scheduleStaggeredHealthBootstrap()
+                    // Connect stays quiet: no AutoHR bootstrap/pulse (wiki: no concurrent cmds during data work).
+                    self.healthService.syncTime()
+                    self.startRealtimeStepPolling()
                 default:
                     break
                 }
@@ -56,23 +57,6 @@ final class BluetoothViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
-    }
-
-    /// JL + Veepoo bands often accept health/SpO₂ only after Auto HR is sent; repeat while link stays verified.
-    private func scheduleStaggeredHealthBootstrap() {
-        healthBootstrapTask?.cancel()
-        healthBootstrapTask = Task { [weak self] in
-            guard let self else { return }
-            let delays: [Double] = [0.5, 1.2, 2.5, 5.0, 9.0, 14.0]
-            for d in delays {
-                try? await Task.sleep(nanoseconds: UInt64(d * 1_000_000_000))
-                guard !Task.isCancelled else { return }
-                guard self.bleService.connectionStatus == .verified else { return }
-                self.autoHR = true
-                self.healthService.bootstrapHealthChannelAfterVerification()
-                self.bleService.refreshBluetoothStateIfConfigured()
-            }
-        }
     }
 
     var statusText: String {
@@ -108,6 +92,7 @@ final class BluetoothViewModel: ObservableObject {
         let a = Int(age) ?? 30
         let t = Int(targetSteps) ?? 8000
         healthService.syncPersonalInfo(height: h, weight: w, age: a, sex: sex, targetStep: t)
+        healthService.userStatureCm = UInt(h)
     }
 
     /// Sends Settings toggles to the band (only after BLE SDK is configured and device connected).
@@ -118,68 +103,114 @@ final class BluetoothViewModel: ObservableObject {
         healthService.setAutoTemperature(autoTemperature)
     }
 
-    /// Pull-to-refresh: wake BLE stack, re-open health pipe, time sync, battery, then daily data if idle.
-    func performPullToRefresh() async {
+    func attachAuth(_ auth: AuthService) {
+        authService = auth
+    }
+
+    /// Pull-to-refresh: battery + wiki realtime steps/kcal (+ safe sleep). No AutoHR pulse.
+    func performPullToRefresh(auth: AuthService? = nil) async {
+        if let auth { authService = auth }
         bleService.configureSDKIfNeeded()
         bleService.refreshBluetoothStateIfConfigured()
         try? await Task.sleep(nanoseconds: 250_000_000)
 
         guard bleService.connectionStatus == .verified, healthService.isConnected else { return }
 
-        autoHR = true
-        healthService.bootstrapHealthChannelAfterVerification()
-        healthService.ensureLiveMeasurementChannel()
         healthService.syncTime()
         await bleService.readBatteryAsync()
-
-        guard healthService.operation == .idle else { return }
-        healthService.readAllDailyData()
-        await healthService.waitUntilOperationIdle(timeoutSeconds: 55)
-    }
-
-    /// Call from views with `scenePhase == .active` (and onAppear) so Auto-HR pulse runs only in foreground.
-    func handleAppForegroundActive(_ active: Bool) {
-        setAppForegroundActive(active)
-        if active {
-            bleService.refreshBluetoothStateIfConfigured()
-            if bleService.connectionStatus == .verified {
-                healthService.ensureLiveMeasurementChannel()
-                bleService.refreshBluetoothStateIfConfigured()
-            }
+        await syncActivityMetricsToCloud(auth: auth ?? authService)
+        if healthService.measurementHUD != nil {
+            healthService.dismissMeasurementOverlay()
         }
     }
 
-    /// Starts/stops the 7s Auto-HR pulse loop (no change to the Settings toggle binding).
-    private func setAppForegroundActive(_ active: Bool) {
-        stopAutoHRPulseLoop()
-        guard active else { return }
-        if bleService.connectionStatus == .verified, healthService.isConnected {
-            healthService.pulseAutoHRHealthChannel(restoreTo: autoHR)
-        }
-        startAutoHRPulseLoop()
+    /// Realtime Step/Dis/Cal + safe sleep → Supabase.
+    func syncActivityMetricsToCloud(auth: AuthService? = nil) async {
+        let resolvedAuth = auth ?? authService
+        guard bleService.connectionStatus == .verified, healthService.isConnected else { return }
+        applyStatureToHealthService()
+
+        let totals = await healthService.syncActivityMetricsFromBand(includeSleep: true)
+        guard let resolvedAuth, resolvedAuth.session != nil else { return }
+        await WatchMetricsBridge.persistBandDayTotals(
+            auth: resolvedAuth,
+            steps: totals.steps,
+            caloriesKcal: totals.caloriesKcal,
+            sleepMinutes: totals.sleepMinutes
+        )
     }
 
-    private func startAutoHRPulseLoop() {
-        autoHRPulseTask?.cancel()
-        autoHRPulseTask = Task { [weak self] in
+    /// Legacy name used by older call sites.
+    func syncStepsAndSleepToCloud(
+        auth: AuthService? = nil,
+        pullDailyFirst: Bool = false,
+        showHUD: Bool = false
+    ) async {
+        _ = pullDailyFirst
+        _ = showHUD
+        await syncActivityMetricsToCloud(auth: auth)
+    }
+
+    private func applyStatureToHealthService() {
+        if let deviceStature = bleService.connectedDevice?.deviceStature, deviceStature > 0 {
+            healthService.userStatureCm = deviceStature
+        } else {
+            healthService.userStatureCm = UInt(Int(height) ?? 175)
+        }
+    }
+
+    /// After pairing UI dismisses — sync steps/kcal/sleep without freezing the success screen.
+    func scheduleDeferredStepsSleepSync(delayNanoseconds: UInt64 = 1_200_000_000) {
+        postConnectMetricsTask?.cancel()
+        postConnectMetricsTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: delayNanoseconds)
+            guard !Task.isCancelled, let self else { return }
+            guard self.bleService.connectionStatus == .verified else { return }
+            await self.syncActivityMetricsToCloud()
+        }
+    }
+
+    /// Wiki-style realtime step poll (~8s) while verified — keeps Activity close to the watch face.
+    private func startRealtimeStepPolling() {
+        stopRealtimeStepPolling()
+        realtimeStepPollTask = Task { [weak self] in
+            // First sample shortly after verify.
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 7_000_000_000)
-                guard !Task.isCancelled else { break }
                 guard let self else { break }
                 guard self.bleService.connectionStatus == .verified,
-                      self.healthService.isConnected else { continue }
-                self.healthService.pulseAutoHRHealthChannel(restoreTo: self.autoHR)
+                      self.healthService.isConnected else { break }
+                let totals = await self.healthService.fetchRealtimeStepTotals()
+                if let auth = self.authService, auth.session != nil {
+                    await WatchMetricsBridge.persistBandDayTotals(
+                        auth: auth,
+                        steps: totals.steps,
+                        caloriesKcal: totals.caloriesKcal,
+                        sleepMinutes: nil
+                    )
+                }
+                try? await Task.sleep(nanoseconds: 8_000_000_000)
             }
         }
     }
 
-    private func stopAutoHRPulseLoop() {
-        autoHRPulseTask?.cancel()
-        autoHRPulseTask = nil
+    private func stopRealtimeStepPolling() {
+        realtimeStepPollTask?.cancel()
+        realtimeStepPollTask = nil
     }
 
-    /// Cold start / return: if watch already verified, align like official “auto” flow.
-    func performLaunchWatchSyncIfPossible() async {
+    /// Foreground: refresh BT state only — no global AutoHR pulse.
+    func handleAppForegroundActive(_ active: Bool) {
+        guard active else { return }
+        bleService.refreshBluetoothStateIfConfigured()
+        if bleService.connectionStatus == .verified {
+            startRealtimeStepPolling()
+        }
+    }
+
+    /// Cold start: if already verified, sync time/battery + activity metrics (no AutoHR spam).
+    func performLaunchWatchSyncIfPossible(auth: AuthService? = nil) async {
+        if let auth { authService = auth }
         bleService.configureSDKIfNeeded()
         bleService.refreshBluetoothStateIfConfigured()
         try? await Task.sleep(nanoseconds: 500_000_000)
@@ -187,11 +218,9 @@ final class BluetoothViewModel: ObservableObject {
         guard bleService.isBluetoothOn else { return }
         guard bleService.connectionStatus == .verified, healthService.isConnected else { return }
 
-        autoHR = true
-        healthService.bootstrapHealthChannelAfterVerification()
-        healthService.ensureLiveMeasurementChannel()
         healthService.syncTime()
         await bleService.readBatteryAsync()
-        // Full day sync is heavy — use pull-to-refresh for that to avoid blocking first open.
+        startRealtimeStepPolling()
+        await syncActivityMetricsToCloud(auth: auth ?? authService)
     }
 }

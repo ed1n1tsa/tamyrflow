@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Inter-Bold.ttf</string>
+	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>TamyrFlow uses your photo library so you can set a profile picture.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TamyrFlow uses your location to find nearby wearable devices over Bluetooth.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>TamyrFlow reads wellness data such as steps, heart rate, and sleep to show your progress.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>TamyrFlow may save wellness data you choose to track in the app.</string>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+</dict>
+</plist>
