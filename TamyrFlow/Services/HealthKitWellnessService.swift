@@ -3,16 +3,32 @@ import HealthKit
 
 /// Read-only HealthKit helpers for wellness metrics (sleep first; SpO₂/temp later).
 enum HealthKitWellnessService {
-    /// Sum of asleep samples over the last ~36h ending around local noon (covers “last night”).
+    private static let store = HKHealthStore()
+
+    /// Request sleep read access (no-op if already determined). Returns false if HealthKit unavailable.
+    @discardableResult
+    static func ensureSleepReadAccess() async -> Bool {
+        guard HKHealthStore.isHealthDataAvailable() else { return false }
+        guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else { return false }
+        do {
+            try await store.requestAuthorization(toShare: [], read: [sleepType])
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Sum of asleep samples for “last night”: previous day 18:00 → today 14:00 local.
     static func fetchRecentSleepMinutes(now: Date = Date()) async -> Int? {
-        guard HKHealthStore.isHealthDataAvailable() else { return nil }
+        guard await ensureSleepReadAccess() else { return nil }
         guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else { return nil }
 
-        let store = HKHealthStore()
         let cal = Calendar.current
         let dayStart = cal.startOfDay(for: now)
-        let end = cal.date(byAdding: .hour, value: 12, to: dayStart) ?? now
-        let start = cal.date(byAdding: .hour, value: -36, to: end) ?? now.addingTimeInterval(-36 * 3600)
+        // Yesterday 18:00 → today 14:00 covers a typical night even if the user opens the app late.
+        let start = cal.date(byAdding: .hour, value: -6, to: dayStart) // previous day 18:00
+            ?? now.addingTimeInterval(-30 * 3600)
+        let end = cal.date(byAdding: .hour, value: 14, to: dayStart) ?? now
 
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
 
@@ -40,9 +56,7 @@ enum HealthKitWellnessService {
 
     private static func isAsleep(_ sample: HKCategorySample) -> Bool {
         let value = sample.value
-        // Legacy
         if value == HKCategoryValueSleepAnalysis.asleep.rawValue { return true }
-        // iOS 16+ stages
         if #available(iOS 16.0, *) {
             switch value {
             case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,

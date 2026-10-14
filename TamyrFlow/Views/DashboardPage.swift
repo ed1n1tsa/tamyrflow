@@ -47,7 +47,14 @@ struct DashboardPage: View {
                             }
                             TFSecondaryButton(L10n.Hub.sleep) {
                                 Task {
-                                    await vm.syncActivityMetricsToCloud(auth: auth)
+                                    if let minutes = await vm.healthService.fetchSleepMinutesRobust(), minutes > 0 {
+                                        await WatchMetricsBridge.persistBandDayTotals(
+                                            auth: auth,
+                                            steps: nil,
+                                            caloriesKcal: nil,
+                                            sleepMinutes: minutes
+                                        )
+                                    }
                                 }
                             }
                         }
