@@ -48,12 +48,12 @@ enum IndicatorKind: String, CaseIterable, Identifiable, Hashable {
 
     var accent: Color {
         switch self {
-        case .heartRate: return Color(red: 0.95, green: 0.28, blue: 0.38)
-        case .spo2: return Color(red: 0.25, green: 0.55, blue: 1.0)
-        case .temperature: return Color(red: 0.98, green: 0.55, blue: 0.22)
-        case .bloodPressure: return Color(red: 0.62, green: 0.40, blue: 0.95)
-        case .steps: return Color(red: 0.20, green: 0.78, blue: 0.72)
-        case .sleep: return Color(red: 0.30, green: 0.45, blue: 0.95)
+        case .heartRate: return Color(red: 1.0, green: 0.32, blue: 0.42)
+        case .spo2: return Color(red: 0.35, green: 0.62, blue: 1.0)
+        case .temperature: return Color(red: 1.0, green: 0.58, blue: 0.22)
+        case .bloodPressure: return Color(red: 0.68, green: 0.42, blue: 1.0)
+        case .steps: return Color(red: 0.18, green: 0.85, blue: 0.72)
+        case .sleep: return Color(red: 0.28, green: 0.48, blue: 1.0)
         }
     }
 }
