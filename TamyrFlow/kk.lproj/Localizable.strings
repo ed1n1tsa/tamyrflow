@@ -633,3 +633,24 @@
 "watch_success_sub" = "Дайын — Tamyr Flow-та сағатты пайдалана аласыз.";
 "watch_go_my" = "Сағатыма өту";
 "watch_setup_later" = "Кейін баптау";
+
+"ind_screen_title" = "Көрсеткіштер";
+"ind_subtitle" = "Денсаулық көрсеткіштерінің динамикасын қараңыз";
+"ind_pick_date" = "Аяқталу күні";
+"ind_trend_avg" = "орташа";
+"ind_sleep_value_format" = "%d сағ %d мин";
+"ind_period_7" = "7 күн";
+"ind_period_30" = "30 күн";
+"ind_period_90" = "90 күн";
+"ind_pulse" = "Пульс";
+"ind_spo2" = "Қандағы оттегі";
+"ind_temp" = "Температура";
+"ind_pressure" = "Қысым";
+"ind_steps" = "Қадамдар";
+"ind_sleep" = "Ұйқы";
+"ind_unit_bpm" = "соғ/мин";
+"ind_unit_spo2" = "SpO₂, %";
+"ind_unit_temp" = "°C";
+"ind_unit_pressure" = "мм сын. бағ.";
+"ind_unit_steps" = "қадам";
+"ind_unit_sleep" = "сағ";

@@ -660,6 +660,47 @@ enum L10n {
         static var contactEmail: String { tr("about_contact_email") }
     }
 
+    enum Indicators {
+        static var screenTitle: String { tr("ind_screen_title") }
+        static var subtitle: String { tr("ind_subtitle") }
+        static var pickDate: String { tr("ind_pick_date") }
+        static var trendAvg: String { tr("ind_trend_avg") }
+        static var sleepValueFormat: String { tr("ind_sleep_value_format") }
+        static var period7: String { tr("ind_period_7") }
+        static var period30: String { tr("ind_period_30") }
+        static var period90: String { tr("ind_period_90") }
+
+        static func periodLabel(_ period: IndicatorsPeriod) -> String {
+            switch period {
+            case .days7: return period7
+            case .days30: return period30
+            case .days90: return period90
+            }
+        }
+
+        static func title(for kind: IndicatorKind) -> String {
+            switch kind {
+            case .heartRate: return tr("ind_pulse")
+            case .spo2: return tr("ind_spo2")
+            case .temperature: return tr("ind_temp")
+            case .bloodPressure: return tr("ind_pressure")
+            case .steps: return tr("ind_steps")
+            case .sleep: return tr("ind_sleep")
+            }
+        }
+
+        static func unit(for kind: IndicatorKind) -> String {
+            switch kind {
+            case .heartRate: return tr("ind_unit_bpm")
+            case .spo2: return tr("ind_unit_spo2")
+            case .temperature: return tr("ind_unit_temp")
+            case .bloodPressure: return tr("ind_unit_pressure")
+            case .steps: return tr("ind_unit_steps")
+            case .sleep: return tr("ind_unit_sleep")
+            }
+        }
+    }
+
     enum Goals {
         static var screenTitle: String { tr("goals_screen_title") }
         static var emptyHeadline: String { tr("goals_empty_headline") }

@@ -12,7 +12,7 @@ struct RootTabView: View {
                 DashboardPage(selectedTab: $tab)
                     .opacity(tab == .home ? 1 : 0)
                     .allowsHitTesting(tab == .home)
-                HeartRatePage()
+                IndicatorsPageView(auth: auth)
                     .opacity(tab == .metrics ? 1 : 0)
                     .allowsHitTesting(tab == .metrics)
                 ActivityPageView(auth: auth, selectedTab: $tab)
@@ -33,7 +33,7 @@ struct RootTabView: View {
                 .padding(.bottom, 8)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
-            if tab != .profile && tab != .goals && tab != .activity {
+            if tab != .profile && tab != .goals && tab != .activity && tab != .metrics {
                 ConnectionStatusBar(ble: vm.bleService, health: vm.healthService)
             }
         }

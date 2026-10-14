@@ -633,3 +633,24 @@
 "watch_success_sub" = "Всё готово — можно пользоваться часами в Tamyr Flow.";
 "watch_go_my" = "Перейти к моим часам";
 "watch_setup_later" = "Настроить позже";
+
+"ind_screen_title" = "Показатели";
+"ind_subtitle" = "Просматривайте динамику показателей вашего здоровья";
+"ind_pick_date" = "Дата окончания";
+"ind_trend_avg" = "в среднем";
+"ind_sleep_value_format" = "%d ч %d мин";
+"ind_period_7" = "7 дней";
+"ind_period_30" = "30 дней";
+"ind_period_90" = "90 дней";
+"ind_pulse" = "Пульс";
+"ind_spo2" = "Кислород в крови";
+"ind_temp" = "Температура";
+"ind_pressure" = "Давление";
+"ind_steps" = "Шаги";
+"ind_sleep" = "Сон";
+"ind_unit_bpm" = "уд/мин";
+"ind_unit_spo2" = "SpO₂, %";
+"ind_unit_temp" = "°C";
+"ind_unit_pressure" = "мм рт. ст.";
+"ind_unit_steps" = "шагов";
+"ind_unit_sleep" = "ч";
