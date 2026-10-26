@@ -3,6 +3,8 @@ import SwiftUI
 /// Metrics tab: period filters + indicator cards with sparklines.
 struct IndicatorsPageView: View {
     @EnvironmentObject private var language: LanguageStore
+    @EnvironmentObject private var vm: BluetoothViewModel
+    private let auth: AuthService
     @StateObject private var service: IndicatorsService
     @State private var showCalendar = false
     @State private var calendarDate = Date()
@@ -10,6 +12,7 @@ struct IndicatorsPageView: View {
     @State private var errorAlert: String?
 
     init(auth: AuthService) {
+        self.auth = auth
         _service = StateObject(wrappedValue: IndicatorsService(auth: auth))
     }
 
@@ -236,7 +239,7 @@ struct IndicatorsPageView: View {
     private func detailDestination(for kind: IndicatorKind) -> some View {
         switch kind {
         case .heartRate:
-            HeartRatePage()
+            PulsePageView(auth: auth, health: vm.healthService, ble: vm.bleService)
         case .spo2:
             OxygenPage()
         case .temperature:

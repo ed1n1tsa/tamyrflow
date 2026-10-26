@@ -1,7 +1,7 @@
 import Foundation
 import HealthKit
 
-/// Read-only HealthKit helpers for wellness metrics (sleep first; SpO₂/temp later).
+/// Read-only HealthKit helpers for wellness metrics (sleep, heart rate; SpO₂/temp later).
 enum HealthKitWellnessService {
     private static let store = HKHealthStore()
 
@@ -15,6 +15,49 @@ enum HealthKitWellnessService {
             return true
         } catch {
             return false
+        }
+    }
+
+    /// Request heart-rate read access. Does not block the rest of the app if denied.
+    @discardableResult
+    static func ensureHeartRateReadAccess() async -> Bool {
+        guard HKHealthStore.isHealthDataAvailable() else { return false }
+        guard let hrType = HKObjectType.quantityType(forIdentifier: .heartRate) else { return false }
+        do {
+            try await store.requestAuthorization(toShare: [], read: [hrType])
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Heart-rate samples in `[start, end)` local range. Values in bpm.
+    static func fetchHeartRateSamples(start: Date, end: Date) async -> [(date: Date, bpm: Double)] {
+        guard await ensureHeartRateReadAccess() else { return [] }
+        guard let hrType = HKObjectType.quantityType(forIdentifier: .heartRate) else { return [] }
+
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [.strictStartDate])
+        let unit = HKUnit.count().unitDivided(by: .minute())
+
+        return await withCheckedContinuation { cont in
+            let query = HKSampleQuery(
+                sampleType: hrType,
+                predicate: predicate,
+                limit: HKObjectQueryNoLimit,
+                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+            ) { _, samples, _ in
+                guard let samples = samples as? [HKQuantitySample] else {
+                    cont.resume(returning: [])
+                    return
+                }
+                let mapped: [(Date, Double)] = samples.compactMap { sample in
+                    let bpm = sample.quantity.doubleValue(for: unit)
+                    guard bpm >= 30, bpm <= 250 else { return nil }
+                    return (sample.startDate, bpm)
+                }
+                cont.resume(returning: mapped)
+            }
+            store.execute(query)
         }
     }
 

@@ -18,7 +18,9 @@ struct DashboardPage: View {
 
                     TFCard(title: L10n.Hub.section, subtitle: L10n.Hub.sectionSub) {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                            hubNav(title: L10n.Tab.heart, icon: "heart.fill") { HeartRatePage() }
+                            hubNav(title: L10n.Tab.heart, icon: "heart.fill") {
+                                PulsePageView(auth: auth, health: vm.healthService, ble: vm.bleService)
+                            }
                             hubNav(title: L10n.Tab.spo2, icon: "lungs.fill") { OxygenPage() }
                             hubNav(title: L10n.Tab.temp, icon: "thermometer.medium") { TemperaturePage() }
                             hubNav(title: L10n.Tab.ecg, icon: "waveform.path.ecg") { ECGPage() }

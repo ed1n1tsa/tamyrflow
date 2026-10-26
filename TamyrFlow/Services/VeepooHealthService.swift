@@ -439,6 +439,71 @@ final class VeepooHealthService: ObservableObject {
         return mac.isEmpty ? nil : mac
     }
 
+    /// Half-hour average heart-rate samples from the Veepoo local DB for the last `dayCount` days (incl. today).
+    /// Does not start a daily dump — reads whatever is already synced into the SDK DB.
+    func fetchHalfHourHeartSamples(dayCount: Int = 7) -> [(date: Date, bpm: Double)] {
+        guard let tableID = deviceTableID else { return [] }
+        let cal = Calendar.current
+        var out: [(Date, Double)] = []
+        let days = max(1, min(dayCount, 30))
+
+        for offset in 0..<days {
+            let dateStr = Self.sdkDateString(dayOffset: offset)
+            var dict: NSDictionary?
+            _ = TFTryObjC {
+                if let raw = VPDataBaseOperation.veepooSDKGetOriginalChangeHalfHourData(
+                    withDate: dateStr,
+                    andTableID: tableID
+                ) as NSDictionary? {
+                    dict = raw
+                } else if let raw = VPDataBaseOperation.veepooSDKGetOriginalChangeHalfHourData(
+                    withDate: dateStr,
+                    andTableID: tableID
+                ) as? [AnyHashable: Any] {
+                    dict = raw as NSDictionary
+                }
+            }
+            guard let dict else { continue }
+
+            let dayStart = cal.date(byAdding: .day, value: -offset, to: cal.startOfDay(for: Date()))
+                ?? cal.startOfDay(for: Date())
+
+            for (key, value) in dict {
+                let timeKey = String(describing: key)
+                let parts = timeKey.split(separator: ":").map(String.init)
+                guard parts.count >= 2,
+                      let hour = Int(parts[0]),
+                      let minute = Int(parts[1])
+                else { continue }
+
+                let bpm: Double?
+                if let nested = value as? [AnyHashable: Any] {
+                    bpm = Self.doubleValue(nested["heartValue"] ?? nested["HeartValue"])
+                } else if let nested = value as? NSDictionary {
+                    bpm = Self.doubleValue(nested["heartValue"] ?? nested["HeartValue"])
+                } else {
+                    bpm = Self.doubleValue(value)
+                }
+                guard let bpm, bpm >= 30, bpm <= 250 else { continue }
+
+                var comps = cal.dateComponents([.year, .month, .day], from: dayStart)
+                comps.hour = hour
+                comps.minute = minute
+                guard let date = cal.date(from: comps) else { continue }
+                out.append((date, bpm))
+            }
+        }
+
+        return out.sorted { $0.0 < $1.0 }
+    }
+
+    private static func doubleValue(_ any: Any?) -> Double? {
+        if let d = any as? Double { return d }
+        if let n = any as? NSNumber { return n.doubleValue }
+        if let s = any as? String { return Double(s) }
+        return nil
+    }
+
     private static func sdkDateString(dayOffset: Int, from date: Date = Date()) -> String {
         let cal = Calendar.current
         let day = cal.date(byAdding: .day, value: -dayOffset, to: cal.startOfDay(for: date)) ?? date
