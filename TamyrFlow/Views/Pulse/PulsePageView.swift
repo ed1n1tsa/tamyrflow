@@ -310,11 +310,11 @@ struct PulsePageView: View {
     }
 
     private var averageCard: some View {
-        HStack(spacing: 12) {
+        HStack(alignment: .center, spacing: 14) {
             Image(systemName: "heart.fill")
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Color(red: 1, green: 0.35, blue: 0.48))
-                .frame(width: 40, height: 40)
+                .frame(width: 42, height: 42)
                 .background(Circle().fill(Color(red: 1, green: 0.35, blue: 0.48).opacity(0.18)))
 
             VStack(alignment: .leading, spacing: 4) {
@@ -328,11 +328,13 @@ struct PulsePageView: View {
                     Text(trend)
                         .font(AppFont.interBold(11))
                         .foregroundStyle(ProfileTheme.connected)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            Spacer()
+            Spacer(minLength: 0)
         }
-        .padding(16)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .pulseCardBackground()
     }
 
