@@ -190,87 +190,120 @@ struct PulsePageView: View {
     // MARK: - Cards
 
     private var lastMeasurementCard: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image("PulseHeroHeart")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 64, height: 64)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .center, spacing: 14) {
+                Image("PulseHeroHeart")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 72, height: 72)
+                    .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(L10n.Pulse.lastMeasurement)
-                    .font(AppFont.interBold(12))
-                    .foregroundStyle(ProfileTheme.muted)
-
-                if let last = service.lastMeasurement {
-                    Text(PulseFormatters.bpmWithUnit(last.value))
-                        .font(AppFont.interBold(26))
-                        .foregroundStyle(.white)
-                    Text(PulseFormatters.relativeDateTime(last.recordedAt))
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(L10n.Pulse.lastMeasurement)
                         .font(AppFont.interBold(12))
                         .foregroundStyle(ProfileTheme.muted)
-                    Text("\(L10n.Pulse.sourceLabel): \(PulseFormatters.sourceTitle(last.source))")
-                        .font(AppFont.interBold(11))
-                        .foregroundStyle(ProfileTheme.muted.opacity(0.9))
-                } else {
-                    Text(L10n.Pulse.noData)
-                        .font(AppFont.interBold(22))
-                        .foregroundStyle(.white)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
 
-            VStack(alignment: .trailing, spacing: 8) {
-                if service.isWatchConnected {
-                    HStack(spacing: 6) {
-                        Circle().fill(ProfileTheme.connected).frame(width: 7, height: 7)
-                        Text(L10n.Pulse.watchConnected)
+                    if let last = service.lastMeasurement {
+                        Text(PulseFormatters.bpmWithUnit(last.value))
+                            .font(AppFont.interBold(28))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                        Text(PulseFormatters.relativeDateTime(last.recordedAt))
+                            .font(AppFont.interBold(12))
+                            .foregroundStyle(ProfileTheme.muted)
+                        Text("\(L10n.Pulse.sourceLabel): \(PulseFormatters.sourceTitle(last.source))")
                             .font(AppFont.interBold(11))
+                            .foregroundStyle(ProfileTheme.muted.opacity(0.9))
+                    } else {
+                        Text(L10n.Pulse.noData)
+                            .font(AppFont.interBold(24))
                             .foregroundStyle(.white)
                     }
-                    Image("PulseWatchConnected")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 44, height: 44)
-                    Text(L10n.Pulse.newDataAvailable)
-                        .font(AppFont.interBold(10))
-                        .foregroundStyle(ProfileTheme.muted)
-                        .multilineTextAlignment(.trailing)
-                    Button {
-                        Task { await service.syncAvailableSources() }
-                    } label: {
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                VStack(alignment: .trailing, spacing: 8) {
+                    if service.isWatchConnected {
                         HStack(spacing: 6) {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                                .font(.system(size: 11, weight: .bold))
-                            Text(L10n.Pulse.refreshData)
+                            Circle().fill(ProfileTheme.connected).frame(width: 7, height: 7)
+                            Text(L10n.Pulse.watchConnected)
                                 .font(AppFont.interBold(11))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 8)
-                        .background(Capsule().fill(ProfileTheme.accent))
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    Image("PulseWatchDisconnected")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 48, height: 48)
-                    Text(L10n.Pulse.watchDisconnected)
-                        .font(AppFont.interBold(11))
-                        .foregroundStyle(ProfileTheme.muted)
-                        .multilineTextAlignment(.trailing)
-                    Button { showConnectWatch = true } label: {
-                        Text(L10n.Pulse.connectWatch)
+                        Image("PulseWatchConnected")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 36, height: 36)
+                        Text(L10n.Pulse.newDataAvailable)
+                            .font(AppFont.interBold(10))
+                            .foregroundStyle(ProfileTheme.muted)
+                            .multilineTextAlignment(.trailing)
+                            .lineLimit(2)
+                            .frame(width: 110, alignment: .trailing)
+                    } else {
+                        Image("PulseWatchDisconnected")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 40, height: 40)
+                        Text(L10n.Pulse.watchDisconnected)
                             .font(AppFont.interBold(11))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 8)
-                            .background(Capsule().fill(ProfileTheme.accent))
+                            .foregroundStyle(ProfileTheme.muted)
+                            .multilineTextAlignment(.trailing)
+                            .lineLimit(2)
+                            .frame(width: 110, alignment: .trailing)
                     }
-                    .buttonStyle(.plain)
                 }
             }
-            .frame(width: 118, alignment: .trailing)
+
+            if service.isWatchConnected {
+                Button {
+                    Task { await service.syncAvailableSources() }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 14, weight: .bold))
+                        Text(L10n.Pulse.refreshData)
+                            .font(AppFont.interBold(14))
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 13)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(ProfileTheme.accent)
+                            .shadow(color: ProfileTheme.accent.opacity(0.35), radius: 8, y: 2)
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(service.syncState == .loading)
+                .opacity(service.syncState == .loading ? 0.7 : 1)
+            } else {
+                Button { showConnectWatch = true } label: {
+                    Text(L10n.Pulse.connectWatch)
+                        .font(AppFont.interBold(14))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(ProfileTheme.accent)
+                                .shadow(color: ProfileTheme.accent.opacity(0.35), radius: 8, y: 2)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+
+            #if DEBUG
+            if !service.lastSyncDebug.isEmpty {
+                Text(service.lastSyncDebug)
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(ProfileTheme.muted.opacity(0.7))
+                    .lineLimit(3)
+            }
+            #endif
         }
         .padding(16)
         .pulseCardBackground()

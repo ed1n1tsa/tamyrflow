@@ -439,16 +439,70 @@ final class VeepooHealthService: ObservableObject {
         return mac.isEmpty ? nil : mac
     }
 
-    /// Half-hour average heart-rate samples from the Veepoo local DB for the last `dayCount` days (incl. today).
-    /// Does not start a daily dump — reads whatever is already synced into the SDK DB.
-    func fetchHalfHourHeartSamples(dayCount: Int = 7) -> [(date: Date, bpm: Double)] {
-        guard let tableID = deviceTableID else { return [] }
-        let cal = Calendar.current
-        var out: [(Date, Double)] = []
-        let days = max(1, min(dayCount, 30))
+    /// Pull band → SDK DB, then return heart-rate samples (5‑min original preferred, half‑hour fallback).
+    /// Manual measurements on the watch only appear after a daily dump fills the local Veepoo DB.
+    func syncAndFetchHeartSamples(dayCount: Int = 7) async -> (samples: [(date: Date, bpm: Double)], debug: String) {
+        var notes: [String] = []
+        let connected = isConnected && deviceTableID != nil
+        guard connected else {
+            return ([], "watch: not connected")
+        }
 
-        for offset in 0..<days {
-            let dateStr = Self.sdkDateString(dayOffset: offset)
+        // 1) Dump band into SDK DB. Force even on accurate-sleep bands for Pulse —
+        // without this, VPDataBaseOperation stays empty after on-watch HR measures.
+        let dumped = await pullDailyDataFromBand(showHUD: false, forceDespiteAccurateSleep: true)
+        notes.append(dumped ? "dump: ok" : "dump: \(readProgressText.isEmpty ? "fail/skip" : readProgressText)")
+
+        // 2) Prefer 5‑minute original slots (captures a single watch measurement).
+        var samples = fetchOriginalHeartSamples(dayCount: dayCount)
+        notes.append("origin5m: \(samples.count)")
+
+        // 3) Fallback: half-hour averages.
+        if samples.isEmpty {
+            samples = fetchHalfHourHeartSamples(dayCount: dayCount)
+            notes.append("halfHour: \(samples.count)")
+        }
+
+        // 4) If the app just finished a live HR test, include that point too.
+        if let live = heartRate, live.value >= 30, live.value <= 250 {
+            let already = samples.contains { abs($0.bpm - Double(live.value)) < 0.6 && abs($0.date.timeIntervalSinceNow) < 180 }
+            if !already {
+                samples.append((Date(), Double(live.value)))
+                notes.append("liveTest: \(live.value)")
+            }
+        }
+
+        samples.sort { $0.date < $1.date }
+        notes.append("total: \(samples.count)")
+        let debug = notes.joined(separator: " · ")
+        print("[PulseSync] \(debug)")
+        return (samples, debug)
+    }
+
+    /// 5‑minute original HR from Veepoo local DB (filled by daily dump).
+    func fetchOriginalHeartSamples(dayCount: Int = 7) -> [(date: Date, bpm: Double)] {
+        parseHeartDictSamples(dayCount: dayCount) { dateStr, tableID in
+            var dict: NSDictionary?
+            _ = TFTryObjC {
+                if let raw = VPDataBaseOperation.veepooSDKGetOriginalData(
+                    withDate: dateStr,
+                    andTableID: tableID
+                ) as NSDictionary? {
+                    dict = raw
+                } else if let raw = VPDataBaseOperation.veepooSDKGetOriginalData(
+                    withDate: dateStr,
+                    andTableID: tableID
+                ) as? [AnyHashable: Any] {
+                    dict = raw as NSDictionary
+                }
+            }
+            return dict
+        }
+    }
+
+    /// Half-hour average heart-rate samples from the Veepoo local DB.
+    func fetchHalfHourHeartSamples(dayCount: Int = 7) -> [(date: Date, bpm: Double)] {
+        parseHeartDictSamples(dayCount: dayCount) { dateStr, tableID in
             var dict: NSDictionary?
             _ = TFTryObjC {
                 if let raw = VPDataBaseOperation.veepooSDKGetOriginalChangeHalfHourData(
@@ -463,8 +517,22 @@ final class VeepooHealthService: ObservableObject {
                     dict = raw as NSDictionary
                 }
             }
-            guard let dict else { continue }
+            return dict
+        }
+    }
 
+    private func parseHeartDictSamples(
+        dayCount: Int,
+        loader: (_ dateStr: String, _ tableID: String) -> NSDictionary?
+    ) -> [(date: Date, bpm: Double)] {
+        guard let tableID = deviceTableID else { return [] }
+        let cal = Calendar.current
+        var out: [(Date, Double)] = []
+        let days = max(1, min(dayCount, 30))
+
+        for offset in 0..<days {
+            let dateStr = Self.sdkDateString(dayOffset: offset)
+            guard let dict = loader(dateStr, tableID) else { continue }
             let dayStart = cal.date(byAdding: .day, value: -offset, to: cal.startOfDay(for: Date()))
                 ?? cal.startOfDay(for: Date())
 
@@ -476,15 +544,7 @@ final class VeepooHealthService: ObservableObject {
                       let minute = Int(parts[1])
                 else { continue }
 
-                let bpm: Double?
-                if let nested = value as? [AnyHashable: Any] {
-                    bpm = Self.doubleValue(nested["heartValue"] ?? nested["HeartValue"])
-                } else if let nested = value as? NSDictionary {
-                    bpm = Self.doubleValue(nested["heartValue"] ?? nested["HeartValue"])
-                } else {
-                    bpm = Self.doubleValue(value)
-                }
-                guard let bpm, bpm >= 30, bpm <= 250 else { continue }
+                guard let bpm = Self.heartValue(from: value), bpm >= 30, bpm <= 250 else { continue }
 
                 var comps = cal.dateComponents([.year, .month, .day], from: dayStart)
                 comps.hour = hour
@@ -493,8 +553,38 @@ final class VeepooHealthService: ObservableObject {
                 out.append((date, bpm))
             }
         }
-
         return out.sorted { $0.0 < $1.0 }
+    }
+
+    /// Prefer `heartValue`; else average of `ppgs` / `ecgs` arrays when present.
+    private static func heartValue(from value: Any) -> Double? {
+        let nested: [AnyHashable: Any]?
+        if let d = value as? [AnyHashable: Any] {
+            nested = d
+        } else if let d = value as? NSDictionary {
+            nested = d as? [AnyHashable: Any]
+        } else {
+            return doubleValue(value)
+        }
+        guard let nested else { return nil }
+
+        if let bpm = doubleValue(nested["heartValue"] ?? nested["HeartValue"]), bpm >= 30 {
+            return bpm
+        }
+        for key in ["ppgs", "ecgs", "PPGs", "ECGs"] {
+            if let arr = nested[key] as? [Any] {
+                let vals = arr.compactMap(doubleValue).filter { $0 >= 30 && $0 <= 250 }
+                if !vals.isEmpty {
+                    return vals.reduce(0, +) / Double(vals.count)
+                }
+            } else if let arr = nested[key] as? NSArray {
+                let vals = arr.compactMap { doubleValue($0) }.filter { $0 >= 30 && $0 <= 250 }
+                if !vals.isEmpty {
+                    return vals.reduce(0, +) / Double(vals.count)
+                }
+            }
+        }
+        return nil
     }
 
     private static func doubleValue(_ any: Any?) -> Double? {

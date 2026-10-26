@@ -13,6 +13,8 @@ final class PulseService: ObservableObject {
     @Published private(set) var recent: [PulseMeasurement] = []
     @Published private(set) var isLoading = false
     @Published private(set) var syncState: PulseSyncState = .idle
+    /// Last sync diagnostic (Xcode console + optional UI). Not user-facing copy.
+    @Published private(set) var lastSyncDebug: String = ""
     @Published var lastError: String?
 
     private let auth: AuthService
@@ -70,13 +72,16 @@ final class PulseService: ObservableObject {
     func syncAvailableSources() async {
         syncState = .loading
         var inserted = 0
-        var hadSource = false
+        var parts: [String] = []
         let watchOK = isWatchConnected
 
         if watchOK {
-            hadSource = true
-            let band = health.fetchHalfHourHeartSamples(dayCount: 14)
-            inserted += await persistSamples(band, source: .device, deviceLabel: "Tamyr Watch")
+            let result = await health.syncAndFetchHeartSamples(dayCount: 14)
+            parts.append(result.debug)
+            inserted += await persistSamples(result.samples, source: .device, deviceLabel: "Tamyr Watch")
+            parts.append("deviceInsert: \(inserted)")
+        } else {
+            parts.append("watch: off")
         }
 
         let cal = Calendar.current
@@ -84,14 +89,14 @@ final class PulseService: ObservableObject {
             ?? Date().addingTimeInterval(-30 * 86_400)
         let hkEnd = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: Date())) ?? Date()
         let hkSamples = await HealthKitWellnessService.fetchHeartRateSamples(start: hkStart, end: hkEnd)
-        if !hkSamples.isEmpty || watchOK == false {
-            // Attempt counts as a source path even when empty (permission may be denied).
-            if !hkSamples.isEmpty { hadSource = true }
-            inserted += await persistSamples(hkSamples, source: .appleHealth, deviceLabel: "Apple Health")
-        }
+        let hkInserted = await persistSamples(hkSamples, source: .appleHealth, deviceLabel: "Apple Health")
+        inserted += hkInserted
+        parts.append("hk: \(hkSamples.count)/ins \(hkInserted)")
 
         await loadFromSupabase()
         rebuildDerived()
+        lastSyncDebug = parts.joined(separator: " | ")
+        print("[PulseSync] \(lastSyncDebug)")
 
         if !watchOK && hkSamples.isEmpty && measurements.isEmpty {
             syncState = .noSource
