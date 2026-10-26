@@ -675,6 +675,7 @@
 "pulse_watch_connected" = "Подключены часы";
 "pulse_watch_disconnected" = "Часы не подключены";
 "pulse_new_data_available" = "Доступны новые данные";
+"pulse_update_hint" = "Нажмите «Обновить» — измерим пульс на часах";
 "pulse_average_title" = "Средний пульс";
 "pulse_vs_prev_day" = "по сравнению с прошлым днём";
 "pulse_vs_prev_week" = "по сравнению с прошлой неделей";
@@ -696,7 +697,7 @@
 "pulse_connect_cta_title" = "Для отображения данных о пульсе подключите ваши часы";
 "pulse_connect_cta_body" = "TamyrFlow будет получать данные о пульсе с подключённых часов или из Apple Health.";
 "pulse_syncing_title" = "Обновляем данные";
-"pulse_syncing_body" = "Получаем последние измерения с ваших часов и Apple Health…";
+"pulse_syncing_body" = "Измеряем пульс на часах и проверяем Apple Health. Держите часы на запястье…";
 "pulse_toast_success" = "Данные успешно обновлены. Получены новые измерения.";
 "pulse_history_title" = "История пульса";
 "pulse_history_empty_sub" = "Пока нет измерений пульса. Обновите данные после подключения часов или разрешения Apple Health.";

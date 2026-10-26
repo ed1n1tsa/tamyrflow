@@ -681,6 +681,7 @@ enum L10n {
         static var watchConnected: String { tr("pulse_watch_connected") }
         static var watchDisconnected: String { tr("pulse_watch_disconnected") }
         static var newDataAvailable: String { tr("pulse_new_data_available") }
+        static var updateHint: String { tr("pulse_update_hint") }
         static var averageTitle: String { tr("pulse_average_title") }
         static var vsPrevDay: String { tr("pulse_vs_prev_day") }
         static var vsPrevWeek: String { tr("pulse_vs_prev_week") }

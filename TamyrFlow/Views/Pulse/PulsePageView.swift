@@ -237,11 +237,11 @@ struct PulsePageView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 36, height: 36)
-                        Text(L10n.Pulse.newDataAvailable)
+                        Text(L10n.Pulse.updateHint)
                             .font(AppFont.interBold(10))
                             .foregroundStyle(ProfileTheme.muted)
                             .multilineTextAlignment(.trailing)
-                            .lineLimit(2)
+                            .lineLimit(3)
                             .frame(width: 110, alignment: .trailing)
                     } else {
                         Image("PulseWatchDisconnected")

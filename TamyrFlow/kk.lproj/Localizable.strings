@@ -675,6 +675,7 @@
 "pulse_watch_connected" = "Сағат қосулы";
 "pulse_watch_disconnected" = "Сағат қосылмаған";
 "pulse_new_data_available" = "Жаңа деректер бар";
+"pulse_update_hint" = "«Жаңарту» басыңыз — сағатта пульс өлшейміз";
 "pulse_average_title" = "Орташа пульс";
 "pulse_vs_prev_day" = "алдыңғы күнмен салыстырғанда";
 "pulse_vs_prev_week" = "алдыңғы аптамен салыстырғанда";
@@ -696,7 +697,7 @@
 "pulse_connect_cta_title" = "Пульс деректерін көрсету үшін сағатыңызды қосыңыз";
 "pulse_connect_cta_body" = "TamyrFlow пульс деректерін қосылған сағаттан немесе Apple Health-тен алады.";
 "pulse_syncing_title" = "Деректер жаңартылуда";
-"pulse_syncing_body" = "Сағатыңыздан және Apple Health-тен соңғы өлшемдерді алып жатырмыз…";
+"pulse_syncing_body" = "Сағатта пульс өлшеп, Apple Health тексерілуде. Сағатты қолда ұстаңыз…";
 "pulse_toast_success" = "Деректер сәтті жаңартылды. Жаңа өлшемдер алынды.";
 "pulse_history_title" = "Пульс тарихы";
 "pulse_history_empty_sub" = "Әзірге пульс өлшемдері жоқ. Сағатты қосқаннан немесе Apple Health рұқсатынан кейін деректерді жаңартыңыз.";

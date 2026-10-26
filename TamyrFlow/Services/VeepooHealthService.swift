@@ -439,10 +439,8 @@ final class VeepooHealthService: ObservableObject {
         return mac.isEmpty ? nil : mac
     }
 
-    /// Read heart-rate samples already in the Veepoo local DB (+ optional live test point).
-    ///
-    /// Never calls `veepooSdkStartReadDeviceAllData` from Pulse: that dump hangs/crashes in
-    /// `parseBlockHRVDataWithBlockModel:` (`-[NSString hour]`) on this device family.
+    /// Read heart-rate for Pulse sync without Veepoo daily dump (dump hangs/crashes on HRV parse).
+    /// Order: local SDK DB → short live HR test on the band → recent in-memory reading.
     func syncAndFetchHeartSamples(dayCount: Int = 7) async -> (samples: [(date: Date, bpm: Double)], debug: String) {
         var notes: [String] = []
         let connected = isConnected && deviceTableID != nil
@@ -461,13 +459,23 @@ final class VeepooHealthService: ObservableObject {
             notes.append("halfHour: \(samples.count)")
         }
 
-        if let live = heartRate, live.value >= 30, live.value <= 250 {
+        // Accurate-sleep (and empty DB) bands cannot history-sync safely — take one live reading.
+        if samples.isEmpty {
+            if let live = await captureLiveHeartSample(timeoutSeconds: 22) {
+                samples.append(live)
+                notes.append("liveCapture: \(Int(live.bpm))")
+            } else {
+                notes.append("liveCapture: none")
+            }
+        }
+
+        if let cached = heartRate, cached.value >= 30, cached.value <= 250 {
             let already = samples.contains {
-                abs($0.bpm - Double(live.value)) < 0.6 && abs($0.date.timeIntervalSinceNow) < 180
+                abs($0.bpm - Double(cached.value)) < 0.6 && abs($0.date.timeIntervalSinceNow) < 180
             }
             if !already {
-                samples.append((Date(), Double(live.value)))
-                notes.append("liveTest: \(live.value)")
+                samples.append((Date(), Double(cached.value)))
+                notes.append("cachedHR: \(cached.value)")
             }
         }
 
@@ -476,6 +484,85 @@ final class VeepooHealthService: ObservableObject {
         let debug = notes.joined(separator: " · ")
         print("[PulseSync] \(debug)")
         return (samples, debug)
+    }
+
+    /// Quiet one-shot HR via `veepooSDKTestHeartStart` (no MeasurementHUD — Pulse has its own overlay).
+    /// Wear the watch snugly; returns nil on timeout / not worn / busy.
+    func captureLiveHeartSample(timeoutSeconds: Double = 22) async -> (date: Date, bpm: Double)? {
+        await waitUntilOperationIdle(timeoutSeconds: 2)
+        guard canStart(.heartTest, needsManualFreeState: true) else {
+            print("[PulseSync] liveCapture blocked: \(lastError ?? "busy")")
+            return nil
+        }
+        ensureLiveMeasurementChannel()
+        heartSawNonStartState = false
+        // Do not set measurementHUD — avoid stacking with Pulse sync overlay.
+        cancelManualMeasurementTimeout()
+
+        let result: Int? = await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+            var resumed = false
+            var best: Int?
+            var settleTask: Task<Void, Never>?
+
+            let finish: (Int?) -> Void = { [weak self] value in
+                guard let self else {
+                    if !resumed {
+                        resumed = true
+                        cont.resume(returning: value)
+                    }
+                    return
+                }
+                guard !resumed else { return }
+                resumed = true
+                settleTask?.cancel()
+                self.manager?.veepooSDKTestHeartStart(false) { [weak self] _, _ in
+                    Task { @MainActor in self?.finishOperation() }
+                }
+                // Ensure we leave heartTest even if stop callback is slow.
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 400_000_000)
+                    if self.operation == .heartTest {
+                        self.finishOperation()
+                    }
+                }
+                cont.resume(returning: value)
+            }
+
+            manager?.veepooSDKTestHeartStart(true) { [weak self] state, value in
+                Task { @MainActor in
+                    guard let self else { return }
+                    guard self.operation == .heartTest else { return }
+                    let v = Int(value)
+                    self.heartRate = HeartRateReading(state: state, value: v)
+                    if state.rawValue != 0 { self.heartSawNonStartState = true }
+                    if v >= 40, v <= 220 {
+                        best = v
+                        // After we see a measuring reading, wait briefly for a stabler value then stop.
+                        if state.rawValue == 1, settleTask == nil {
+                            settleTask = Task { @MainActor in
+                                try? await Task.sleep(nanoseconds: 3_500_000_000)
+                                finish(best)
+                            }
+                        }
+                    }
+                    // Terminal SDK states.
+                    if state.rawValue == 2 || state.rawValue == 3 || state.rawValue == 4 {
+                        finish(best)
+                    }
+                    if state.rawValue == 0, self.heartSawNonStartState {
+                        finish(best)
+                    }
+                }
+            }
+
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                finish(best)
+            }
+        }
+
+        guard let bpm = result, bpm >= 40, bpm <= 220 else { return nil }
+        return (Date(), Double(bpm))
     }
 
     /// 5‑minute original HR from Veepoo local DB (filled by daily dump).

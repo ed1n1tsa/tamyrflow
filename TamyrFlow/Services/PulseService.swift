@@ -80,11 +80,12 @@ final class PulseService: ObservableObject {
     /// Always clears `.loading` (hard timeout) so the overlay cannot stick forever.
     func syncAvailableSources() async {
         syncState = .loading
+        // Live capture can take ~22s; keep overlay until then.
         let watchdog = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 20_000_000_000)
+            try? await Task.sleep(nanoseconds: 40_000_000_000)
             if case .loading = self.syncState {
                 self.syncState = .error("timeout")
-                self.lastSyncDebug = (self.lastSyncDebug.isEmpty ? "" : self.lastSyncDebug + " | ") + "watchdog: 20s"
+                self.lastSyncDebug = (self.lastSyncDebug.isEmpty ? "" : self.lastSyncDebug + " | ") + "watchdog: 40s"
                 print("[PulseSync] watchdog fired — clearing loading overlay")
             }
         }
