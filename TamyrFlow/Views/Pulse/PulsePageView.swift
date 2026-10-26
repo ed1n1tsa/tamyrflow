@@ -612,6 +612,16 @@ struct PulsePageView: View {
                     .foregroundStyle(ProfileTheme.muted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
+                Button {
+                    // Soft escape if something blocks sync completion.
+                    service.cancelSyncOverlay()
+                } label: {
+                    Text(L10n.Pulse.close)
+                        .font(AppFont.interBold(13))
+                        .foregroundStyle(ProfileTheme.accent)
+                        .padding(.top, 4)
+                }
+                .buttonStyle(.plain)
             }
             .padding(24)
             .background(

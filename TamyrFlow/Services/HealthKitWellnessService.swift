@@ -32,7 +32,23 @@ enum HealthKitWellnessService {
     }
 
     /// Heart-rate samples in `[start, end)` local range. Values in bpm.
-    static func fetchHeartRateSamples(start: Date, end: Date) async -> [(date: Date, bpm: Double)] {
+    /// Hard-capped so Pulse sync overlay cannot hang on Health authorization/query.
+    static func fetchHeartRateSamples(start: Date, end: Date, timeoutSeconds: Double = 8) async -> [(date: Date, bpm: Double)] {
+        await withTaskGroup(of: [(date: Date, bpm: Double)].self) { group in
+            group.addTask {
+                await Self.fetchHeartRateSamplesUnbounded(start: start, end: end)
+            }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                return []
+            }
+            let first = await group.next() ?? []
+            group.cancelAll()
+            return first
+        }
+    }
+
+    private static func fetchHeartRateSamplesUnbounded(start: Date, end: Date) async -> [(date: Date, bpm: Double)] {
         guard await ensureHeartRateReadAccess() else { return [] }
         guard let hrType = HKObjectType.quantityType(forIdentifier: .heartRate) else { return [] }
 
@@ -40,6 +56,12 @@ enum HealthKitWellnessService {
         let unit = HKUnit.count().unitDivided(by: .minute())
 
         return await withCheckedContinuation { cont in
+            var resumed = false
+            let finish: ([(Date, Double)]) -> Void = { value in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: value)
+            }
             let query = HKSampleQuery(
                 sampleType: hrType,
                 predicate: predicate,
@@ -47,7 +69,7 @@ enum HealthKitWellnessService {
                 sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
             ) { _, samples, _ in
                 guard let samples = samples as? [HKQuantitySample] else {
-                    cont.resume(returning: [])
+                    finish([])
                     return
                 }
                 let mapped: [(Date, Double)] = samples.compactMap { sample in
@@ -55,7 +77,7 @@ enum HealthKitWellnessService {
                     guard bpm >= 30, bpm <= 250 else { return nil }
                     return (sample.startDate, bpm)
                 }
-                cont.resume(returning: mapped)
+                finish(mapped)
             }
             store.execute(query)
         }

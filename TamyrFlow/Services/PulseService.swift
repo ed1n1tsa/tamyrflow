@@ -68,42 +68,77 @@ final class PulseService: ObservableObject {
         rebuildDerived()
     }
 
+    /// User dismissed the sync overlay (or soft-cancel).
+    func cancelSyncOverlay() {
+        if case .loading = syncState {
+            syncState = .idle
+            lastSyncDebug = (lastSyncDebug.isEmpty ? "" : lastSyncDebug + " | ") + "cancelled"
+        }
+    }
+
     /// Sync available sources → measurements, then reload. Never starts a live HR test.
+    /// Always clears `.loading` (hard timeout) so the overlay cannot stick forever.
     func syncAvailableSources() async {
         syncState = .loading
+        let watchdog = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 20_000_000_000)
+            if case .loading = self.syncState {
+                self.syncState = .error("timeout")
+                self.lastSyncDebug = (self.lastSyncDebug.isEmpty ? "" : self.lastSyncDebug + " | ") + "watchdog: 20s"
+                print("[PulseSync] watchdog fired — clearing loading overlay")
+            }
+        }
+        defer { watchdog.cancel() }
+
         var inserted = 0
         var parts: [String] = []
         let watchOK = isWatchConnected
 
-        if watchOK {
-            let result = await health.syncAndFetchHeartSamples(dayCount: 14)
-            parts.append(result.debug)
-            inserted += await persistSamples(result.samples, source: .device, deviceLabel: "Tamyr Watch")
-            parts.append("deviceInsert: \(inserted)")
-        } else {
-            parts.append("watch: off")
-        }
+        do {
+            if watchOK {
+                let result = await health.syncAndFetchHeartSamples(dayCount: 14)
+                parts.append(result.debug)
+                let before = inserted
+                inserted += await persistSamples(result.samples, source: .device, deviceLabel: "Tamyr Watch")
+                parts.append("deviceInsert: \(inserted - before)")
+            } else {
+                parts.append("watch: off")
+            }
 
-        let cal = Calendar.current
-        let hkStart = cal.date(byAdding: .day, value: -30, to: cal.startOfDay(for: Date()))
-            ?? Date().addingTimeInterval(-30 * 86_400)
-        let hkEnd = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: Date())) ?? Date()
-        let hkSamples = await HealthKitWellnessService.fetchHeartRateSamples(start: hkStart, end: hkEnd)
-        let hkInserted = await persistSamples(hkSamples, source: .appleHealth, deviceLabel: "Apple Health")
-        inserted += hkInserted
-        parts.append("hk: \(hkSamples.count)/ins \(hkInserted)")
+            let cal = Calendar.current
+            let hkStart = cal.date(byAdding: .day, value: -30, to: cal.startOfDay(for: Date()))
+                ?? Date().addingTimeInterval(-30 * 86_400)
+            let hkEnd = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: Date())) ?? Date()
+            let hkSamples = await HealthKitWellnessService.fetchHeartRateSamples(
+                start: hkStart,
+                end: hkEnd,
+                timeoutSeconds: 8
+            )
+            let hkInserted = await persistSamples(hkSamples, source: .appleHealth, deviceLabel: "Apple Health")
+            inserted += hkInserted
+            parts.append("hk: \(hkSamples.count)/ins \(hkInserted)")
 
-        await loadFromSupabase()
-        rebuildDerived()
-        lastSyncDebug = parts.joined(separator: " | ")
-        print("[PulseSync] \(lastSyncDebug)")
+            await loadFromSupabase()
+            rebuildDerived()
+            lastSyncDebug = parts.joined(separator: " | ")
+            print("[PulseSync] \(lastSyncDebug)")
 
-        if !watchOK && hkSamples.isEmpty && measurements.isEmpty {
-            syncState = .noSource
-        } else if inserted == 0 {
-            syncState = .noNewData
-        } else {
-            syncState = .success
+            // Don't overwrite watchdog error if it already fired.
+            if case .loading = syncState {
+                if !watchOK && hkSamples.isEmpty && measurements.isEmpty {
+                    syncState = .noSource
+                } else if inserted == 0 {
+                    syncState = .noNewData
+                } else {
+                    syncState = .success
+                }
+            }
+        } catch {
+            lastError = error.localizedDescription
+            lastSyncDebug = parts.joined(separator: " | ") + " | error: \(error.localizedDescription)"
+            if case .loading = syncState {
+                syncState = .error(error.localizedDescription)
+            }
         }
     }
 
