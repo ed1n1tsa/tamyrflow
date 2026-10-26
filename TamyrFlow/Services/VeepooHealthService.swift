@@ -439,8 +439,12 @@ final class VeepooHealthService: ObservableObject {
         return mac.isEmpty ? nil : mac
     }
 
-    /// Pull band → SDK DB, then return heart-rate samples (5‑min original preferred, half‑hour fallback).
-    /// Manual measurements on the watch only appear after a daily dump fills the local Veepoo DB.
+    /// Sync heart-rate history for Pulse without crashing Veepoo's daily dump.
+    ///
+    /// Full `veepooSdkStartReadDeviceAllData` can crash inside
+    /// `VPHandleDeviceDailyData parseBlockHRVDataWithBlockModel:` (`-[NSString hour]`).
+    /// That path is skipped on accurate-sleep bands. On other bands we still dump once
+    /// (needed to fill SDK DB); never force dump on accurate-sleep devices.
     func syncAndFetchHeartSamples(dayCount: Int = 7) async -> (samples: [(date: Date, bpm: Double)], debug: String) {
         var notes: [String] = []
         let connected = isConnected && deviceTableID != nil
@@ -448,12 +452,18 @@ final class VeepooHealthService: ObservableObject {
             return ([], "watch: not connected")
         }
 
-        // 1) Dump band into SDK DB. Force even on accurate-sleep bands for Pulse —
-        // without this, VPDataBaseOperation stays empty after on-watch HR measures.
-        let dumped = await pullDailyDataFromBand(showHUD: false, forceDespiteAccurateSleep: true)
-        notes.append(dumped ? "dump: ok" : "dump: \(readProgressText.isEmpty ? "fail/skip" : readProgressText)")
+        notes.append(deviceUsesAccurateSleep ? "band: accurateSleep" : "band: ordinary")
 
-        // 2) Prefer 5‑minute original slots (captures a single watch measurement).
+        // 1) Safe dump only when this band type historically survives AllData.
+        // NEVER force dump on accurate-sleep — HRV parser crash (NSString hour).
+        if deviceUsesAccurateSleep {
+            notes.append("dump: skipped (HRV crash risk)")
+        } else {
+            let dumped = await pullDailyDataFromBand(showHUD: false, forceDespiteAccurateSleep: false)
+            notes.append(dumped ? "dump: ok" : "dump: \(readProgressText.isEmpty ? "fail/skip" : readProgressText)")
+        }
+
+        // 2) Prefer 5‑minute original slots.
         var samples = fetchOriginalHeartSamples(dayCount: dayCount)
         notes.append("origin5m: \(samples.count)")
 
@@ -463,9 +473,11 @@ final class VeepooHealthService: ObservableObject {
             notes.append("halfHour: \(samples.count)")
         }
 
-        // 4) If the app just finished a live HR test, include that point too.
+        // 4) Include a recent in-app live HR test point if present.
         if let live = heartRate, live.value >= 30, live.value <= 250 {
-            let already = samples.contains { abs($0.bpm - Double(live.value)) < 0.6 && abs($0.date.timeIntervalSinceNow) < 180 }
+            let already = samples.contains {
+                abs($0.bpm - Double(live.value)) < 0.6 && abs($0.date.timeIntervalSinceNow) < 180
+            }
             if !already {
                 samples.append((Date(), Double(live.value)))
                 notes.append("liveTest: \(live.value)")
