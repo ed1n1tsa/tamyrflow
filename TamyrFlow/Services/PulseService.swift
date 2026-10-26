@@ -333,8 +333,12 @@ final class PulseService: ObservableObject {
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
+        // Cap to recent points so overlay cannot spend minutes on hundreds of round-trips.
+        let capped = Array(samples.suffix(80))
         var inserted = 0
-        for sample in samples {
+        for sample in capped {
+            if case .idle = syncState { break }
+            if case .error = syncState { break }
             let recorded = sample.date
             let windowStart = recorded.addingTimeInterval(-90)
             let windowEnd = recorded.addingTimeInterval(90)
