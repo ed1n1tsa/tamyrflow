@@ -439,12 +439,10 @@ final class VeepooHealthService: ObservableObject {
         return mac.isEmpty ? nil : mac
     }
 
-    /// Sync heart-rate history for Pulse without crashing Veepoo's daily dump.
+    /// Read heart-rate samples already in the Veepoo local DB (+ optional live test point).
     ///
-    /// Full `veepooSdkStartReadDeviceAllData` can crash inside
-    /// `VPHandleDeviceDailyData parseBlockHRVDataWithBlockModel:` (`-[NSString hour]`).
-    /// That path is skipped on accurate-sleep bands. On other bands we still dump once
-    /// (needed to fill SDK DB); never force dump on accurate-sleep devices.
+    /// Never calls `veepooSdkStartReadDeviceAllData` from Pulse: that dump hangs/crashes in
+    /// `parseBlockHRVDataWithBlockModel:` (`-[NSString hour]`) on this device family.
     func syncAndFetchHeartSamples(dayCount: Int = 7) async -> (samples: [(date: Date, bpm: Double)], debug: String) {
         var notes: [String] = []
         let connected = isConnected && deviceTableID != nil
@@ -453,27 +451,16 @@ final class VeepooHealthService: ObservableObject {
         }
 
         notes.append(deviceUsesAccurateSleep ? "band: accurateSleep" : "band: ordinary")
+        notes.append("dump: skipped (avoid HRV hang/crash)")
 
-        // 1) Safe dump only when this band type historically survives AllData.
-        // NEVER force dump on accurate-sleep — HRV parser crash (NSString hour).
-        if deviceUsesAccurateSleep {
-            notes.append("dump: skipped (HRV crash risk)")
-        } else {
-            let dumped = await pullDailyDataFromBand(showHUD: false, forceDespiteAccurateSleep: false)
-            notes.append(dumped ? "dump: ok" : "dump: \(readProgressText.isEmpty ? "fail/skip" : readProgressText)")
-        }
-
-        // 2) Prefer 5‑minute original slots.
         var samples = fetchOriginalHeartSamples(dayCount: dayCount)
         notes.append("origin5m: \(samples.count)")
 
-        // 3) Fallback: half-hour averages.
         if samples.isEmpty {
             samples = fetchHalfHourHeartSamples(dayCount: dayCount)
             notes.append("halfHour: \(samples.count)")
         }
 
-        // 4) Include a recent in-app live HR test point if present.
         if let live = heartRate, live.value >= 30, live.value <= 250 {
             let already = samples.contains {
                 abs($0.bpm - Double(live.value)) < 0.6 && abs($0.date.timeIntervalSinceNow) < 180
