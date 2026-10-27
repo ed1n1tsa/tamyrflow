@@ -206,6 +206,22 @@ final class IndicatorsService: ObservableObject {
         if let d = frac.date(from: raw) { return d }
         let plain = ISO8601DateFormatter()
         plain.formatOptions = [.withInternetDateTime]
-        return plain.date(from: raw)
+        if let d = plain.date(from: raw) { return d }
+        // Postgres / PostgREST sometimes omit `T` or fractional seconds.
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.timeZone = TimeZone(secondsFromGMT: 0)
+        for format in [
+            "yyyy-MM-dd'T'HH:mm:ssXXXXX",
+            "yyyy-MM-dd HH:mm:ssXXXXX",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX",
+            "yyyy-MM-dd HH:mm:ss.SSSXXXXX",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd HH:mm:ss"
+        ] {
+            df.dateFormat = format
+            if let d = df.date(from: raw) { return d }
+        }
+        return nil
     }
 }

@@ -162,15 +162,10 @@ struct IndicatorCardView: View {
     }
 
     private var chartValues: [Double] {
+        // Only real series — no fake waves (they looked like data next to "—").
         let nonzero = card.series.filter { $0.value > 0 }.map(\.value)
-        if !nonzero.isEmpty { return nonzero }
-        // Soft placeholder wave when empty (matches mock energy).
-        switch card.kind {
-        case .sleep:
-            return [0.35, 0.55, 0.4, 0.7, 0.48, 0.82, 0.58]
-        default:
-            return [0.42, 0.58, 0.48, 0.72, 0.55, 0.8, 0.62]
-        }
+        if nonzero.count == 1 { return [nonzero[0], nonzero[0]] }
+        return nonzero
     }
 
     private static func formatThousands(_ n: Int) -> String {

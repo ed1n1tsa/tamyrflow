@@ -12,7 +12,7 @@ struct RootTabView: View {
                 DashboardPage(selectedTab: $tab)
                     .opacity(tab == .home ? 1 : 0)
                     .allowsHitTesting(tab == .home)
-                IndicatorsPageView(auth: auth)
+                IndicatorsPageView(auth: auth, isActive: tab == .metrics)
                     .opacity(tab == .metrics ? 1 : 0)
                     .allowsHitTesting(tab == .metrics)
                 ActivityPageView(auth: auth, selectedTab: $tab)
