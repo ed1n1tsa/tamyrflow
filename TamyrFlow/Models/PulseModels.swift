@@ -39,6 +39,11 @@ enum PulseSyncState: Equatable {
     case noSource
 }
 
+enum PulseOverlayMode: Equatable {
+    case sync
+    case measure
+}
+
 struct PulseMeasurement: Identifiable, Equatable, Hashable {
     let id: UUID
     let value: Double

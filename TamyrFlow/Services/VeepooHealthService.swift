@@ -439,8 +439,8 @@ final class VeepooHealthService: ObservableObject {
         return mac.isEmpty ? nil : mac
     }
 
-    /// Read heart-rate for Pulse sync without Veepoo daily dump (dump hangs/crashes on HRV parse).
-    /// Order: local SDK DB → short live HR test on the band → recent in-memory reading.
+    /// Sync stored heart-rate only (no live test). Never runs AllData dump (HRV crash on accurate-sleep).
+    /// Order: band basic-data packets → SDK local DB → half-hour averages.
     func syncAndFetchHeartSamples(dayCount: Int = 7) async -> (samples: [(date: Date, bpm: Double)], debug: String) {
         var notes: [String] = []
         let connected = isConnected && deviceTableID != nil
@@ -451,32 +451,21 @@ final class VeepooHealthService: ObservableObject {
         notes.append(deviceUsesAccurateSleep ? "band: accurateSleep" : "band: ordinary")
         notes.append("dump: skipped (avoid HRV hang/crash)")
 
-        var samples = fetchOriginalHeartSamples(dayCount: dayCount)
-        notes.append("origin5m: \(samples.count)")
+        let days = max(1, min(dayCount, 14))
+        let basic = await pullBasicHeartFromBand(dayCount: days)
+        var samples = basic.samples
+        notes.append(basic.debug)
+
+        let origin = fetchOriginalHeartSamples(dayCount: days)
+        notes.append("origin5m: \(origin.count)")
+        samples = Self.mergeHeartSamples(samples, origin)
 
         if samples.isEmpty {
-            samples = fetchHalfHourHeartSamples(dayCount: dayCount)
-            notes.append("halfHour: \(samples.count)")
-        }
-
-        // Accurate-sleep (and empty DB) bands cannot history-sync safely — take one live reading.
-        if samples.isEmpty {
-            if let live = await captureLiveHeartSample(timeoutSeconds: 22) {
-                samples.append(live)
-                notes.append("liveCapture: \(Int(live.bpm))")
-            } else {
-                notes.append("liveCapture: none")
-            }
-        }
-
-        if let cached = heartRate, cached.value >= 30, cached.value <= 250 {
-            let already = samples.contains {
-                abs($0.bpm - Double(cached.value)) < 0.6 && abs($0.date.timeIntervalSinceNow) < 180
-            }
-            if !already {
-                samples.append((Date(), Double(cached.value)))
-                notes.append("cachedHR: \(cached.value)")
-            }
+            let half = fetchHalfHourHeartSamples(dayCount: days)
+            notes.append("halfHour: \(half.count)")
+            samples = Self.mergeHeartSamples(samples, half)
+        } else {
+            notes.append("halfHour: skipped")
         }
 
         samples.sort { $0.date < $1.date }
@@ -486,17 +475,168 @@ final class VeepooHealthService: ObservableObject {
         return (samples, debug)
     }
 
-    /// Quiet one-shot HR via `veepooSDKTestHeartStart` (no MeasurementHUD — Pulse has its own overlay).
-    /// Wear the watch snugly; returns nil on timeout / not worn / busy.
-    func captureLiveHeartSample(timeoutSeconds: Double = 22) async -> (date: Date, bpm: Double)? {
+    /// Pull 5‑min basic HR from the band via `veepooSDK_readBasicDataWithDayNumber` (no AllData / no HRV).
+    /// Works when the Manage stack forwards AddManage-style reads; otherwise returns empty.
+    func pullBasicHeartFromBand(dayCount: Int) async -> (samples: [(date: Date, bpm: Double)], debug: String) {
         await waitUntilOperationIdle(timeoutSeconds: 2)
+        forceIdleForPulseIfNeeded()
+        guard canStart(.readingDailyData) else {
+            return ([], "basic: busy(\(lastError ?? "?"))")
+        }
+        cancelManualMeasurementTimeout()
+        defer { finishOperation() }
+
+        var all: [(date: Date, bpm: Double)] = []
+        var dayNotes: [String] = []
+        let days = max(1, min(dayCount, 14))
+
+        for day in 0..<days {
+            let daySamples = await readBasicHeartDay(dayNumber: day)
+            dayNotes.append("d\(day)=\(daySamples.count)")
+            all.append(contentsOf: daySamples)
+            if daySamples.isEmpty, day >= 2 {
+                // Older days often empty on this stack — stop early to keep sync snappy.
+                break
+            }
+        }
+
+        let debug = "basic: \(all.count)[\(dayNotes.joined(separator: ","))]"
+        print("[PulseSync] \(debug)")
+        return (all, debug)
+    }
+
+    private func readBasicHeartDay(dayNumber: Int) async -> [(date: Date, bpm: Double)] {
+        guard let mgr = manager, isConnected else { return [] }
+        let cal = Calendar.current
+        let dayStart = cal.date(byAdding: .day, value: -dayNumber, to: cal.startOfDay(for: Date()))
+            ?? cal.startOfDay(for: Date())
+
+        return await withCheckedContinuation { (cont: CheckedContinuation<[(Date, Double)], Never>) in
+            var resumed = false
+            var collected: [(Date, Double)] = []
+            var lastPackage = 0
+
+            let finish: () -> Void = {
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: collected)
+            }
+
+            let ok = TFTryObjC {
+                mgr.veepooSDK_readBasicData(withDayNumber: dayNumber, maxPackage: 1) { array, totalPackage, currentReadPackage in
+                    Task { @MainActor in
+                        lastPackage = max(lastPackage, Int(currentReadPackage))
+                        let items: [Any]
+                        if let arr = array as [Any]? {
+                            items = arr
+                        } else if let arr = array as NSArray? {
+                            items = arr.map { $0 as Any }
+                        } else {
+                            items = []
+                        }
+                        collected.append(contentsOf: Self.parseBasicHeartArray(items, dayStart: dayStart))
+                        let total = max(Int(totalPackage), 1)
+                        let current = Int(currentReadPackage)
+                        if current >= total || totalPackage == 0 {
+                            finish()
+                        }
+                    }
+                }
+            }
+            if !ok {
+                finish()
+                return
+            }
+            Task {
+                try? await Task.sleep(nanoseconds: 6_000_000_000)
+                finish()
+            }
+        }
+    }
+
+    private static func parseBasicHeartArray(_ array: [Any], dayStart: Date) -> [(date: Date, bpm: Double)] {
+        let cal = Calendar.current
+        var out: [(Date, Double)] = []
+        for item in array {
+            let dict: [String: Any]
+            if let d = item as? [String: Any] {
+                dict = d
+            } else if let d = item as? NSDictionary {
+                var mapped: [String: Any] = [:]
+                for (k, v) in d {
+                    mapped[String(describing: k)] = v
+                }
+                dict = mapped
+            } else {
+                continue
+            }
+
+            guard let bpm = heartValue(from: dict), bpm >= 30, bpm <= 250 else { continue }
+
+            let timeRaw = dict["time"] ?? dict["Time"] ?? dict["date"] ?? dict["Date"]
+            let timeKey = timeRaw.map { String(describing: $0) } ?? ""
+            let parts = timeKey
+                .replacingOccurrences(of: "-", with: ":")
+                .split(whereSeparator: { $0 == ":" || $0 == " " })
+                .map(String.init)
+            var hour = 0
+            var minute = 0
+            if parts.count >= 2, let h = Int(parts[parts.count - 2]), let m = Int(parts[parts.count - 1]) {
+                hour = h
+                minute = m
+            } else if let idx = dict["timeIndex"] as? Int {
+                // Some firmwares use 5‑min slot index from midnight.
+                hour = (idx * 5) / 60
+                minute = (idx * 5) % 60
+            }
+
+            var comps = cal.dateComponents([.year, .month, .day], from: dayStart)
+            comps.hour = min(max(hour, 0), 23)
+            comps.minute = min(max(minute, 0), 59)
+            guard let date = cal.date(from: comps) else { continue }
+            out.append((date, bpm))
+        }
+        return out
+    }
+
+    private static func mergeHeartSamples(
+        _ a: [(date: Date, bpm: Double)],
+        _ b: [(date: Date, bpm: Double)]
+    ) -> [(date: Date, bpm: Double)] {
+        var out = a
+        for sample in b {
+            let dup = out.contains {
+                abs($0.bpm - sample.bpm) < 0.6 && abs($0.date.timeIntervalSince(sample.date)) < 90
+            }
+            if !dup { out.append(sample) }
+        }
+        return out
+    }
+
+    /// Clear a stuck BLE op so Pulse measure/sync can start again.
+    func forceIdleForPulseIfNeeded() {
+        guard operation != .idle else { return }
+        print("[PulseSync] forceIdle from \(operation.rawValue)")
+        cancelManualMeasurementTimeout()
+        liveMeasurementDebounceTask?.cancel()
+        finishOperation()
+    }
+
+    /// Explicit user-initiated HR test for «Измерить пульс» (not used by «Обновить данные»).
+    /// Wear the watch snugly; returns nil on timeout / not worn / busy.
+    func captureLiveHeartSample(timeoutSeconds: Double = 25) async -> (date: Date, bpm: Double)? {
+        await waitUntilOperationIdle(timeoutSeconds: 3)
+        forceIdleForPulseIfNeeded()
+        // Sensor cooldown after a previous test / on-watch measure.
+        try? await Task.sleep(nanoseconds: 1_200_000_000)
+
         guard canStart(.heartTest, needsManualFreeState: true) else {
-            print("[PulseSync] liveCapture blocked: \(lastError ?? "busy")")
+            print("[PulseSync] measure blocked: \(lastError ?? "busy")")
             return nil
         }
         ensureLiveMeasurementChannel()
         heartSawNonStartState = false
-        // Do not set measurementHUD — avoid stacking with Pulse sync overlay.
+        // Do not set measurementHUD — Pulse has its own overlay.
         cancelManualMeasurementTimeout()
 
         let result: Int? = await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
@@ -518,9 +658,8 @@ final class VeepooHealthService: ObservableObject {
                 self.manager?.veepooSDKTestHeartStart(false) { [weak self] _, _ in
                     Task { @MainActor in self?.finishOperation() }
                 }
-                // Ensure we leave heartTest even if stop callback is slow.
                 Task { @MainActor in
-                    try? await Task.sleep(nanoseconds: 400_000_000)
+                    try? await Task.sleep(nanoseconds: 800_000_000)
                     if self.operation == .heartTest {
                         self.finishOperation()
                     }
@@ -537,19 +676,15 @@ final class VeepooHealthService: ObservableObject {
                     if state.rawValue != 0 { self.heartSawNonStartState = true }
                     if v >= 40, v <= 220 {
                         best = v
-                        // After we see a measuring reading, wait briefly for a stabler value then stop.
                         if state.rawValue == 1, settleTask == nil {
                             settleTask = Task { @MainActor in
-                                try? await Task.sleep(nanoseconds: 3_500_000_000)
+                                try? await Task.sleep(nanoseconds: 4_000_000_000)
                                 finish(best)
                             }
                         }
                     }
-                    // Terminal SDK states.
+                    // Terminal only — do NOT finish on state 0 (that aborted retries).
                     if state.rawValue == 2 || state.rawValue == 3 || state.rawValue == 4 {
-                        finish(best)
-                    }
-                    if state.rawValue == 0, self.heartSawNonStartState {
                         finish(best)
                     }
                 }

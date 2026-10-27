@@ -237,7 +237,7 @@ struct PulsePageView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 36, height: 36)
-                        Text(L10n.Pulse.updateHint)
+                        Text(L10n.Pulse.syncHint)
                             .font(AppFont.interBold(10))
                             .foregroundStyle(ProfileTheme.muted)
                             .multilineTextAlignment(.trailing)
@@ -259,25 +259,46 @@ struct PulsePageView: View {
             }
 
             if service.isWatchConnected {
-                Button {
-                    Task { await service.syncAvailableSources() }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                            .font(.system(size: 14, weight: .bold))
-                        Text(L10n.Pulse.refreshData)
-                            .font(AppFont.interBold(14))
+                VStack(spacing: 10) {
+                    Button {
+                        Task { await service.syncAvailableSources() }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.system(size: 14, weight: .bold))
+                            Text(L10n.Pulse.refreshData)
+                                .font(AppFont.interBold(14))
+                        }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 13)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(ProfileTheme.accent)
+                                .shadow(color: ProfileTheme.accent.opacity(0.35), radius: 8, y: 2)
+                        )
                     }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 13)
-                    .background(
-                        Capsule(style: .continuous)
-                            .fill(ProfileTheme.accent)
-                            .shadow(color: ProfileTheme.accent.opacity(0.35), radius: 8, y: 2)
-                    )
+                    .buttonStyle(.plain)
+
+                    Button {
+                        Task { await service.measureHeartNow() }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 13, weight: .bold))
+                            Text(L10n.Pulse.measureNow)
+                                .font(AppFont.interBold(14))
+                        }
+                        .foregroundStyle(ProfileTheme.accent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule(style: .continuous)
+                                .strokeBorder(ProfileTheme.accent.opacity(0.85), lineWidth: 1.5)
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
                 .disabled(service.syncState == .loading)
                 .opacity(service.syncState == .loading ? 0.7 : 1)
             } else {
@@ -604,10 +625,10 @@ struct PulsePageView: View {
                     Image(systemName: "heart.fill")
                         .foregroundStyle(Color(red: 1, green: 0.35, blue: 0.48))
                 }
-                Text(L10n.Pulse.syncingTitle)
+                Text(service.overlayMode == .measure ? L10n.Pulse.measuringTitle : L10n.Pulse.syncingTitle)
                     .font(AppFont.interBold(16))
                     .foregroundStyle(.white)
-                Text(L10n.Pulse.syncingBody)
+                Text(service.overlayMode == .measure ? L10n.Pulse.measuringBody : L10n.Pulse.syncingBody)
                     .font(AppFont.interBold(12))
                     .foregroundStyle(ProfileTheme.muted)
                     .multilineTextAlignment(.center)
@@ -637,7 +658,11 @@ struct PulsePageView: View {
     private func handleSyncState(_ state: PulseSyncState) {
         switch state {
         case .success:
-            withAnimation { toast = L10n.Pulse.toastSuccess }
+            withAnimation {
+                toast = service.overlayMode == .measure
+                    ? L10n.Pulse.toastMeasureSuccess
+                    : L10n.Pulse.toastSuccess
+            }
         case .noNewData:
             sheet = .noNewData
         case .noSource:

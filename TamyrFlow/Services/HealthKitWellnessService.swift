@@ -1,7 +1,7 @@
 import Foundation
 import HealthKit
 
-/// Read-only HealthKit helpers for wellness metrics (sleep, heart rate; SpO₂/temp later).
+/// HealthKit helpers for wellness metrics (sleep, heart rate; SpO₂/temp later).
 enum HealthKitWellnessService {
     private static let store = HKHealthStore()
 
@@ -18,15 +18,34 @@ enum HealthKitWellnessService {
         }
     }
 
-    /// Request heart-rate read access. Does not block the rest of the app if denied.
+    /// Request heart-rate read (+ optional write) access. Does not block the rest of the app if denied.
     @discardableResult
-    static func ensureHeartRateReadAccess() async -> Bool {
+    static func ensureHeartRateReadAccess(alsoWrite: Bool = false) async -> Bool {
         guard HKHealthStore.isHealthDataAvailable() else { return false }
         guard let hrType = HKObjectType.quantityType(forIdentifier: .heartRate) else { return false }
         do {
-            try await store.requestAuthorization(toShare: [], read: [hrType])
+            let share: Set<HKSampleType> = alsoWrite ? [hrType] : []
+            try await store.requestAuthorization(toShare: share, read: [hrType])
             return true
         } catch {
+            return false
+        }
+    }
+
+    /// Persist a user-initiated HR reading into Apple Health (App Store–friendly path).
+    @discardableResult
+    static func saveHeartRateSample(bpm: Double, at date: Date = Date()) async -> Bool {
+        guard bpm >= 30, bpm <= 250 else { return false }
+        guard await ensureHeartRateReadAccess(alsoWrite: true) else { return false }
+        guard let hrType = HKQuantityType.quantityType(forIdentifier: .heartRate) else { return false }
+        let unit = HKUnit.count().unitDivided(by: .minute())
+        let quantity = HKQuantity(unit: unit, doubleValue: bpm)
+        let sample = HKQuantitySample(type: hrType, quantity: quantity, start: date, end: date)
+        do {
+            try await store.save(sample)
+            return true
+        } catch {
+            print("[PulseSync] HealthKit save failed: \(error.localizedDescription)")
             return false
         }
     }

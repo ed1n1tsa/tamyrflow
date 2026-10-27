@@ -13,6 +13,8 @@ final class PulseService: ObservableObject {
     @Published private(set) var recent: [PulseMeasurement] = []
     @Published private(set) var isLoading = false
     @Published private(set) var syncState: PulseSyncState = .idle
+    /// Distinguishes overlay copy: sync vs explicit measure.
+    @Published private(set) var overlayMode: PulseOverlayMode = .sync
     /// Last sync diagnostic (Xcode console + optional UI). Not user-facing copy.
     @Published private(set) var lastSyncDebug: String = ""
     @Published var lastError: String?
@@ -76,16 +78,16 @@ final class PulseService: ObservableObject {
         }
     }
 
-    /// Sync available sources → measurements, then reload. Never starts a live HR test.
+    /// Sync stored sources → measurements. Never starts a live HR test (App Store–honest «Обновить»).
     /// Always clears `.loading` (hard timeout) so the overlay cannot stick forever.
     func syncAvailableSources() async {
+        overlayMode = .sync
         syncState = .loading
-        // Live capture can take ~22s; keep overlay until then.
         let watchdog = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 40_000_000_000)
+            try? await Task.sleep(nanoseconds: 35_000_000_000)
             if case .loading = self.syncState {
                 self.syncState = .error("timeout")
-                self.lastSyncDebug = (self.lastSyncDebug.isEmpty ? "" : self.lastSyncDebug + " | ") + "watchdog: 40s"
+                self.lastSyncDebug = (self.lastSyncDebug.isEmpty ? "" : self.lastSyncDebug + " | ") + "watchdog: 35s"
                 print("[PulseSync] watchdog fired — clearing loading overlay")
             }
         }
@@ -97,7 +99,7 @@ final class PulseService: ObservableObject {
 
         do {
             if watchOK {
-                let result = await health.syncAndFetchHeartSamples(dayCount: 14)
+                let result = await health.syncAndFetchHeartSamples(dayCount: 7)
                 parts.append(result.debug)
                 let before = inserted
                 inserted += await persistSamples(result.samples, source: .device, deviceLabel: "Tamyr Watch")
@@ -124,7 +126,6 @@ final class PulseService: ObservableObject {
             lastSyncDebug = parts.joined(separator: " | ")
             print("[PulseSync] \(lastSyncDebug)")
 
-            // Don't overwrite watchdog error if it already fired.
             if case .loading = syncState {
                 if !watchOK && hkSamples.isEmpty && measurements.isEmpty {
                     syncState = .noSource
@@ -137,6 +138,57 @@ final class PulseService: ObservableObject {
         } catch {
             lastError = error.localizedDescription
             lastSyncDebug = parts.joined(separator: " | ") + " | error: \(error.localizedDescription)"
+            if case .loading = syncState {
+                syncState = .error(error.localizedDescription)
+            }
+        }
+    }
+
+    /// Explicit «Измерить пульс»: live SDK test → Supabase + Apple Health.
+    func measureHeartNow() async {
+        guard isWatchConnected else {
+            syncState = .noSource
+            return
+        }
+        overlayMode = .measure
+        syncState = .loading
+        let watchdog = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 40_000_000_000)
+            if case .loading = self.syncState, self.overlayMode == .measure {
+                self.syncState = .error("timeout")
+                self.lastSyncDebug = (self.lastSyncDebug.isEmpty ? "" : self.lastSyncDebug + " | ") + "measureWatchdog: 40s"
+            }
+        }
+        defer { watchdog.cancel() }
+
+        var parts: [String] = ["mode: measure"]
+        do {
+            guard let sample = await health.captureLiveHeartSample(timeoutSeconds: 25) else {
+                parts.append("live: none")
+                lastSyncDebug = parts.joined(separator: " · ")
+                print("[PulseSync] \(lastSyncDebug)")
+                if case .loading = syncState {
+                    syncState = .error("measure_failed")
+                }
+                return
+            }
+            parts.append("live: \(Int(sample.bpm))")
+            let inserted = await persistSamples([sample], source: .device, deviceLabel: "Tamyr Watch")
+            parts.append("deviceInsert: \(inserted)")
+            let hkOK = await HealthKitWellnessService.saveHeartRateSample(bpm: sample.bpm, at: sample.date)
+            parts.append("hkWrite: \(hkOK ? 1 : 0)")
+
+            await loadFromSupabase()
+            rebuildDerived()
+            lastSyncDebug = parts.joined(separator: " · ")
+            print("[PulseSync] \(lastSyncDebug)")
+
+            if case .loading = syncState {
+                syncState = inserted > 0 ? .success : .error("persist_failed")
+            }
+        } catch {
+            lastError = error.localizedDescription
+            lastSyncDebug = parts.joined(separator: " · ") + " | error: \(error.localizedDescription)"
             if case .loading = syncState {
                 syncState = .error(error.localizedDescription)
             }

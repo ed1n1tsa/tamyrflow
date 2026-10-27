@@ -96,12 +96,17 @@ final class WatchPermissionService: NSObject, ObservableObject, CLLocationManage
         }
         let store = HKHealthStore()
         var read: Set<HKObjectType> = []
+        var share: Set<HKSampleType> = []
         if let steps = HKObjectType.quantityType(forIdentifier: .stepCount) { read.insert(steps) }
-        if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) { read.insert(hr) }
+        if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) {
+            read.insert(hr)
+            share.insert(hr)
+        }
         if let sleep = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { read.insert(sleep) }
 
         do {
-            try await store.requestAuthorization(toShare: [], read: read)
+            // Share HR so in-app «Измерить пульс» can write into Apple Health (App Review path).
+            try await store.requestAuthorization(toShare: share, read: read)
             statuses[.health] = .granted
         } catch {
             // Missing HealthKit entitlement shows up here — treat as unavailable, not user-deny.

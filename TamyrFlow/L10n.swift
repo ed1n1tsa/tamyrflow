@@ -682,6 +682,10 @@ enum L10n {
         static var watchDisconnected: String { tr("pulse_watch_disconnected") }
         static var newDataAvailable: String { tr("pulse_new_data_available") }
         static var updateHint: String { tr("pulse_update_hint") }
+        static var syncHint: String { tr("pulse_sync_hint") }
+        static var measureNow: String { tr("pulse_measure_now") }
+        static var measuringTitle: String { tr("pulse_measuring_title") }
+        static var measuringBody: String { tr("pulse_measuring_body") }
         static var averageTitle: String { tr("pulse_average_title") }
         static var vsPrevDay: String { tr("pulse_vs_prev_day") }
         static var vsPrevWeek: String { tr("pulse_vs_prev_week") }
@@ -704,6 +708,7 @@ enum L10n {
         static var connectCTABody: String { tr("pulse_connect_cta_body") }
         static var syncingTitle: String { tr("pulse_syncing_title") }
         static var syncingBody: String { tr("pulse_syncing_body") }
+        static var toastMeasureSuccess: String { tr("pulse_toast_measure_success") }
         static var toastSuccess: String { tr("pulse_toast_success") }
         static var historyTitle: String { tr("pulse_history_title") }
         static var historyEmptySub: String { tr("pulse_history_empty_sub") }
