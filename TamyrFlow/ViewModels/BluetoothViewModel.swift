@@ -38,8 +38,9 @@ final class BluetoothViewModel: ObservableObject {
                     self.postConnectMetricsTask?.cancel()
                     self.stopRealtimeStepPolling()
                 case .verified:
-                    // Connect stays quiet: no AutoHR bootstrap/pulse (wiki: no concurrent cmds during data work).
+                    // Connect: time + battery + realtime steps only. Never AllData / band sleep (SDK crash).
                     self.healthService.syncTime()
+                    Task { await self.bleService.readBatteryAsync() }
                     self.startRealtimeStepPolling()
                 default:
                     break
@@ -124,19 +125,19 @@ final class BluetoothViewModel: ObservableObject {
         }
     }
 
-    /// Realtime Step/Dis/Cal + safe sleep → Supabase.
+    /// Realtime Step/Dis/Cal → Supabase. No band sleep / AllData (connect crash fix).
     func syncActivityMetricsToCloud(auth: AuthService? = nil) async {
         let resolvedAuth = auth ?? authService
         guard bleService.connectionStatus == .verified, healthService.isConnected else { return }
         applyStatureToHealthService()
 
-        let totals = await healthService.syncActivityMetricsFromBand(includeSleep: true)
+        let totals = await healthService.syncActivityMetricsFromBand(includeSleep: false)
         guard let resolvedAuth, resolvedAuth.session != nil else { return }
         await WatchMetricsBridge.persistBandDayTotals(
             auth: resolvedAuth,
             steps: totals.steps,
             caloriesKcal: totals.caloriesKcal,
-            sleepMinutes: totals.sleepMinutes
+            sleepMinutes: nil
         )
     }
 
@@ -159,13 +160,14 @@ final class BluetoothViewModel: ObservableObject {
         }
     }
 
-    /// After pairing UI dismisses — sync steps/kcal/sleep without freezing the success screen.
+    /// After pairing UI dismisses — battery already requested on verify; persist realtime steps only.
     func scheduleDeferredStepsSleepSync(delayNanoseconds: UInt64 = 1_200_000_000) {
         postConnectMetricsTask?.cancel()
         postConnectMetricsTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: delayNanoseconds)
             guard !Task.isCancelled, let self else { return }
             guard self.bleService.connectionStatus == .verified else { return }
+            await self.bleService.readBatteryAsync()
             await self.syncActivityMetricsToCloud()
         }
     }
