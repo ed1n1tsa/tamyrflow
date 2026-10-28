@@ -238,10 +238,11 @@ final class VeepooHealthService: ObservableObject {
         if showHUD {
             measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
         }
-        defer {
-            if showHUD { finishOperation() }
+        let result = await fetchSleepMinutesRobust()
+        if showHUD {
+            measurementHUD = nil
         }
-        return await fetchSleepMinutesRobust()
+        return result
     }
 
     /// Wiki realtime step totals (`Step` / `Dis` / `Cal`) — matches the watch face, no daily dump required.
