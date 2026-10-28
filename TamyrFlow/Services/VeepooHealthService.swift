@@ -173,8 +173,12 @@ final class VeepooHealthService: ObservableObject {
         }
     }
 
+    /// Legacy dashboard entry — never runs AllData (SDK crash). Refreshes realtime steps only.
     func readAllDailyData() {
-        Task { _ = await pullDailyDataFromBand(showHUD: true) }
+        Task {
+            readProgressText = "AllData disabled — realtime steps only"
+            _ = await fetchRealtimeStepTotals()
+        }
     }
 
     /// True when the band reports accurate sleep — Veepoo's full daily dump can crash in `VPAccurateSleepModel`.
@@ -182,62 +186,15 @@ final class VeepooHealthService: ObservableObject {
         (bleService.connectedDevice?.sleepType ?? 0) != 0
     }
 
-    /// `VPPeripheralManage` path: dump band → SDK DB.
-    /// By default skipped on accurate-sleep bands (SDK can crash). Pass `forceDespiteAccurateSleep`
-    /// only from explicit Activity sleep sync after the UI is already showing steps.
+    /// Permanently disabled: `veepooSdkStartReadDeviceAllData` crashes in accurate-sleep / HRV parsers
+    /// (`-[NSString year]` / `hour`) on client bands. Product: no history dump on connect.
     @discardableResult
     func pullDailyDataFromBand(showHUD: Bool = true, forceDespiteAccurateSleep: Bool = false) async -> Bool {
-        if deviceUsesAccurateSleep, !forceDespiteAccurateSleep {
-            readProgressText = "daily dump skipped (accurate sleep band)"
-            return false
-        }
-
-        await waitUntilOperationIdle(timeoutSeconds: 2)
-        guard canStart(.readingDailyData) else { return false }
-        // Do not poke AutoHR here — wiki forbids concurrent cmds while reading daily data.
-        guard let mgr = manager else {
-            lastError = L10n.Err.deviceNotConnected
-            finishOperation()
-            return false
-        }
-
-        syncProgressHistory.removeAll()
-        if showHUD {
-            measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: 0.05)
-        }
-        scheduleManualMeasurementTimeout(for: .readingDailyData, seconds: 45)
-
-        let startOK = TFTryObjC {
-            mgr.veepooSdkStartReadDeviceAllData { [weak self] state, total, current, progress in
-                Task { @MainActor in
-                    guard let self else { return }
-                    self.readProgressText = "state: \(state.rawValue), day \(current)/\(max(total, 1)), progress \(progress)%"
-                    self.appendChart(Double(progress), to: &self.syncProgressHistory)
-                    let p = Double(progress) / 100.0
-                    if showHUD {
-                        self.measurementHUD = MeasurementHUDState(kind: .dailySync, progress01: max(0.05, min(1, p)))
-                    }
-                    if state.rawValue == 2 {
-                        self.lastDailySyncAt = Date()
-                        self.finishOperation()
-                    } else if state.rawValue == 0 || state.rawValue == 1 {
-                        self.operation = .readingDailyData
-                    }
-                }
-            }
-        }
-
-        guard startOK else {
-            lastError = L10n.Err.opBusy
-            finishOperation()
-            return false
-        }
-
-        await waitUntilOperationIdle(timeoutSeconds: 45)
-        if measurementHUD != nil, operation == .readingDailyData {
-            finishOperation()
-        }
-        return lastDailySyncAt != nil || operation == .idle
+        _ = showHUD
+        _ = forceDespiteAccurateSleep
+        readProgressText = "daily dump disabled (SDK crash risk)"
+        print("[WatchSync] AllData dump blocked — use realtime steps / user measurements")
+        return false
     }
 
     func readTodaySteps() {
@@ -274,38 +231,18 @@ final class VeepooHealthService: ObservableObject {
         return todaySteps
     }
 
-    /// Load last-night sleep minutes from the SDK local DB.
+    /// Sleep snapshot without BLE sleep pulls (avoids `VPAccurateSleepModel` crash).
     @discardableResult
     func fetchSleepMinutesSnapshot(showHUD: Bool = false, pullDailyIfNeeded: Bool = true) async -> Int? {
-        if pullDailyIfNeeded {
-            await ensureRecentDailySync(showHUD: showHUD)
-        }
+        _ = pullDailyIfNeeded
         if showHUD {
             measurementHUD = MeasurementHUDState(kind: .sleepSnapshot, progress01: nil)
         }
-
-        await waitUntilOperationIdle(timeoutSeconds: 2)
-        operation = .readingSleep
-        defer { finishOperation() }
-
-        // Veepoo: “today’s sleep” UI is usually yesterday’s night.
-        if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: 1), minutes > 0 {
-            todaySleepMinutes = minutes
-            return minutes
+        let result = await fetchSleepMinutesRobust()
+        if showHUD {
+            measurementHUD = nil
         }
-        if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: 0), minutes > 0 {
-            todaySleepMinutes = minutes
-            return minutes
-        }
-        if let minutes = await readSleepViaDirectSDK(dayNumber: 1), minutes > 0 {
-            todaySleepMinutes = minutes
-            return minutes
-        }
-        if let minutes = await readSleepViaDirectSDK(dayNumber: 0), minutes > 0 {
-            todaySleepMinutes = minutes
-            return minutes
-        }
-        return todaySleepMinutes
+        return result
     }
 
     /// Wiki realtime step totals (`Step` / `Dis` / `Cal`) — matches the watch face, no daily dump required.
@@ -339,11 +276,12 @@ final class VeepooHealthService: ObservableObject {
         return totals
     }
 
-    /// Activity sync: realtime steps/kcal first, then robust sleep (band → DB → HealthKit).
-    func syncActivityMetricsFromBand(includeSleep: Bool = true) async -> BandDayTotals {
+    /// Activity sync: realtime steps/kcal only. Sleep from band is skipped (SDK crash on accurate-sleep).
+    func syncActivityMetricsFromBand(includeSleep: Bool = false) async -> BandDayTotals {
         var totals = await fetchRealtimeStepTotals()
         guard includeSleep else { return totals }
 
+        // Optional: Apple Health only — never BLE sleep / AllData.
         if let sleep = await fetchSleepMinutesRobust(), sleep > 0 {
             todaySleepMinutes = sleep
             totals.sleepMinutes = sleep
@@ -351,52 +289,17 @@ final class VeepooHealthService: ObservableObject {
         return totals
     }
 
-    /// Multi-source sleep for “last night” (wiki: sleep day index starts at 1 = yesterday).
+    /// Sleep without touching Veepoo BLE sleep parsers (client crash in `VPAccurateSleepModel`).
     @discardableResult
     func fetchSleepMinutesRobust() async -> Int? {
-        // 1) Direct device read (works even before/without full daily dump on many bands).
-        for day in [1, 2, 0] {
-            if let minutes = await readSleepViaDirectSDK(dayNumber: day), minutes > 0 {
-                todaySleepMinutes = minutes
-                return minutes
-            }
-        }
-
-        // 2) Ordinary sleep already in SDK DB.
+        // Local SDK DB only if already present (no BLE pull). Ordinary sleep tables only.
         for dayOffset in [1, 0, 2] {
             if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: dayOffset), minutes > 0 {
                 todaySleepMinutes = minutes
                 return minutes
             }
         }
-
-        // 3) Quiet daily dump — fills SDK DB. Skip on accurate-sleep bands (dump/parse can kill process).
-        if !deviceUsesAccurateSleep {
-            _ = await pullDailyDataFromBand(showHUD: false)
-            for dayOffset in [1, 0, 2] {
-                if let minutes = loadSleepMinutesFromSDKDatabase(dayOffset: dayOffset), minutes > 0 {
-                    todaySleepMinutes = minutes
-                    return minutes
-                }
-            }
-        } else {
-            // Accurate bands: never auto daily-dump (can kill process). Read accurate DB in @try only.
-            for dayOffset in [1, 0, 2] {
-                if let minutes = loadAccurateSleepMinutesSafely(dayOffset: dayOffset), minutes > 0 {
-                    todaySleepMinutes = minutes
-                    return minutes
-                }
-            }
-            try? await Task.sleep(nanoseconds: 800_000_000)
-            for day in [1, 2, 0] {
-                if let minutes = await readSleepViaDirectSDK(dayNumber: day), minutes > 0 {
-                    todaySleepMinutes = minutes
-                    return minutes
-                }
-            }
-        }
-
-        // 4) Apple Health fallback (entitlement + permission required).
+        // Apple Health — optional, never required for connect stability.
         if let hkSleep = await HealthKitWellnessService.fetchRecentSleepMinutes(), hkSleep > 0 {
             todaySleepMinutes = hkSleep
             return hkSleep
@@ -404,16 +307,14 @@ final class VeepooHealthService: ObservableObject {
         return todaySleepMinutes
     }
 
-    /// Steps + sleep for Activity/Goals (legacy entry — prefers realtime steps).
+    /// Steps for Activity/Goals — never dumps, never pulls band sleep over BLE.
     func syncStepsAndSleepFromBand(
         showHUD: Bool = false,
         pullDailyFirst: Bool = false
     ) async -> (steps: Int?, sleepMinutes: Int?) {
         _ = showHUD
-        if pullDailyFirst, !deviceUsesAccurateSleep {
-            _ = await pullDailyDataFromBand(showHUD: showHUD)
-        }
-        let totals = await syncActivityMetricsFromBand(includeSleep: true)
+        _ = pullDailyFirst
+        let totals = await syncActivityMetricsFromBand(includeSleep: false)
         return (totals.steps, totals.sleepMinutes)
     }
 
@@ -425,12 +326,8 @@ final class VeepooHealthService: ObservableObject {
     }
 
     private func ensureRecentDailySync(showHUD: Bool) async {
-        // Never auto-dump on accurate-sleep devices (connect crash).
-        guard !deviceUsesAccurateSleep else { return }
-        if let last = lastDailySyncAt, Date().timeIntervalSince(last) < 90 {
-            return
-        }
-        _ = await pullDailyDataFromBand(showHUD: showHUD)
+        // AllData permanently disabled — keep signature for call sites.
+        _ = showHUD
     }
 
     private var deviceTableID: String? {
