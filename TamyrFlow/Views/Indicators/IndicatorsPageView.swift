@@ -3,13 +3,19 @@ import SwiftUI
 /// Metrics tab: period filters + indicator cards with sparklines.
 struct IndicatorsPageView: View {
     @EnvironmentObject private var language: LanguageStore
+    @EnvironmentObject private var vm: BluetoothViewModel
+    private let auth: AuthService
+    /// Tab stays mounted; refresh whenever this tab is shown so new Pulse rows appear.
+    var isActive: Bool = true
     @StateObject private var service: IndicatorsService
     @State private var showCalendar = false
     @State private var calendarDate = Date()
     @State private var detailKind: IndicatorKind?
     @State private var errorAlert: String?
 
-    init(auth: AuthService) {
+    init(auth: AuthService, isActive: Bool = true) {
+        self.auth = auth
+        self.isActive = isActive
         _service = StateObject(wrappedValue: IndicatorsService(auth: auth))
     }
 
@@ -48,6 +54,16 @@ struct IndicatorsPageView: View {
         }
         .id(language.code)
         .task { await service.refresh() }
+        .onChange(of: isActive) { _, active in
+            guard active else { return }
+            Task { await service.refresh() }
+        }
+        .onChange(of: detailKind) { old, new in
+            // Returning from Pulse / other detail after a measure or sync.
+            if old != nil, new == nil {
+                Task { await service.refresh() }
+            }
+        }
         .refreshable { await service.refresh() }
         .sheet(isPresented: $showCalendar) {
             NavigationStack {
@@ -236,7 +252,7 @@ struct IndicatorsPageView: View {
     private func detailDestination(for kind: IndicatorKind) -> some View {
         switch kind {
         case .heartRate:
-            HeartRatePage()
+            PulsePageView(auth: auth, health: vm.healthService, ble: vm.bleService)
         case .spo2:
             OxygenPage()
         case .temperature:

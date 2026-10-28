@@ -660,6 +660,91 @@ enum L10n {
         static var contactEmail: String { tr("about_contact_email") }
     }
 
+    enum Pulse {
+        static var title: String { tr("pulse_title") }
+        static var close: String { tr("pulse_close") }
+        static var gotIt: String { tr("pulse_got_it") }
+        static var retry: String { tr("pulse_retry") }
+        static var support: String { tr("pulse_support") }
+        static var connectWatch: String { tr("pulse_connect_watch") }
+        static var howItWorks: String { tr("pulse_how_it_works") }
+        static var refreshData: String { tr("pulse_refresh_data") }
+        static var noData: String { tr("pulse_no_data") }
+        static var bpmUnit: String { tr("pulse_bpm_unit") }
+        static var today: String { tr("pulse_today") }
+        static var yesterday: String { tr("pulse_yesterday") }
+        static var lastMeasurement: String { tr("pulse_last_measurement") }
+        static var sourceLabel: String { tr("pulse_source_label") }
+        static var sourceWatch: String { tr("pulse_source_watch") }
+        static var sourceAppleHealth: String { tr("pulse_source_apple_health") }
+        static var sourceManual: String { tr("pulse_source_manual") }
+        static var watchConnected: String { tr("pulse_watch_connected") }
+        static var watchDisconnected: String { tr("pulse_watch_disconnected") }
+        static var newDataAvailable: String { tr("pulse_new_data_available") }
+        static var updateHint: String { tr("pulse_update_hint") }
+        static var syncHint: String { tr("pulse_sync_hint") }
+        static var measureNow: String { tr("pulse_measure_now") }
+        static var measuringTitle: String { tr("pulse_measuring_title") }
+        static var measuringBody: String { tr("pulse_measuring_body") }
+        static var averageTitle: String { tr("pulse_average_title") }
+        static var vsPrevDay: String { tr("pulse_vs_prev_day") }
+        static var vsPrevWeek: String { tr("pulse_vs_prev_week") }
+        static var vsPrevMonth: String { tr("pulse_vs_prev_month") }
+        static var dynamicsTitle: String { tr("pulse_dynamics_title") }
+        static var chartEmptySub: String { tr("pulse_chart_empty_sub") }
+        static var chartEmptySubConnected: String { tr("pulse_chart_empty_sub_connected") }
+        static var minimum: String { tr("pulse_minimum") }
+        static var maximum: String { tr("pulse_maximum") }
+        static var zonesTitle: String { tr("pulse_zones_title") }
+        static var zonesInsufficient: String { tr("pulse_zones_insufficient") }
+        static var zoneRest: String { tr("pulse_zone_rest") }
+        static var zoneLight: String { tr("pulse_zone_light") }
+        static var zoneMid: String { tr("pulse_zone_mid") }
+        static var zoneHigh: String { tr("pulse_zone_high") }
+        static var recentTitle: String { tr("pulse_recent_title") }
+        static var seeAll: String { tr("pulse_see_all") }
+        static var disclaimer: String { tr("pulse_disclaimer") }
+        static var connectCTATitle: String { tr("pulse_connect_cta_title") }
+        static var connectCTABody: String { tr("pulse_connect_cta_body") }
+        static var syncingTitle: String { tr("pulse_syncing_title") }
+        static var syncingBody: String { tr("pulse_syncing_body") }
+        static var toastMeasureSuccess: String { tr("pulse_toast_measure_success") }
+        static var toastSuccess: String { tr("pulse_toast_success") }
+        static var historyTitle: String { tr("pulse_history_title") }
+        static var historyEmptySub: String { tr("pulse_history_empty_sub") }
+        static var periodDay: String { tr("pulse_period_day") }
+        static var periodWeek: String { tr("pulse_period_week") }
+        static var periodMonth: String { tr("pulse_period_month") }
+
+        static var sheetAboutTitle: String { tr("pulse_sheet_about_title") }
+        static var sheetAboutBody: String { tr("pulse_sheet_about_body") }
+        static var sheetHowTitle: String { tr("pulse_sheet_how_title") }
+        static var sheetHowBody: String { tr("pulse_sheet_how_body") }
+        static var sheetProblemsTitle: String { tr("pulse_sheet_problems_title") }
+        static var sheetProblemsBody: String { tr("pulse_sheet_problems_body") }
+        static var sheetZonesTitle: String { tr("pulse_sheet_zones_title") }
+        static var sheetZonesBody: String { tr("pulse_sheet_zones_body") }
+        static var sheetDetailTitle: String { tr("pulse_sheet_detail_title") }
+        static var sheetNoNewTitle: String { tr("pulse_sheet_nonew_title") }
+        static var sheetNoNewBody: String { tr("pulse_sheet_nonew_body") }
+        static var sheetErrorTitle: String { tr("pulse_sheet_error_title") }
+        static var sheetErrorBody: String { tr("pulse_sheet_error_body") }
+
+        static var detailPulse: String { tr("pulse_detail_pulse") }
+        static var detailWhen: String { tr("pulse_detail_when") }
+        static var detailSource: String { tr("pulse_detail_source") }
+        static var detailType: String { tr("pulse_detail_type") }
+        static var detailDevice: String { tr("pulse_detail_device") }
+
+        static func periodLabel(_ period: PulsePeriod) -> String {
+            switch period {
+            case .day: return periodDay
+            case .week: return periodWeek
+            case .month: return periodMonth
+            }
+        }
+    }
+
     enum Indicators {
         static var screenTitle: String { tr("ind_screen_title") }
         static var subtitle: String { tr("ind_subtitle") }

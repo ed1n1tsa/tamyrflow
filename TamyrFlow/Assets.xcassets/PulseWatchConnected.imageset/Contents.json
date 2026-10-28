@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "PulseWatchConnected.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
