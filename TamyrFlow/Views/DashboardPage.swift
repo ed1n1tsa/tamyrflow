@@ -36,6 +36,9 @@ struct DashboardPage: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
+            .task {
+                await vm.performPullToRefresh(auth: auth)
+            }
             .refreshable {
                 await vm.performPullToRefresh(auth: auth)
             }
@@ -57,16 +60,11 @@ struct DashboardPage: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
-                    Image(systemName: "waveform.path.ecg")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(ProfileTheme.accent)
-                    (
-                        Text("Tamyr")
-                            .foregroundColor(.white)
-                        + Text("Flow")
-                            .foregroundColor(ProfileTheme.accent)
-                    )
-                    .font(AppFont.interBold(20))
+                    BrandLogoMark()
+                    Text("TAMYR FLOW")
+                        .font(AppFont.interBold(18))
+                        .tracking(1.1)
+                        .foregroundStyle(.white)
                 }
                 Text(L10n.Home.tagline)
                     .font(AppFont.interBold(12))
@@ -518,7 +516,10 @@ struct DashboardPage: View {
     }
 
     private var pulseValue: Int? {
-        if let hr = vm.healthService.heartRate?.value, hr >= 30 { return hr }
+        if let hr = vm.healthService.heartRate?.value, (30...250).contains(hr) { return hr }
+        if let last = vm.healthService.heartRateHistory.last?.value, last >= 30 {
+            return Int(last.rounded())
+        }
         return nil
     }
 

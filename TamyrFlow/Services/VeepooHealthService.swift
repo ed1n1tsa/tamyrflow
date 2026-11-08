@@ -576,6 +576,7 @@ final class VeepooHealthService: ObservableObject {
                     if state.rawValue != 0 { self.heartSawNonStartState = true }
                     if v >= 40, v <= 220 {
                         best = v
+                        self.appendChart(Double(v), to: &self.heartRateHistory)
                         if state.rawValue == 1, settleTask == nil {
                             settleTask = Task { @MainActor in
                                 try? await Task.sleep(nanoseconds: 4_000_000_000)
