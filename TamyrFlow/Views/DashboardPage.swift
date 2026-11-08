@@ -19,10 +19,12 @@ struct DashboardPage: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                HomeBackgroundView()
+        ZStack {
+            // Outside NavigationStack so the navy/aurora fills under the status bar
+            // (NavStack otherwise leaves a black strip at the top).
+            HomeBackgroundView()
 
+            NavigationStack {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 16) {
                         header
@@ -31,24 +33,25 @@ struct DashboardPage: View {
                         activitySection
                     }
                     .padding(.horizontal, ProfileTheme.contentInset)
-                    .padding(.top, 8)
+                    .padding(.top, 12)
                     .padding(.bottom, 28)
                 }
-            }
-            .toolbar(.hidden, for: .navigationBar)
-            .task {
-                await vm.performPullToRefresh(auth: auth)
-            }
-            .refreshable {
-                await vm.performPullToRefresh(auth: auth)
-            }
-            .id(language.code)
-            .navigationDestination(isPresented: $showMyWatch) {
-                MyWatchPage()
-            }
-            .fullScreenCover(isPresented: $showConnectWatch) {
-                WatchConnectFlowView {
-                    showConnectWatch = false
+                .toolbar(.hidden, for: .navigationBar)
+                .toolbarBackground(.hidden, for: .navigationBar)
+                .task {
+                    await vm.performPullToRefresh(auth: auth)
+                }
+                .refreshable {
+                    await vm.performPullToRefresh(auth: auth)
+                }
+                .id(language.code)
+                .navigationDestination(isPresented: $showMyWatch) {
+                    MyWatchPage()
+                }
+                .fullScreenCover(isPresented: $showConnectWatch) {
+                    WatchConnectFlowView {
+                        showConnectWatch = false
+                    }
                 }
             }
         }
@@ -110,32 +113,35 @@ struct DashboardPage: View {
                 .scaledToFit()
                 .frame(width: 88, height: 88)
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 7) {
                 HStack(spacing: 6) {
                     Circle().fill(ProfileTheme.connected).frame(width: 7, height: 7)
                     Text(L10n.Home.watchConnected)
                         .font(AppFont.interBold(15))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(ProfileTheme.muted)
                 }
                 Text(watchDisplayName)
                     .font(AppFont.interBold(13))
                     .foregroundStyle(ProfileTheme.muted)
+                    .lineLimit(1)
 
-                HStack(spacing: 14) {
-                    Label(vm.batteryText, systemImage: "battery.100")
-                        .font(AppFont.interBold(12))
-                        .foregroundStyle(ProfileTheme.connected)
-                    Label(syncLabel, systemImage: "arrow.triangle.2.circlepath")
-                        .font(AppFont.interBold(11))
-                        .foregroundStyle(ProfileTheme.accentSoft)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
+                Label(vm.batteryText, systemImage: "battery.100")
+                    .font(AppFont.interBold(12))
+                    .foregroundStyle(ProfileTheme.connected)
+
+                // Own row so “Sync: Today, 18:23” is never clipped by battery/chevron.
+                Label(syncLabel, systemImage: "arrow.triangle.2.circlepath")
+                    .font(AppFont.interBold(11))
+                    .foregroundStyle(ProfileTheme.accentSoft)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
             }
-            Spacer(minLength: 0)
-            Image(systemName: "chevron.right")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(ProfileTheme.muted)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(14)
         .homeGlassCard()
