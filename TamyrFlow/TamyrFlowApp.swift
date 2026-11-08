@@ -23,6 +23,11 @@ struct TamyrFlowApp: App {
                 .environmentObject(vm)
                 .environmentObject(auth)
                 .environmentObject(language)
+                // Create CBCentralManager early so bluetooth-central state restoration /
+                // silent accessory reconnect can run when the app is backgrounded.
+                .task {
+                    vm.bleService.configureSDKIfNeeded()
+                }
         }
     }
 }
