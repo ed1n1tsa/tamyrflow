@@ -55,6 +55,10 @@ final class VeepooHealthService: ObservableObject {
     /// Heart rate: same pattern as SpO₂ (`VPTestHeartStateStart` after testing).
     private var heartSawNonStartState = false
     private var isAutoHRPulseInFlight = false
+    /// True while a user-initiated live measure owns the BLE pipe.
+    /// ViewModel pauses step polling so the band is not DeviceBusy.
+    @Published private(set) var isExclusiveMeasuring = false
+    private var exclusiveMeasureDepth = 0
     /// Used by `VPDataBaseOperation` step→distance/kcal conversion (must match band personal info).
     var userStatureCm: UInt = 175
     /// Last successful band metrics touch (realtime steps / former daily dump).
@@ -153,24 +157,58 @@ final class VeepooHealthService: ObservableObject {
     }
 
     /// Same “kick” as toggling Auto HR — call before live measurements if the band was slow to open the health pipe.
+    /// Skipped during exclusive measure: AutoHR-on right before a test was a common DeviceBusy cause.
     func ensureLiveMeasurementChannel() {
         guard isConnected else { return }
+        guard !isExclusiveMeasuring else { return }
         setAutoHR(true)
     }
 
     /// Brief Auto-HR off→on to keep the health/SpO₂ pipe open on some bands. Restores `enabled` after ~200ms (matches Settings when passed from the view model).
     func pulseAutoHRHealthChannel(restoreTo enabled: Bool) {
         guard isConnected else { return }
+        guard !isExclusiveMeasuring else { return }
         guard !isAutoHRPulseInFlight else { return }
         isAutoHRPulseInFlight = true
         setAutoHR(false)
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 200_000_000)
-            if self.isConnected {
+            if self.isConnected, !self.isExclusiveMeasuring {
                 self.setAutoHR(enabled)
             }
             self.isAutoHRPulseInFlight = false
         }
+    }
+
+    /// Pause competing BLE (step poll via `isExclusiveMeasuring`, AutoHR) before a live test.
+    func beginExclusiveLiveMeasure() async {
+        exclusiveMeasureDepth += 1
+        if exclusiveMeasureDepth == 1 {
+            isExclusiveMeasuring = true
+            print("[Measure] exclusive BEGIN — AutoHR off, wait for idle")
+            setAutoHR(false)
+            forceIdleForPulseIfNeeded()
+            await waitUntilOperationIdle(timeoutSeconds: 4)
+            // Let the band drop busy state after step-poll / AutoHR traffic.
+            try? await Task.sleep(nanoseconds: 1_800_000_000)
+            forceIdleForPulseIfNeeded()
+            lastError = nil
+        }
+    }
+
+    func endExclusiveLiveMeasure() {
+        exclusiveMeasureDepth = max(0, exclusiveMeasureDepth - 1)
+        if exclusiveMeasureDepth == 0 {
+            isExclusiveMeasuring = false
+            print("[Measure] exclusive END")
+        }
+    }
+
+    /// Runs `body` with the BLE pipe reserved for one live measurement.
+    func withExclusiveLiveMeasure<T>(_ body: () async -> T) async -> T {
+        await beginExclusiveLiveMeasure()
+        defer { endExclusiveLiveMeasure() }
+        return await body()
     }
 
     /// Legacy dashboard entry — never runs AllData (SDK crash). Refreshes realtime steps only.
@@ -525,16 +563,17 @@ final class VeepooHealthService: ObservableObject {
     /// Explicit user-initiated HR test for «Измерить пульс» (not used by «Обновить данные»).
     /// Wear the watch snugly; returns nil on timeout / not worn / busy.
     func captureLiveHeartSample(timeoutSeconds: Double = 25) async -> (date: Date, bpm: Double)? {
-        await waitUntilOperationIdle(timeoutSeconds: 3)
-        forceIdleForPulseIfNeeded()
-        // Sensor cooldown after a previous test / on-watch measure.
-        try? await Task.sleep(nanoseconds: 1_200_000_000)
+        await withExclusiveLiveMeasure {
+            await self.captureLiveHeartSampleExclusive(timeoutSeconds: timeoutSeconds)
+        }
+    }
 
+    private func captureLiveHeartSampleExclusive(timeoutSeconds: Double) async -> (date: Date, bpm: Double)? {
         guard canStart(.heartTest, needsManualFreeState: true) else {
             print("[PulseSync] measure blocked: \(lastError ?? "busy")")
             return nil
         }
-        ensureLiveMeasurementChannel()
+        // Do NOT ensureLiveMeasurementChannel() here — AutoHR kick races the heart test.
         heartSawNonStartState = false
         // Do not set measurementHUD — Pulse has its own overlay.
         cancelManualMeasurementTimeout()
@@ -603,15 +642,16 @@ final class VeepooHealthService: ObservableObject {
 
     /// Explicit SpO₂ measure for the oxygen detail page (no global HUD).
     func captureLiveOxygenSample(timeoutSeconds: Double = 45) async -> (date: Date, spo2: Double)? {
-        await waitUntilOperationIdle(timeoutSeconds: 3)
-        forceIdleForPulseIfNeeded()
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        await withExclusiveLiveMeasure {
+            await self.captureLiveOxygenSampleExclusive(timeoutSeconds: timeoutSeconds)
+        }
+    }
 
+    private func captureLiveOxygenSampleExclusive(timeoutSeconds: Double) async -> (date: Date, spo2: Double)? {
         guard canStart(.oxygenTest, needsManualFreeState: true) else {
             print("[VitalMetric] oxygen blocked: \(lastError ?? "busy")")
             return nil
         }
-        ensureLiveMeasurementChannel()
         oxygenSawNonStartState = false
         cancelManualMeasurementTimeout()
 
@@ -677,15 +717,16 @@ final class VeepooHealthService: ObservableObject {
             lastError = L10n.Err.tempUnsupported
             return nil
         }
-        await waitUntilOperationIdle(timeoutSeconds: 3)
-        forceIdleForPulseIfNeeded()
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        return await withExclusiveLiveMeasure {
+            await self.captureLiveTemperatureSampleExclusive(timeoutSeconds: timeoutSeconds)
+        }
+    }
 
+    private func captureLiveTemperatureSampleExclusive(timeoutSeconds: Double) async -> (date: Date, celsius: Double)? {
         guard canStart(.temperatureTest, needsManualFreeState: true) else {
             print("[VitalMetric] temperature blocked: \(lastError ?? "busy")")
             return nil
         }
-        ensureLiveMeasurementChannel()
         cancelManualMeasurementTimeout()
 
         let result: Double? = await withCheckedContinuation { (cont: CheckedContinuation<Double?, Never>) in
@@ -747,15 +788,18 @@ final class VeepooHealthService: ObservableObject {
     func captureLiveBloodPressureSample(
         timeoutSeconds: Double = 55
     ) async -> (date: Date, systolic: Double, diastolic: Double)? {
-        await waitUntilOperationIdle(timeoutSeconds: 3)
-        forceIdleForPulseIfNeeded()
-        try? await Task.sleep(nanoseconds: 1_000_000_000)
+        await withExclusiveLiveMeasure {
+            await self.captureLiveBloodPressureSampleExclusive(timeoutSeconds: timeoutSeconds)
+        }
+    }
 
+    private func captureLiveBloodPressureSampleExclusive(
+        timeoutSeconds: Double
+    ) async -> (date: Date, systolic: Double, diastolic: Double)? {
         guard canStart(.bloodPressureTest, needsManualFreeState: true) else {
             print("[VitalMetric] blood pressure blocked: \(lastError ?? "busy")")
             return nil
         }
-        ensureLiveMeasurementChannel()
         cancelManualMeasurementTimeout()
 
         let result: (Int, Int)? = await withCheckedContinuation { (cont: CheckedContinuation<(Int, Int)?, Never>) in
