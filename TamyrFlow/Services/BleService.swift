@@ -41,7 +41,7 @@ final class BleService: ObservableObject {
         didConfigureSDK = true
         bleManager = manager
 
-        // Catch Veepoo `VPAccurateSleepModel` parse crashes (`NSString year`) on connect.
+        // Drop Veepoo day-dump parsers + catch BLE characteristic NSExceptions on connect.
         TFInstallAccurateSleepCrashGuard()
 
         // Official persistence path (wiki): assign VPPeripheralManage before any data APIs.
