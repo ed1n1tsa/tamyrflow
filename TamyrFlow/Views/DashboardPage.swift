@@ -1,227 +1,685 @@
 import SwiftUI
 
+/// Product home — connected / disconnected watch hero + indicators (Figma).
 struct DashboardPage: View {
     @EnvironmentObject private var vm: BluetoothViewModel
     @EnvironmentObject private var auth: AuthService
+    @EnvironmentObject private var language: LanguageStore
     @Binding var selectedTab: MainTab
+
+    @State private var activityPeriod: HomeActivityPeriod = .week
+    @State private var showConnectWatch = false
+    @State private var showMyWatch = false
+
+    private var isWatchConnected: Bool {
+        switch vm.bleService.connectionStatus {
+        case .connected, .verified: return true
+        default: return false
+        }
+    }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    TFCard(title: L10n.Dashboard.capsTitle, subtitle: L10n.Dashboard.capsSub) {
-                        Text(L10n.Dashboard.capsBody)
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.55))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+            ZStack {
+                HomeBackgroundView()
 
-                    TFCard(title: L10n.Hub.section, subtitle: L10n.Hub.sectionSub) {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                            hubNav(title: L10n.Tab.heart, icon: "heart.fill") {
-                                PulsePageView(auth: auth, health: vm.healthService, ble: vm.bleService)
-                            }
-                            hubNav(title: L10n.Tab.spo2, icon: "lungs.fill") { OxygenPage() }
-                            hubNav(title: L10n.Tab.temp, icon: "thermometer.medium") { TemperaturePage() }
-                            hubNav(title: L10n.Tab.ecg, icon: "waveform.path.ecg") { ECGPage() }
-                            hubNav(title: L10n.Tab.micro, icon: "cross.case.fill") { MicroTestPage() }
-                            hubNav(title: L10n.Hub.vitals, icon: "heart.text.square.fill") { VitalsPage() }
-                            hubNav(title: L10n.Tab.scan, icon: "antenna.radiowaves.left.and.right") { DeviceScanPage() }
-                            Button {
-                                selectedTab = .metrics
-                            } label: {
-                                hubLabel(title: L10n.Tab.metrics, icon: "chart.bar.fill")
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        VStack(spacing: 10) {
-                            TFSecondaryButton(L10n.Hub.steps) {
-                                Task {
-                                    let totals = await vm.healthService.fetchRealtimeStepTotals()
-                                    await WatchMetricsBridge.persistBandDayTotals(
-                                        auth: auth,
-                                        steps: totals.steps,
-                                        caloriesKcal: totals.caloriesKcal,
-                                        sleepMinutes: nil
-                                    )
-                                }
-                            }
-                            TFSecondaryButton(L10n.Hub.sleep) {
-                                Task {
-                                    if let minutes = await vm.healthService.fetchSleepMinutesRobust(), minutes > 0 {
-                                        await WatchMetricsBridge.persistBandDayTotals(
-                                            auth: auth,
-                                            steps: nil,
-                                            caloriesKcal: nil,
-                                            sleepMinutes: minutes
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.top, 6)
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        header
+                        watchCard
+                        indicatorsSection
+                        activitySection
                     }
-
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                        miniStat(title: L10n.Dashboard.battery, value: vm.batteryText, icon: "battery.100.bolt")
-                        miniStat(title: L10n.Dashboard.charge, value: vm.chargeStateText, icon: "bolt.fill")
-                        miniStat(title: L10n.Dashboard.device, value: vm.currentDeviceName == "-" ? "—" : String(vm.currentDeviceName.prefix(10)), icon: "applewatch")
-                        miniStat(title: L10n.Dashboard.sdk, value: vm.bleService.isSDKConfigured ? L10n.Dashboard.sdkOk : L10n.Dashboard.sdkWait, icon: "cpu")
-                        miniStat(title: L10n.Hub.steps, value: stepsValue, icon: "figure.walk")
-                        miniStat(title: L10n.Hub.sleep, value: sleepValue, icon: "moon.zzz.fill")
-                    }
-
-                    TFCard(title: L10n.Dashboard.liveTraces, subtitle: L10n.Dashboard.liveSub) {
-                        LiveMetricChart(
-                            title: L10n.Dashboard.heartRate,
-                            data: vm.healthService.heartRateHistory,
-                            unit: "bpm",
-                            color: Color.pink
-                        )
-                        Divider().background(Color.white.opacity(0.12))
-                        LiveMetricChart(
-                            title: L10n.Dashboard.spo2,
-                            data: vm.healthService.oxygenHistory,
-                            unit: "%",
-                            color: AppTheme.accentSecondary
-                        )
-                    }
-
-                    TFCard(title: L10n.Dashboard.syncProgress, subtitle: L10n.Dashboard.syncSub) {
-                        LiveMetricChart(
-                            title: L10n.Dashboard.progressPct,
-                            data: vm.healthService.syncProgressHistory,
-                            unit: "%",
-                            color: AppTheme.accent,
-                            yDomain: 0...100
-                        )
-                        Text(vm.healthService.readProgressText)
-                            .font(.caption)
-                            .foregroundStyle(.white.opacity(0.45))
-                    }
-
-                    TFCard(title: L10n.Dashboard.deviceCard, subtitle: vm.currentDeviceAddress) {
-                        LabeledContent(L10n.Dashboard.name) {
-                            Text(vm.currentDeviceName)
-                                .foregroundStyle(.white)
-                        }
-                        .foregroundStyle(.white.opacity(0.55))
-                        LabeledContent(L10n.Dashboard.status) {
-                            Text(vm.statusText)
-                                .foregroundStyle(AppTheme.accent)
-                        }
-                        .foregroundStyle(.white.opacity(0.55))
-                    }
-
-                    TFCard(title: L10n.Dashboard.actions, subtitle: L10n.Dashboard.actionsSub) {
-                        TFPrimaryButton(L10n.Dashboard.readBattery, systemImage: "battery.100") {
-                            vm.bleService.readBattery()
-                        }
-                        TFPrimaryButton(L10n.Dashboard.syncTime, systemImage: "clock.arrow.circlepath") {
-                            vm.healthService.syncTime()
-                        }
-                        .padding(.top, 4)
-                        TFSecondaryButton(L10n.Dashboard.readDaily) {
-                            vm.healthService.readAllDailyData()
-                        }
-                    }
-
-                    TFCard(title: L10n.Dashboard.pipeline, subtitle: L10n.Dashboard.pipelineSub) {
-                        HStack {
-                            Label(vm.healthService.operation.localizedLabel, systemImage: "arrow.triangle.2.circlepath")
-                                .font(.caption.weight(.medium))
-                            Spacer()
-                            Text(vm.healthService.canRunManualTests ? L10n.Dashboard.manualOk : L10n.Dashboard.busy)
-                                .font(.caption)
-                                .foregroundStyle(vm.healthService.canRunManualTests ? AppTheme.accent : AppTheme.warning)
-                        }
-                        .foregroundStyle(.white.opacity(0.75))
-                    }
+                    .padding(.horizontal, ProfileTheme.contentInset)
+                    .padding(.top, 8)
+                    .padding(.bottom, 28)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 32)
             }
-            .scrollContentBackground(.hidden)
+            .toolbar(.hidden, for: .navigationBar)
             .refreshable {
                 await vm.performPullToRefresh(auth: auth)
             }
-            .navigationTitle(L10n.Dashboard.title)
-            .navigationBarTitleDisplayMode(.large)
-            .tfNavigationChrome()
+            .id(language.code)
+            .navigationDestination(isPresented: $showMyWatch) {
+                MyWatchPage()
+            }
+            .fullScreenCover(isPresented: $showConnectWatch) {
+                WatchConnectFlowView {
+                    showConnectWatch = false
+                }
+            }
         }
     }
 
-    private var stepsValue: String {
-        if let s = vm.healthService.todaySteps { return "\(s)" }
-        return "—"
-    }
+    // MARK: - Header
 
-    private var sleepValue: String {
-        if let minutes = vm.healthService.todaySleepMinutes, minutes > 0 {
-            let hours = Double(minutes) / 60.0
-            return String(format: "%.1fh", hours)
+    private var header: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Image(systemName: "waveform.path.ecg")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(ProfileTheme.accent)
+                    (
+                        Text("Tamyr")
+                            .foregroundColor(.white)
+                        + Text("Flow")
+                            .foregroundColor(ProfileTheme.accent)
+                    )
+                    .font(AppFont.interBold(20))
+                }
+                Text(L10n.Home.tagline)
+                    .font(AppFont.interBold(12))
+                    .foregroundStyle(ProfileTheme.muted)
+            }
+            Spacer()
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: "bell.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(
+                        Circle()
+                            .fill(ProfileTheme.cardFill)
+                            .overlay(Circle().strokeBorder(ProfileTheme.cardBorder, lineWidth: 1))
+                    )
+                Circle()
+                    .fill(Color.red)
+                    .frame(width: 8, height: 8)
+                    .offset(x: -4, y: 4)
+            }
         }
-        if let n = vm.healthService.sleepSegmentsToday { return "\(n)" }
-        return "—"
     }
 
-    private func hubNav<Dest: View>(title: String, icon: String, @ViewBuilder destination: () -> Dest) -> some View {
-        NavigationLink {
-            destination()
-        } label: {
-            hubLabel(title: title, icon: icon)
+    // MARK: - Watch card
+
+    @ViewBuilder
+    private var watchCard: some View {
+        if isWatchConnected {
+            Button { showMyWatch = true } label: {
+                connectedWatchCard
+            }
+            .buttonStyle(.plain)
+        } else {
+            disconnectedWatchCard
         }
-        .buttonStyle(.plain)
     }
 
-    private func hubLabel(title: String, icon: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(AppTheme.accent)
-            Text(title)
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.45))
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
+    private var connectedWatchCard: some View {
+        HStack(spacing: 14) {
+            Image("HomeWatchConnected")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 88, height: 88)
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    Circle().fill(ProfileTheme.connected).frame(width: 7, height: 7)
+                    Text(L10n.Home.watchConnected)
+                        .font(AppFont.interBold(15))
+                        .foregroundStyle(.white)
+                }
+                Text(watchDisplayName)
+                    .font(AppFont.interBold(13))
+                    .foregroundStyle(ProfileTheme.muted)
+
+                HStack(spacing: 14) {
+                    Label(vm.batteryText, systemImage: "battery.100")
+                        .font(AppFont.interBold(12))
+                        .foregroundStyle(ProfileTheme.connected)
+                    Label(syncLabel, systemImage: "arrow.triangle.2.circlepath")
+                        .font(AppFont.interBold(11))
+                        .foregroundStyle(ProfileTheme.accentSoft)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+            }
             Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(ProfileTheme.muted)
         }
-        .frame(maxWidth: .infinity, minHeight: 72, alignment: .topLeading)
-        .padding(12)
-        .background {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(AppTheme.cardBackground)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+        .padding(14)
+        .homeGlassCard()
+    }
+
+    private var disconnectedWatchCard: some View {
+        HStack(alignment: .center, spacing: 14) {
+            Image("HomeWatchDisconnected")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 92, height: 92)
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L10n.Home.watchDisconnected)
+                    .font(AppFont.interBold(16))
+                    .foregroundStyle(.white)
+                Text(L10n.Home.watchDisconnectedBody)
+                    .font(AppFont.interBold(12))
+                    .foregroundStyle(ProfileTheme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 8) {
+                    Button { showConnectWatch = true } label: {
+                        Text(L10n.Home.connectWatch)
+                            .font(AppFont.interBold(13))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule().fill(ProfileTheme.accent)
+                                    .shadow(color: ProfileTheme.accent.opacity(0.45), radius: 8, y: 2)
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button { showMyWatch = true } label: {
+                        Text(L10n.Home.moreDetails)
+                            .font(AppFont.interBold(13))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(
+                                Capsule()
+                                    .strokeBorder(ProfileTheme.cardBorder, lineWidth: 1)
+                                    .background(Capsule().fill(Color.white.opacity(0.04)))
+                            )
+                    }
+                    .buttonStyle(.plain)
                 }
+            }
+        }
+        .padding(14)
+        .homeGlassCard()
+    }
+
+    // MARK: - Indicators
+
+    private var indicatorsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(L10n.Home.mainIndicators)
+                    .font(AppFont.interBold(17))
+                    .foregroundStyle(.white)
+                Spacer()
+                Button { selectedTab = .metrics } label: {
+                    Text(L10n.Home.allData)
+                        .font(AppFont.interBold(13))
+                        .foregroundStyle(ProfileTheme.accent)
+                }
+                .buttonStyle(.plain)
+            }
+
+            NavigationLink {
+                PulsePageView(auth: auth, health: vm.healthService, ble: vm.bleService)
+            } label: {
+                pulseCard
+            }
+            .buttonStyle(.plain)
+
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                NavigationLink { OxygenPage() } label: {
+                    smallMetricCard(
+                        title: L10n.Home.oxygen,
+                        value: oxygenText,
+                        tint: Color(red: 0.25, green: 0.65, blue: 1.0),
+                        icon: "drop.fill",
+                        wave: true
+                    )
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink { TemperaturePage() } label: {
+                    smallMetricCard(
+                        title: L10n.Home.temperature,
+                        value: temperatureText,
+                        tint: Color(red: 1.0, green: 0.55, blue: 0.2),
+                        icon: "thermometer.medium",
+                        wave: true
+                    )
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink { VitalsPage() } label: {
+                    smallMetricCard(
+                        title: L10n.Home.pressure,
+                        value: "—",
+                        tint: Color(red: 0.7, green: 0.4, blue: 1.0),
+                        icon: "waveform.path.ecg",
+                        wave: true
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Button { selectedTab = .activity } label: {
+                    stepsCard
+                }
+                .buttonStyle(.plain)
+            }
+
+            sleepCard
         }
     }
 
-    private func miniStat(title: String, value: String, icon: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(AppTheme.accent)
-            Text(title)
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.45))
-            Text(value)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.white)
-                .lineLimit(2)
-                .minimumScaleFactor(0.8)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(AppTheme.cardBackground)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+    private var pulseCard: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.red.opacity(0.22))
+                    .frame(width: 54, height: 54)
+                    .shadow(color: Color.red.opacity(0.45), radius: 10, y: 0)
+                Image(systemName: "heart.fill")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(Color.red)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(L10n.Home.pulse)
+                    .font(AppFont.interBold(13))
+                    .foregroundStyle(ProfileTheme.muted)
+                Text(pulseText)
+                    .font(AppFont.interBold(28))
+                    .foregroundStyle(.white)
+                if pulseValue != nil {
+                    Text(L10n.Home.bpm)
+                        .font(AppFont.interBold(11))
+                        .foregroundStyle(ProfileTheme.muted)
                 }
+            }
+
+            Spacer(minLength: 8)
+
+            MiniSparkline(values: pulseSpark, tint: .red)
+                .frame(width: 110, height: 44)
         }
+        .padding(16)
+        .homeGlassCard()
+    }
+
+    private func smallMetricCard(title: String, value: String, tint: Color, icon: String, wave: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(tint)
+                    .frame(width: 28, height: 28)
+                    .background(Circle().fill(tint.opacity(0.18)))
+                Spacer()
+            }
+            Text(title)
+                .font(AppFont.interBold(12))
+                .foregroundStyle(ProfileTheme.muted)
+            Text(value)
+                .font(AppFont.interBold(20))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if wave {
+                MiniSparkline(values: placeholderWave, tint: tint.opacity(0.85))
+                    .frame(height: 28)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
+        .homeGlassCard()
+    }
+
+    private var stepsCard: some View {
+        let steps = vm.healthService.todaySteps
+        let target = 10_000
+        let ratio = steps.map { min(1, Double($0) / Double(target)) } ?? 0
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "figure.walk")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color(red: 0.2, green: 0.85, blue: 0.65))
+                    .frame(width: 28, height: 28)
+                    .background(Circle().fill(Color(red: 0.2, green: 0.85, blue: 0.65).opacity(0.18)))
+                Spacer()
+                ZStack {
+                    Circle()
+                        .stroke(Color.white.opacity(0.1), lineWidth: 4)
+                    Circle()
+                        .trim(from: 0, to: ratio)
+                        .stroke(Color(red: 0.2, green: 0.85, blue: 0.65), style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                    Text(steps == nil ? "—" : "\(Int(ratio * 100))%")
+                        .font(AppFont.interBold(9))
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 36, height: 36)
+            }
+            Text(L10n.Home.steps)
+                .font(AppFont.interBold(12))
+                .foregroundStyle(ProfileTheme.muted)
+            if let steps {
+                Text("\(formatInt(steps))")
+                    .font(AppFont.interBold(20))
+                    .foregroundStyle(.white)
+                Text(String(format: L10n.Home.stepsOf, formatInt(target)))
+                    .font(AppFont.interBold(11))
+                    .foregroundStyle(ProfileTheme.muted)
+            } else {
+                Text(L10n.Home.noData)
+                    .font(AppFont.interBold(20))
+                    .foregroundStyle(.white)
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
+        .homeGlassCard()
+    }
+
+    private var sleepCard: some View {
+        ZStack(alignment: .trailing) {
+            Image("HomeSleepMoon")
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: 110)
+                .clipped()
+                .opacity(0.9)
+                .mask(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                )
+
+            LinearGradient(
+                colors: [
+                    Color(red: 0.02, green: 0.05, blue: 0.12).opacity(0.92),
+                    Color(red: 0.02, green: 0.05, blue: 0.12).opacity(0.35),
+                    .clear
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.purple.opacity(0.7), Color.blue.opacity(0.45)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "moon.stars.fill")
+                        .foregroundStyle(.white)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.Home.sleep)
+                        .font(AppFont.interBold(13))
+                        .foregroundStyle(ProfileTheme.muted)
+                    Text(sleepText)
+                        .font(AppFont.interBold(20))
+                        .foregroundStyle(.white)
+                    Text(L10n.Home.sleepToday)
+                        .font(AppFont.interBold(11))
+                        .foregroundStyle(ProfileTheme.muted.opacity(0.9))
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(16)
+        }
+        .frame(height: 110)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(ProfileTheme.cardBorder.opacity(0.85), lineWidth: 1)
+        )
+    }
+
+    // MARK: - Activity
+
+    private var activitySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(L10n.Home.activity)
+                    .font(AppFont.interBold(17))
+                    .foregroundStyle(.white)
+                Spacer()
+                activityPeriodPills
+            }
+
+            ZStack {
+                HomeWeekBars(values: weekBarValues, highlightIndex: highlightIndex)
+                    .frame(height: 160)
+                    .padding(.top, 8)
+
+                if weekBarValues.allSatisfy({ $0 <= 0 }) {
+                    VStack(spacing: 10) {
+                        Image(systemName: "applewatch")
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(ProfileTheme.accent)
+                        Text(L10n.Home.noActivityData)
+                            .font(AppFont.interBold(13))
+                            .foregroundStyle(.white)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(Color.black.opacity(0.55))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .strokeBorder(ProfileTheme.cardBorder.opacity(0.6), lineWidth: 1)
+                            )
+                    )
+                }
+            }
+            .padding(14)
+            .homeGlassCard()
+        }
+    }
+
+    private var activityPeriodPills: some View {
+        HStack(spacing: 4) {
+            ForEach(HomeActivityPeriod.allCases) { period in
+                Button {
+                    activityPeriod = period
+                } label: {
+                    Text(period.title)
+                        .font(AppFont.interBold(11))
+                        .foregroundStyle(activityPeriod == period ? .white : ProfileTheme.muted)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .background(
+                            Capsule()
+                                .fill(activityPeriod == period ? ProfileTheme.accent : Color.clear)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(3)
+        .background(Capsule().fill(Color.white.opacity(0.06)))
+    }
+
+    // MARK: - Data helpers
+
+    private var watchDisplayName: String {
+        let name = vm.currentDeviceName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if name.isEmpty || name == "-" { return "Tamyr Watch" }
+        return name
+    }
+
+    private var syncLabel: String {
+        if let at = vm.healthService.lastDailySyncAt {
+            return "\(L10n.Home.syncPrefix): \(Self.shortTime.string(from: at))"
+        }
+        return "\(L10n.Home.syncPrefix): —"
+    }
+
+    private var pulseValue: Int? {
+        if let hr = vm.healthService.heartRate?.value, hr >= 30 { return hr }
+        return nil
+    }
+
+    private var pulseText: String {
+        if let v = pulseValue { return "\(v)" }
+        return L10n.Home.noData
+    }
+
+    private var pulseSpark: [Double] {
+        let pts = vm.healthService.heartRateHistory.map(\.value).filter { $0 > 0 }
+        if pts.count >= 2 { return pts }
+        return placeholderWave
+    }
+
+    private var oxygenText: String {
+        if let v = vm.healthService.oxygen?.value, v > 0 { return "\(v)%" }
+        return L10n.Home.noData
+    }
+
+    private var temperatureText: String {
+        // Body temperature reading if present in service history
+        if let last = vm.healthService.bodyTemperatureHistory.last?.value, last > 30 {
+            return String(format: "%.1f °C", last)
+        }
+        return L10n.Home.noData
+    }
+
+    private var sleepText: String {
+        guard let minutes = vm.healthService.todaySleepMinutes, minutes > 0 else {
+            return L10n.Home.noData
+        }
+        let h = minutes / 60
+        let m = minutes % 60
+        return String(format: L10n.Home.sleepDurationFormat, h, m)
+    }
+
+    private var weekBarValues: [Double] {
+        // Only today known from band realtime — put it on today's weekday index.
+        var vals = Array(repeating: 0.0, count: 7)
+        if let steps = vm.healthService.todaySteps, steps > 0 {
+            let idx = (Calendar.current.component(.weekday, from: Date()) + 5) % 7 // Mon=0
+            vals[idx] = Double(steps)
+        }
+        return vals
+    }
+
+    private var highlightIndex: Int? {
+        let idx = (Calendar.current.component(.weekday, from: Date()) + 5) % 7
+        return weekBarValues[idx] > 0 ? idx : nil
+    }
+
+    private var placeholderWave: [Double] {
+        [0.35, 0.55, 0.42, 0.7, 0.5, 0.78, 0.6, 0.45]
+    }
+
+    private func formatInt(_ n: Int) -> String {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.groupingSeparator = " "
+        return f.string(from: NSNumber(value: n)) ?? "\(n)"
+    }
+
+    private static let shortTime: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ru_RU")
+        f.dateFormat = "HH:mm"
+        return f
+    }()
+}
+
+// MARK: - Models / helpers
+
+enum HomeActivityPeriod: String, CaseIterable, Identifiable {
+    case day, week, month
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .day: return L10n.Home.periodDay
+        case .week: return L10n.Home.periodWeek
+        case .month: return L10n.Home.periodMonth
+        }
+    }
+}
+
+private struct MiniSparkline: View {
+    let values: [Double]
+    let tint: Color
+
+    var body: some View {
+        Canvas { context, size in
+            guard values.count >= 2, size.width > 1 else { return }
+            let minV = values.min() ?? 0
+            let maxV = values.max() ?? 1
+            let span = max(maxV - minV, 0.001)
+            let step = size.width / CGFloat(values.count - 1)
+            var path = Path()
+            for (i, v) in values.enumerated() {
+                let x = CGFloat(i) * step
+                let y = size.height - CGFloat((v - minV) / span) * size.height
+                if i == 0 { path.move(to: CGPoint(x: x, y: y)) }
+                else { path.addLine(to: CGPoint(x: x, y: y)) }
+            }
+            context.stroke(path, with: .color(tint), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+        }
+    }
+}
+
+private struct HomeWeekBars: View {
+    let values: [Double]
+    let highlightIndex: Int?
+    private let labels = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+
+    var body: some View {
+        GeometryReader { geo in
+            let maxV = max(values.max() ?? 1, 1)
+            let barW = (geo.size.width - 6 * 8) / 7
+            HStack(alignment: .bottom, spacing: 8) {
+                ForEach(0..<7, id: \.self) { i in
+                    let h = max(8, CGFloat(values[i] / maxV) * (geo.size.height - 22))
+                    let on = highlightIndex == i
+                    VStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: on
+                                        ? [ProfileTheme.accent, Color.cyan.opacity(0.7)]
+                                        : [ProfileTheme.accent.opacity(0.55), ProfileTheme.accent.opacity(0.2)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .frame(width: barW, height: h)
+                            .shadow(color: on ? ProfileTheme.accent.opacity(0.55) : .clear, radius: 8, y: 0)
+                        Text(labels[i])
+                            .font(AppFont.interBold(10))
+                            .foregroundStyle(on ? .white : ProfileTheme.muted)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                }
+            }
+        }
+    }
+}
+
+private extension View {
+    func homeGlassCard() -> some View {
+        self
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color(red: 6 / 255, green: 18 / 255, blue: 40 / 255).opacity(0.78))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [
+                                        ProfileTheme.cardBorder.opacity(0.95),
+                                        ProfileTheme.cardBorder.opacity(0.35)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+            )
     }
 }

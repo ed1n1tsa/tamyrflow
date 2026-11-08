@@ -57,8 +57,8 @@ final class VeepooHealthService: ObservableObject {
     private var isAutoHRPulseInFlight = false
     /// Used by `VPDataBaseOperation` step→distance/kcal conversion (must match band personal info).
     var userStatureCm: UInt = 175
-    /// Last successful `veepooSdkStartReadDeviceAllData` finish (SDK local DB is filled from the band).
-    private var lastDailySyncAt: Date?
+    /// Last successful band metrics touch (realtime steps / former daily dump).
+    @Published private(set) var lastDailySyncAt: Date?
 
     /// Only valid after `BleService.configureSDKIfNeeded()` — calling `shareVPPeripheralManager()` earlier can crash inside the SDK.
     private var manager: VPPeripheralBaseManage? {
@@ -335,6 +335,9 @@ final class VeepooHealthService: ObservableObject {
         if let dis = Self.parseDouble(from: dict, keys: ["Dis", "dis", "DIS", "distance"]) {
             todayDistanceKm = dis
             totals.distanceKm = dis
+        }
+        if totals.steps != nil || totals.caloriesKcal != nil {
+            lastDailySyncAt = Date()
         }
         return totals
     }
