@@ -601,6 +601,217 @@ final class VeepooHealthService: ObservableObject {
         return (Date(), Double(bpm))
     }
 
+    /// Explicit SpO₂ measure for the oxygen detail page (no global HUD).
+    func captureLiveOxygenSample(timeoutSeconds: Double = 45) async -> (date: Date, spo2: Double)? {
+        await waitUntilOperationIdle(timeoutSeconds: 3)
+        forceIdleForPulseIfNeeded()
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+
+        guard canStart(.oxygenTest, needsManualFreeState: true) else {
+            print("[VitalMetric] oxygen blocked: \(lastError ?? "busy")")
+            return nil
+        }
+        ensureLiveMeasurementChannel()
+        oxygenSawNonStartState = false
+        cancelManualMeasurementTimeout()
+
+        let result: Int? = await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+            var resumed = false
+            var best: Int?
+            var settleTask: Task<Void, Never>?
+
+            let finish: (Int?) -> Void = { [weak self] value in
+                guard let self else {
+                    if !resumed { resumed = true; cont.resume(returning: value) }
+                    return
+                }
+                guard !resumed else { return }
+                resumed = true
+                settleTask?.cancel()
+                self.manager?.veepooSDKTestOxygenStart(false) { [weak self] _, _ in
+                    Task { @MainActor in self?.finishOperation() }
+                }
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 600_000_000)
+                    if self.operation == .oxygenTest { self.finishOperation() }
+                }
+                cont.resume(returning: value)
+            }
+
+            manager?.veepooSDKTestOxygenStart(true) { [weak self] state, value in
+                Task { @MainActor in
+                    guard let self, self.operation == .oxygenTest else { return }
+                    let v = Int(value)
+                    self.oxygen = OxygenReading(state: state, value: v)
+                    if state.rawValue != 0 { self.oxygenSawNonStartState = true }
+                    if state.rawValue == 1, v >= 70, v <= 100 {
+                        best = v
+                        self.appendChart(Double(v), to: &self.oxygenHistory)
+                        if settleTask == nil {
+                            settleTask = Task { @MainActor in
+                                try? await Task.sleep(nanoseconds: 3_500_000_000)
+                                finish(best)
+                            }
+                        }
+                    }
+                    if state.rawValue == 2 || state.rawValue == 3 || state.rawValue == 4
+                        || state.rawValue == 5 || state.rawValue == 8 {
+                        finish(best)
+                    }
+                }
+            }
+
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                finish(best)
+            }
+        }
+
+        guard let spo2 = result, (70...100).contains(spo2) else { return nil }
+        return (Date(), Double(spo2))
+    }
+
+    /// Explicit temperature measure for the temperature detail page.
+    func captureLiveTemperatureSample(timeoutSeconds: Double = 45) async -> (date: Date, celsius: Double)? {
+        guard supportsTemperature else {
+            lastError = L10n.Err.tempUnsupported
+            return nil
+        }
+        await waitUntilOperationIdle(timeoutSeconds: 3)
+        forceIdleForPulseIfNeeded()
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+
+        guard canStart(.temperatureTest, needsManualFreeState: true) else {
+            print("[VitalMetric] temperature blocked: \(lastError ?? "busy")")
+            return nil
+        }
+        ensureLiveMeasurementChannel()
+        cancelManualMeasurementTimeout()
+
+        let result: Double? = await withCheckedContinuation { (cont: CheckedContinuation<Double?, Never>) in
+            var resumed = false
+            var best: Double?
+
+            let finish: (Double?) -> Void = { [weak self] value in
+                guard let self else {
+                    if !resumed { resumed = true; cont.resume(returning: value) }
+                    return
+                }
+                guard !resumed else { return }
+                resumed = true
+                self.manager?.veepooSDK_temperatureTestStart(false, result: { [weak self] _, _, _, _, _ in
+                    Task { @MainActor in self?.finishOperation() }
+                })
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 600_000_000)
+                    if self.operation == .temperatureTest { self.finishOperation() }
+                }
+                cont.resume(returning: value)
+            }
+
+            manager?.veepooSDK_temperatureTestStart(true, result: { [weak self] state, enable, progress, temp, originalTemp in
+                Task { @MainActor in
+                    guard let self, self.operation == .temperatureTest else { return }
+                    let body = Double(temp) / 10.0
+                    self.temperature = TemperatureReading(
+                        state: state,
+                        enable: enable,
+                        progress: progress,
+                        bodyTemperature: body,
+                        skinTemperature: Double(originalTemp) / 10.0
+                    )
+                    if body > 30, body < 45 {
+                        best = body
+                        self.appendChart(body, to: &self.bodyTemperatureHistory)
+                        if progress >= 90 {
+                            finish(best)
+                        }
+                    }
+                    if state.rawValue == 2 || state.rawValue == 9 || state.rawValue == 0 {
+                        finish(best)
+                    }
+                }
+            })
+
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                finish(best)
+            }
+        }
+
+        guard let celsius = result, celsius > 30, celsius < 45 else { return nil }
+        return (Date(), celsius)
+    }
+
+    /// Explicit blood-pressure measure for the pressure detail page.
+    func captureLiveBloodPressureSample(
+        timeoutSeconds: Double = 55
+    ) async -> (date: Date, systolic: Double, diastolic: Double)? {
+        await waitUntilOperationIdle(timeoutSeconds: 3)
+        forceIdleForPulseIfNeeded()
+        try? await Task.sleep(nanoseconds: 1_000_000_000)
+
+        guard canStart(.bloodPressureTest, needsManualFreeState: true) else {
+            print("[VitalMetric] blood pressure blocked: \(lastError ?? "busy")")
+            return nil
+        }
+        ensureLiveMeasurementChannel()
+        cancelManualMeasurementTimeout()
+
+        let result: (Int, Int)? = await withCheckedContinuation { (cont: CheckedContinuation<(Int, Int)?, Never>) in
+            var resumed = false
+            var best: (Int, Int)?
+
+            let finish: ((Int, Int)?) -> Void = { [weak self] value in
+                guard let self else {
+                    if !resumed { resumed = true; cont.resume(returning: value) }
+                    return
+                }
+                guard !resumed else { return }
+                resumed = true
+                self.manager?.veepooSDKTestBloodStart(false, testMode: 0) { [weak self] _, _, _, _ in
+                    Task { @MainActor in self?.finishOperation() }
+                }
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 600_000_000)
+                    if self.operation == .bloodPressureTest { self.finishOperation() }
+                }
+                cont.resume(returning: value)
+            }
+
+            manager?.veepooSDKTestBloodStart(true, testMode: 0) { [weak self] testState, testProgress, highBlood, lowBlood in
+                Task { @MainActor in
+                    guard let self, self.operation == .bloodPressureTest else { return }
+                    let sys = Int(highBlood)
+                    let dia = Int(lowBlood)
+                    self.bloodPressure = BloodPressureReading(
+                        state: testState,
+                        progress: Int(testProgress),
+                        systolic: sys,
+                        diastolic: dia
+                    )
+                    if sys >= 70, sys <= 220, dia >= 40, dia <= 140, sys > dia {
+                        best = (sys, dia)
+                    }
+                    if testProgress >= 95, best != nil {
+                        finish(best)
+                    }
+                    if testState.rawValue != 0 {
+                        finish(best)
+                    }
+                }
+            }
+
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                finish(best)
+            }
+        }
+
+        guard let pair = result else { return nil }
+        return (Date(), Double(pair.0), Double(pair.1))
+    }
+
     /// 5‑minute original HR from Veepoo local DB (filled by daily dump).
     func fetchOriginalHeartSamples(dayCount: Int = 7) -> [(date: Date, bpm: Double)] {
         parseHeartDictSamples(dayCount: dayCount) { dateStr, tableID in

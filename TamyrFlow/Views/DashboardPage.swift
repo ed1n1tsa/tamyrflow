@@ -222,7 +222,14 @@ struct DashboardPage: View {
             .buttonStyle(.plain)
 
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                NavigationLink { OxygenPage() } label: {
+                NavigationLink {
+                    VitalMetricPageView(
+                        kind: .spo2,
+                        auth: auth,
+                        health: vm.healthService,
+                        ble: vm.bleService
+                    )
+                } label: {
                     smallMetricCard(
                         title: L10n.Home.oxygen,
                         value: oxygenText,
@@ -233,7 +240,14 @@ struct DashboardPage: View {
                 }
                 .buttonStyle(.plain)
 
-                NavigationLink { TemperaturePage() } label: {
+                NavigationLink {
+                    VitalMetricPageView(
+                        kind: .temperature,
+                        auth: auth,
+                        health: vm.healthService,
+                        ble: vm.bleService
+                    )
+                } label: {
                     smallMetricCard(
                         title: L10n.Home.temperature,
                         value: temperatureText,
@@ -244,10 +258,17 @@ struct DashboardPage: View {
                 }
                 .buttonStyle(.plain)
 
-                NavigationLink { VitalsPage() } label: {
+                NavigationLink {
+                    VitalMetricPageView(
+                        kind: .bloodPressure,
+                        auth: auth,
+                        health: vm.healthService,
+                        ble: vm.bleService
+                    )
+                } label: {
                     smallMetricCard(
                         title: L10n.Home.pressure,
-                        value: "—",
+                        value: pressureText,
                         tint: Color(red: 0.7, green: 0.4, blue: 1.0),
                         icon: "waveform.path.ecg",
                         wave: true
@@ -255,7 +276,14 @@ struct DashboardPage: View {
                 }
                 .buttonStyle(.plain)
 
-                Button { selectedTab = .activity } label: {
+                NavigationLink {
+                    VitalMetricPageView(
+                        kind: .steps,
+                        auth: auth,
+                        health: vm.healthService,
+                        ble: vm.bleService
+                    )
+                } label: {
                     stepsCard
                 }
                 .buttonStyle(.plain)
@@ -545,8 +573,18 @@ struct DashboardPage: View {
         return L10n.Home.noData
     }
 
+    private var pressureText: String {
+        if let bp = vm.healthService.bloodPressure,
+           bp.systolic > 0, bp.diastolic > 0 {
+            return "\(bp.systolic)/\(bp.diastolic)"
+        }
+        return "—"
+    }
+
     private var temperatureText: String {
-        // Body temperature reading if present in service history
+        if let body = vm.healthService.temperature?.bodyTemperature, body > 30 {
+            return String(format: "%.1f °C", body)
+        }
         if let last = vm.healthService.bodyTemperatureHistory.last?.value, last > 30 {
             return String(format: "%.1f °C", last)
         }
