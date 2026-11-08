@@ -834,6 +834,40 @@ enum L10n {
         }
     }
 
+    enum Vital {
+        static var averageTitle: String { tr("vital_average_title") }
+        static var dynamicsTitle: String { tr("vital_dynamics_title") }
+        static var toastMeasureSuccess: String { tr("vital_toast_measure_success") }
+        static var historyTitle: String { tr("vital_history_title") }
+        static var disclaimer: String { tr("vital_disclaimer") }
+        static var connectCTATitle: String { tr("vital_connect_cta_title") }
+        static var connectCTABody: String { tr("vital_connect_cta_body") }
+        static var sheetAboutBody: String { tr("vital_sheet_about_body") }
+        static var measuringBody: String { tr("vital_measuring_body") }
+
+        static func measureNow(for kind: IndicatorKind) -> String {
+            switch kind {
+            case .spo2: return tr("vital_measure_spo2")
+            case .temperature: return tr("vital_measure_temp")
+            case .bloodPressure: return tr("vital_measure_pressure")
+            case .steps: return tr("vital_measure_steps")
+            case .sleep: return tr("vital_measure_sleep")
+            default: return L10n.Pulse.measureNow
+            }
+        }
+
+        static func measuringTitle(for kind: IndicatorKind) -> String {
+            switch kind {
+            case .spo2: return tr("vital_measuring_spo2_title")
+            case .temperature: return tr("vital_measuring_temp_title")
+            case .bloodPressure: return tr("vital_measuring_pressure_title")
+            case .steps: return tr("vital_measuring_steps_title")
+            case .sleep: return tr("vital_measuring_sleep_title")
+            default: return L10n.Pulse.measuringTitle
+            }
+        }
+    }
+
     enum Goals {
         static var screenTitle: String { tr("goals_screen_title") }
         static var emptyHeadline: String { tr("goals_empty_headline") }

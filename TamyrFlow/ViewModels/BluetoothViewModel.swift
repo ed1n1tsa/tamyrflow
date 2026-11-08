@@ -58,6 +58,20 @@ final class BluetoothViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+
+        // During «Измерить» pause step poll so the band is free (client DeviceBusy fix).
+        healthService.$isExclusiveMeasuring
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] exclusive in
+                guard let self else { return }
+                if exclusive {
+                    self.stopRealtimeStepPolling()
+                } else if self.bleService.connectionStatus == .verified {
+                    self.startRealtimeStepPolling()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     var statusText: String {
@@ -182,6 +196,11 @@ final class BluetoothViewModel: ObservableObject {
                 guard let self else { break }
                 guard self.bleService.connectionStatus == .verified,
                       self.healthService.isConnected else { break }
+                // Skip ticks while a live measure owns the BLE pipe.
+                if self.healthService.isExclusiveMeasuring {
+                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+                    continue
+                }
                 let totals = await self.healthService.fetchRealtimeStepTotals()
                 if let auth = self.authService, auth.session != nil {
                     await WatchMetricsBridge.persistBandDayTotals(
