@@ -2,18 +2,21 @@ import SwiftUI
 
 /// Figma iPhone 17 — «Важная информация» (disabled → accepted).
 struct ImportantInfoView: View {
+    @EnvironmentObject private var language: LanguageStore
     @Binding var isAccepted: Bool
     var onNext: () -> Void
     var onClose: (() -> Void)? = nil
 
-    private let paragraphs: [String] = [
-        "TamyrFlow — приложение для отслеживания физической активности и общего самочувствия.",
-        "Приложение носит исключительно информационный и оздоровительный характер и не является медицинским изделием.",
-        "Данные, получаемые с умных часов, предназначены для личного ознакомления и могут содержать погрешности.",
-        "TamyrFlow не предназначен для диагностики, лечения, профилактики заболеваний или принятия медицинских решений.",
-        "Информация в приложении не заменяет консультацию квалифицированного медицинского специалиста.",
-        "Нажимая «Понимаю и продолжить», вы подтверждаете, что ознакомились с данной информацией и понимаете ограничения приложения."
-    ]
+    private var paragraphs: [String] {
+        [
+            L10n.ImportantInfo.p1,
+            L10n.ImportantInfo.p2,
+            L10n.ImportantInfo.p3,
+            L10n.ImportantInfo.p4,
+            L10n.ImportantInfo.p5,
+            L10n.ImportantInfo.p6
+        ]
+    }
 
     var body: some View {
         ZStack {
@@ -24,6 +27,7 @@ struct ImportantInfoView: View {
 
                 modalCard
                     .padding(.horizontal, 22)
+                    .id(language.code)
 
                 Spacer(minLength: 24)
             }
@@ -32,8 +36,9 @@ struct ImportantInfoView: View {
 
     private var modalCard: some View {
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
+            HStack(alignment: .center) {
+                LanguagePickerView(style: .onLight)
+                Spacer(minLength: 8)
                 Button {
                     onClose?()
                 } label: {
@@ -45,9 +50,9 @@ struct ImportantInfoView: View {
                 .buttonStyle(.plain)
             }
             .padding(.top, 14)
-            .padding(.trailing, 14)
+            .padding(.horizontal, 14)
 
-            Text("ВАЖНАЯ ИНФОРМАЦИЯ")
+            Text(L10n.ImportantInfo.title)
                 .font(.system(size: 15, weight: .bold))
                 .tracking(0.6)
                 .foregroundStyle(.black)
@@ -64,7 +69,7 @@ struct ImportantInfoView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 12) {
-                        ForEach(paragraphs, id: \.self) { line in
+                        ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, line in
                             Text(line)
                                 .font(.system(size: 13, weight: .regular))
                                 .foregroundStyle(Color.black.opacity(0.88))
@@ -94,7 +99,7 @@ struct ImportantInfoView: View {
                                 .frame(width: 12, height: 12)
                         }
                     }
-                    Text("Понимаю и продолжить")
+                    Text(L10n.ImportantInfo.accept)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(.black)
                     Spacer(minLength: 0)
@@ -106,7 +111,7 @@ struct ImportantInfoView: View {
             .padding(.top, 10)
 
             Button(action: onNext) {
-                Text("ДАЛЕЕ")
+                Text(L10n.ImportantInfo.next)
                     .font(.system(size: 16, weight: .bold))
                     .tracking(1.0)
                     .foregroundStyle(isAccepted ? Color.white : AppTheme.onboardingButtonDisabledText)
@@ -133,8 +138,10 @@ struct ImportantInfoView: View {
 
 #Preview("Off") {
     ImportantInfoView(isAccepted: .constant(false), onNext: {})
+        .environmentObject(LanguageStore())
 }
 
 #Preview("On") {
     ImportantInfoView(isAccepted: .constant(true), onNext: {})
+        .environmentObject(LanguageStore())
 }

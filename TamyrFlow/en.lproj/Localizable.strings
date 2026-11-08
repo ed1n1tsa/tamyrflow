@@ -265,6 +265,15 @@
 "bat_normal" = "Normal";
 
 "auth_start" = "START";
+"important_info_title" = "IMPORTANT INFORMATION";
+"important_info_p1" = "TamyrFlow is an app for tracking physical activity and general well-being.";
+"important_info_p2" = "The app is for informational and wellness purposes only and is not a medical device.";
+"important_info_p3" = "Data from smartwatches is for personal reference and may contain inaccuracies.";
+"important_info_p4" = "TamyrFlow is not intended for diagnosis, treatment, prevention of disease, or medical decision-making.";
+"important_info_p5" = "Information in the app does not replace consultation with a qualified medical professional.";
+"important_info_p6" = "By tapping “I understand and continue”, you confirm that you have read this information and understand the limitations of the app.";
+"important_info_accept" = "I understand and continue";
+"important_info_next" = "NEXT";
 "auth_login_title" = "SIGN IN TO YOUR ACCOUNT";
 "auth_register_title" = "CREATE AN ACCOUNT";
 "auth_email" = "EMAIL";
