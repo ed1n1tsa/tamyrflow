@@ -1090,35 +1090,11 @@ final class VeepooHealthService: ObservableObject {
         }
     }
 
+    /// Permanently disabled — BLE sleep read triggers `VPAccurateSleepModel` crash on many bands.
     private func readSleepViaDirectSDK(dayNumber: Int) async -> Int? {
-        await waitUntilOperationIdle(timeoutSeconds: 1)
-        guard let mgr = manager, isConnected else { return nil }
-        return await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
-            var resumed = false
-            let finish: (Int?) -> Void = { value in
-                guard !resumed else { return }
-                resumed = true
-                cont.resume(returning: value)
-            }
-            let started = TFTryObjC {
-                mgr.veepooSDK_readSleepData(withDayNumber: dayNumber, result: { sleepOneDayArray in
-                    var minutes: Int?
-                    _ = TFTryObjC {
-                        let arr: [Any] = ((sleepOneDayArray as NSArray?) ?? []).map { $0 as Any }
-                        minutes = Self.parseSleepMinutes(from: arr)
-                    }
-                    finish(minutes)
-                })
-            }
-            if !started {
-                finish(nil)
-                return
-            }
-            Task {
-                try? await Task.sleep(nanoseconds: 8_000_000_000)
-                finish(nil)
-            }
-        }
+        _ = dayNumber
+        print("[WatchSync] BLE sleep read blocked — use HealthKit / ordinary SDK DB only")
+        return nil
     }
 
     func startHeartTest() {
