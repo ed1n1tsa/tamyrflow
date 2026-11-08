@@ -39,7 +39,7 @@ struct VitalMetricPageView: View {
                         lastMeasurementCard
                         averageCard
                         dynamicsCard
-                        if service.isWatchConnected || service.lastMeasurement != nil {
+                        if service.isWatchConnected || service.canActWithoutWatch || service.lastMeasurement != nil {
                             recentCard
                             disclaimerCard
                         } else {
@@ -271,7 +271,7 @@ struct VitalMetricPageView: View {
                 }
             }
 
-            if service.isWatchConnected {
+            if service.isWatchConnected || service.canActWithoutWatch {
                 VStack(spacing: 10) {
                     Button {
                         Task { await service.syncAvailableSources() }

@@ -253,16 +253,13 @@ struct IndicatorsPageView: View {
         switch kind {
         case .heartRate:
             PulsePageView(auth: auth, health: vm.healthService, ble: vm.bleService)
-        case .spo2, .temperature, .bloodPressure, .steps:
+        case .spo2, .temperature, .bloodPressure, .steps, .sleep:
             VitalMetricPageView(
                 kind: kind,
                 auth: auth,
                 health: vm.healthService,
                 ble: vm.bleService
             )
-        case .sleep:
-            // Band sleep dump still unsafe; show vitals placeholder until sleep page ships.
-            VitalsPage()
         }
     }
 }

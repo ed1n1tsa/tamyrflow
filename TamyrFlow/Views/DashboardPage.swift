@@ -288,7 +288,17 @@ struct DashboardPage: View {
                 .buttonStyle(.plain)
             }
 
-            sleepCard
+            NavigationLink {
+                VitalMetricPageView(
+                    kind: .sleep,
+                    auth: auth,
+                    health: vm.healthService,
+                    ble: vm.bleService
+                )
+            } label: {
+                sleepCard
+            }
+            .buttonStyle(.plain)
         }
     }
 

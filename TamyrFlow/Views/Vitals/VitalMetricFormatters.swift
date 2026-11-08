@@ -21,6 +21,9 @@ enum VitalMetricFormatters {
         case .steps:
             let n = Int(value.rounded())
             return n.formatted(.number.grouping(.automatic))
+        case .sleep:
+            let minutes = Int(value.rounded())
+            return String(format: L10n.Indicators.sleepValueFormat, minutes / 60, minutes % 60)
         default:
             return "\(Int(value.rounded()))"
         }
@@ -40,6 +43,8 @@ enum VitalMetricFormatters {
             return "\(Int(value.rounded())) \(L10n.Indicators.unit(for: .bloodPressure))"
         case .steps:
             return "\(displayValue(value, kind: .steps)) \(L10n.Indicators.unit(for: .steps))"
+        case .sleep:
+            return displayValue(value, kind: .sleep)
         default:
             return displayValue(value, secondary: secondary, kind: kind)
         }

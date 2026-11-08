@@ -851,6 +851,7 @@ enum L10n {
             case .temperature: return tr("vital_measure_temp")
             case .bloodPressure: return tr("vital_measure_pressure")
             case .steps: return tr("vital_measure_steps")
+            case .sleep: return tr("vital_measure_sleep")
             default: return L10n.Pulse.measureNow
             }
         }
@@ -861,6 +862,7 @@ enum L10n {
             case .temperature: return tr("vital_measuring_temp_title")
             case .bloodPressure: return tr("vital_measuring_pressure_title")
             case .steps: return tr("vital_measuring_steps_title")
+            case .sleep: return tr("vital_measuring_sleep_title")
             default: return L10n.Pulse.measuringTitle
             }
         }

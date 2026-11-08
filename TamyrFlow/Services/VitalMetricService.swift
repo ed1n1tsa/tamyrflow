@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import Supabase
 
-/// Pulse-style service for SpO₂ / temperature / blood pressure / steps.
+/// Pulse-style service for SpO₂ / temperature / blood pressure / steps / sleep.
 @MainActor
 final class VitalMetricService: ObservableObject {
     let kind: IndicatorKind
@@ -24,12 +24,15 @@ final class VitalMetricService: ObservableObject {
     private let ble: BleService
 
     init(kind: IndicatorKind, auth: AuthService, health: VeepooHealthService, ble: BleService) {
-        precondition(kind != .heartRate && kind != .sleep, "Use Pulse/Sleep pages for those metrics")
+        precondition(kind != .heartRate, "Use PulsePageView for heart rate")
         self.kind = kind
         self.auth = auth
         self.health = health
         self.ble = ble
     }
+
+    /// Sleep can refresh from Apple Health without a paired watch.
+    var canActWithoutWatch: Bool { kind == .sleep }
 
     var rangeStart: Date {
         let cal = Calendar.current
@@ -96,7 +99,8 @@ final class VitalMetricService: ObservableObject {
         var parts: [String] = ["kind: \(kind.metricKey)"]
 
         do {
-            if kind == .steps, isWatchConnected {
+            switch kind {
+            case .steps where isWatchConnected:
                 let totals = await health.fetchRealtimeStepTotals()
                 if let steps = totals.steps, steps >= 0 {
                     inserted += await persistSample(
@@ -110,9 +114,23 @@ final class VitalMetricService: ObservableObject {
                 } else {
                     parts.append("steps: none")
                 }
-            } else if !isWatchConnected {
+            case .sleep:
+                // Never BLE accurate-sleep dump — local DB + Apple Health only.
+                if let minutes = await health.fetchSleepMinutesRobust(), minutes > 0 {
+                    inserted += await persistSample(
+                        date: Date(),
+                        value: Double(minutes),
+                        secondary: nil,
+                        source: .appleHealth,
+                        deviceLabel: "Apple Health / Watch DB"
+                    )
+                    parts.append("sleepMin: \(minutes)")
+                } else {
+                    parts.append("sleep: none")
+                }
+            case _ where !isWatchConnected:
                 parts.append("watch: off")
-            } else {
+            default:
                 parts.append("sync: reload-only")
             }
 
@@ -122,7 +140,7 @@ final class VitalMetricService: ObservableObject {
             print("[VitalMetric] \(lastSyncDebug)")
 
             if case .loading = syncState {
-                if !isWatchConnected && measurements.isEmpty {
+                if !isWatchConnected && !canActWithoutWatch && measurements.isEmpty {
                     syncState = .noSource
                 } else if inserted == 0 && measurements.isEmpty {
                     syncState = .noNewData
@@ -140,9 +158,9 @@ final class VitalMetricService: ObservableObject {
         }
     }
 
-    /// Explicit measure on the watch → Supabase.
+    /// Explicit measure / refresh → Supabase.
     func measureNow() async {
-        guard isWatchConnected else {
+        if kind != .sleep, !isWatchConnected {
             syncState = .noSource
             return
         }
@@ -164,6 +182,8 @@ final class VitalMetricService: ObservableObject {
 
         var parts: [String] = ["mode: measure", "kind: \(kind.metricKey)"]
         do {
+            var source: PulseSource = .device
+            var deviceLabel = "Tamyr Watch"
             let sample: (date: Date, value: Double, secondary: Double?)?
             switch kind {
             case .spo2:
@@ -199,6 +219,17 @@ final class VitalMetricService: ObservableObject {
                     sample = nil
                     parts.append("live: none")
                 }
+            case .sleep:
+                // Safe path only — never pull Chinese accurate-sleep over BLE.
+                if let minutes = await health.fetchSleepMinutesRobust(), minutes > 0 {
+                    sample = (Date(), Double(minutes), nil)
+                    source = .appleHealth
+                    deviceLabel = "Apple Health / Watch DB"
+                    parts.append("sleepMin: \(minutes)")
+                } else {
+                    sample = nil
+                    parts.append("sleep: none")
+                }
             default:
                 sample = nil
             }
@@ -216,8 +247,8 @@ final class VitalMetricService: ObservableObject {
                 date: sample.date,
                 value: sample.value,
                 secondary: sample.secondary,
-                source: .device,
-                deviceLabel: "Tamyr Watch"
+                source: source,
+                deviceLabel: deviceLabel
             )
             parts.append("insert: \(inserted)")
             await loadFromSupabase()
@@ -360,7 +391,7 @@ final class VitalMetricService: ObservableObject {
                 let day = cal.startOfDay(for: r.recordedAt)
                 let key = GoalPeriodMath.dateOnlyString(day)
                 var b = buckets[key] ?? (0, 0, day, 0)
-                if kind == .steps {
+                if kind == .steps || kind == .sleep {
                     b.sum = max(b.sum, r.value)
                     b.count = 1
                     b.last = b.sum
@@ -376,7 +407,7 @@ final class VitalMetricService: ObservableObject {
             var prevDay: Date?
             for key in keys {
                 guard let b = buckets[key], b.count > 0 else { continue }
-                let value = kind == .steps ? b.last : (b.sum / Double(b.count))
+                let value = (kind == .steps || kind == .sleep) ? b.last : (b.sum / Double(b.count))
                 let connected: Bool
                 if let prevDay {
                     let diff = cal.dateComponents([.day], from: prevDay, to: b.day).day ?? 99
@@ -402,7 +433,7 @@ final class VitalMetricService: ObservableObject {
         var s = PulsePeriodStats()
         guard !current.isEmpty else { return s }
         let values = current.map(\.value)
-        if kind == .steps {
+        if kind == .steps || kind == .sleep {
             s.average = values.last
         } else {
             s.average = values.reduce(0, +) / Double(values.count)
@@ -422,7 +453,7 @@ final class VitalMetricService: ObservableObject {
         let prev = all.filter { $0.recordedAt >= prevStart && $0.recordedAt < rangeStart }
         if let avg = s.average, !prev.isEmpty {
             let prevAvg: Double
-            if kind == .steps {
+            if kind == .steps || kind == .sleep {
                 prevAvg = prev.map(\.value).max() ?? 0
             } else {
                 prevAvg = prev.map(\.value).reduce(0, +) / Double(prev.count)

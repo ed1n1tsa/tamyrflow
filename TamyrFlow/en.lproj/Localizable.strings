@@ -790,3 +790,5 @@ Open the email and enter the code below.";
 "vital_connect_cta_title" = "Connect your watch to see this data";
 "vital_connect_cta_body" = "TamyrFlow will receive measurements from your connected Tamyr Watch.";
 "vital_sheet_about_body" = "TamyrFlow shows this metric from compatible connected devices.\n\nValues may change with activity, rest, and other factors.\n\nTamyrFlow is for tracking activity and general wellness. It is not intended for diagnosis, treatment, or medical monitoring.";
+"vital_measure_sleep" = "Update sleep";
+"vital_measuring_sleep_title" = "Updating sleep";
