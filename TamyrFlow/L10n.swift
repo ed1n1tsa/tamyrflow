@@ -7,6 +7,18 @@ enum L10n {
         return bundle.localizedString(forKey: key, value: nil, table: nil)
     }
 
+    enum ImportantInfo {
+        static var title: String { tr("important_info_title") }
+        static var p1: String { tr("important_info_p1") }
+        static var p2: String { tr("important_info_p2") }
+        static var p3: String { tr("important_info_p3") }
+        static var p4: String { tr("important_info_p4") }
+        static var p5: String { tr("important_info_p5") }
+        static var p6: String { tr("important_info_p6") }
+        static var accept: String { tr("important_info_accept") }
+        static var next: String { tr("important_info_next") }
+    }
+
     enum Auth {
         static var start: String { tr("auth_start") }
         static var loginTitle: String { tr("auth_login_title") }
