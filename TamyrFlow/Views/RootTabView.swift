@@ -32,11 +32,7 @@ struct RootTabView: View {
                 .padding(.horizontal, 13)
                 .padding(.bottom, 8)
         }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            if tab != .profile && tab != .goals && tab != .activity && tab != .metrics {
-                ConnectionStatusBar(ble: vm.bleService, health: vm.healthService)
-            }
-        }
+        // Home has its own watch status card; other tabs don't need the legacy BLE strip.
         .overlay {
             if let hud = vm.healthService.measurementHUD {
                 MeasurementHUDView(state: hud) {

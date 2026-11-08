@@ -509,6 +509,9 @@ struct DashboardPage: View {
 
     private var syncLabel: String {
         if let at = vm.healthService.lastDailySyncAt {
+            if Calendar.current.isDateInToday(at) {
+                return "\(L10n.Home.syncPrefix): \(L10n.Home.syncToday), \(Self.shortTime.string(from: at))"
+            }
             return "\(L10n.Home.syncPrefix): \(Self.shortTime.string(from: at))"
         }
         return "\(L10n.Home.syncPrefix): —"
@@ -626,7 +629,13 @@ private struct MiniSparkline: View {
 private struct HomeWeekBars: View {
     let values: [Double]
     let highlightIndex: Int?
-    private let labels = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+
+    private var labels: [String] {
+        [
+            L10n.Home.weekdayMon, L10n.Home.weekdayTue, L10n.Home.weekdayWed,
+            L10n.Home.weekdayThu, L10n.Home.weekdayFri, L10n.Home.weekdaySat, L10n.Home.weekdaySun
+        ]
+    }
 
     var body: some View {
         GeometryReader { geo in

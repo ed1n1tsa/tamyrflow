@@ -7,6 +7,42 @@ enum L10n {
         return bundle.localizedString(forKey: key, value: nil, table: nil)
     }
 
+    enum Home {
+        static var tagline: String { tr("home_tagline") }
+        static var watchConnected: String { tr("home_watch_connected") }
+        static var watchDisconnected: String { tr("home_watch_disconnected") }
+        static var watchDisconnectedBody: String { tr("home_watch_disconnected_body") }
+        static var connectWatch: String { tr("home_connect_watch") }
+        static var moreDetails: String { tr("home_more_details") }
+        static var syncPrefix: String { tr("home_sync_prefix") }
+        static var syncToday: String { tr("home_sync_today") }
+        static var mainIndicators: String { tr("home_main_indicators") }
+        static var allData: String { tr("home_all_data") }
+        static var pulse: String { tr("home_pulse") }
+        static var bpm: String { tr("home_bpm") }
+        static var oxygen: String { tr("home_oxygen") }
+        static var temperature: String { tr("home_temperature") }
+        static var pressure: String { tr("home_pressure") }
+        static var steps: String { tr("home_steps") }
+        static var stepsOf: String { tr("home_steps_of") }
+        static var sleep: String { tr("home_sleep") }
+        static var sleepToday: String { tr("home_sleep_today") }
+        static var sleepDurationFormat: String { tr("home_sleep_duration_format") }
+        static var activity: String { tr("home_activity") }
+        static var periodDay: String { tr("home_period_day") }
+        static var periodWeek: String { tr("home_period_week") }
+        static var periodMonth: String { tr("home_period_month") }
+        static var noData: String { tr("home_no_data") }
+        static var noActivityData: String { tr("home_no_activity_data") }
+        static var weekdayMon: String { tr("home_weekday_mon") }
+        static var weekdayTue: String { tr("home_weekday_tue") }
+        static var weekdayWed: String { tr("home_weekday_wed") }
+        static var weekdayThu: String { tr("home_weekday_thu") }
+        static var weekdayFri: String { tr("home_weekday_fri") }
+        static var weekdaySat: String { tr("home_weekday_sat") }
+        static var weekdaySun: String { tr("home_weekday_sun") }
+    }
+
     enum ImportantInfo {
         static var title: String { tr("important_info_title") }
         static var p1: String { tr("important_info_p1") }
