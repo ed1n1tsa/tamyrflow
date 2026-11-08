@@ -45,6 +45,9 @@ final class BleService: ObservableObject {
         manager.peripheralManage = VPPeripheralManage.shareVPPeripheralManager()
 
         manager.isLogEnable = true
+        // Stay off until the user connects. After verify we flip this on so the SDK can
+        // silently reclaim the band in background (with bluetooth-central) instead of
+        // iOS showing “Accessory wants to open TamyrFlow” every few seconds.
         manager.automaticConnection = false
         // If YES, Veepoo SDK only shows devices with their manufacturer ID — easy to see "no devices".
         manager.manufacturerIDFilter = false
@@ -63,8 +66,10 @@ final class BleService: ObservableObject {
             Task { @MainActor in
                 guard let self else { return }
                 self.connectionStatus = Self.mapConnectionState(state)
-                if state.rawValue == 3 {
+                if state.rawValue == 3 { // verified
                     self.connectedDevice = self.bleManager?.peripheralModel
+                    // Allow SDK auto-reconnect while the user remains paired.
+                    self.bleManager?.automaticConnection = true
                 }
                 if state.rawValue == 0 {
                     self.connectedDevice = nil
@@ -256,6 +261,8 @@ final class BleService: ObservableObject {
         configureSDKIfNeeded()
         stopScan()
         connectionStatus = .connecting
+        // Enable SDK auto-reconnect for this pairing session (needed for silent background reclaim).
+        bleManager?.automaticConnection = true
         bleManager?.veepooSDKConnectDevice(device.rawModel) { [weak self] state in
             Task { @MainActor in
                 self?.connectionStatus = Self.mapDeviceConnectState(state)
@@ -263,8 +270,16 @@ final class BleService: ObservableObject {
         }
     }
 
+    /// User-initiated disconnect — also disables SDK auto-reconnect permanently for this session.
     func disconnect() {
+        bleManager?.automaticConnection = false
         bleManager?.veepooSDKDisconnectDevice()
+    }
+
+    /// Keep the Veepoo central warm when returning to foreground / after background BLE wake.
+    func prepareForBackgroundBLE() {
+        configureSDKIfNeeded()
+        refreshBluetoothStateIfConfigured()
     }
 
     func readBattery() {

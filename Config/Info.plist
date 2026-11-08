@@ -16,5 +16,11 @@
 	<string>TamyrFlow may save wellness data you choose to track in the app.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+	<!-- Keep BLE sessions alive / wake silently so bonded watches (e.g. ET488)
+	     do not spam “Accessory wants to open TamyrFlow” while the app is backgrounded. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+	</array>
 </dict>
 </plist>

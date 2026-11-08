@@ -201,13 +201,25 @@ final class BluetoothViewModel: ObservableObject {
         realtimeStepPollTask = nil
     }
 
-    /// Foreground: refresh BT state only — no global AutoHR pulse.
-    func handleAppForegroundActive(_ active: Bool) {
-        guard active else { return }
-        bleService.refreshBluetoothStateIfConfigured()
-        if bleService.connectionStatus == .verified {
-            startRealtimeStepPolling()
+    /// Scene lifecycle: keep BLE alive in background; only poll steps while active.
+    /// Disconnecting on background made bonded bands (ET488) spam iOS
+    /// “Accessory wants to open TamyrFlow” every ~5s.
+    func handleAppSceneActive(_ active: Bool) {
+        if active {
+            bleService.prepareForBackgroundBLE()
+            if bleService.connectionStatus == .verified {
+                startRealtimeStepPolling()
+            }
+        } else {
+            stopRealtimeStepPolling()
+            // Do not disconnect — bluetooth-central + SDK automaticConnection reclaim silently.
+            bleService.prepareForBackgroundBLE()
         }
+    }
+
+    /// Back-compat name.
+    func handleAppForegroundActive(_ active: Bool) {
+        handleAppSceneActive(active)
     }
 
     /// Cold start: if already verified, sync time/battery + activity metrics (no AutoHR spam).

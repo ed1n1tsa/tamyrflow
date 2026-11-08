@@ -67,10 +67,12 @@ struct ContentView: View {
                 }
                 .onAppear {
                     vm.attachAuth(auth)
-                    vm.handleAppForegroundActive(scenePhase == .active)
+                    vm.bleService.configureSDKIfNeeded()
+                    vm.handleAppSceneActive(scenePhase == .active)
                 }
                 .onChange(of: scenePhase) { _, phase in
-                    vm.handleAppForegroundActive(phase == .active)
+                    // Keep central warm on background so bonded watches reconnect silently.
+                    vm.handleAppSceneActive(phase == .active)
                 }
                 .transition(.opacity)
             }
