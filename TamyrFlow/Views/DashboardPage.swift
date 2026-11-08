@@ -146,7 +146,7 @@ struct DashboardPage: View {
             Image("HomeWatchDisconnected")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 92, height: 92)
+                .frame(width: 86, height: 110)
 
             VStack(alignment: .leading, spacing: 10) {
                 Text(L10n.Home.watchDisconnected)
