@@ -148,7 +148,7 @@
 "settings_auto_temp" = "Авто температура";
 "settings_apply" = "Применить на браслет";
 "settings_time_card" = "Время";
-"settings_time_sub" = "Через API SDK";
+"settings_time_sub" = "Сверить часы с временем телефона";
 "settings_sync_time_band" = "Синхронизировать время с браслетом";
 
 /* States */
@@ -379,11 +379,12 @@
 "prof_weight" = "Вес";
 "prof_gender_unspecified_short" = "Не указан";
 "prof_goals_title" = "Цели и прогресс";
-"prof_goals_sub_mock" = "3 из 5 целей достигнуто";
+"prof_goals_empty" = "Целей пока нет — нажмите, чтобы добавить";
 "prof_my_watch" = "Мои часы";
 "prof_connected" = "Подключены";
 "prof_disconnected" = "Не подключены";
-"prof_last_sync_mock" = "Последняя синхронизация Сегодня, 09:40";
+"prof_last_sync_never" = "Ещё не синхронизировано";
+"prof_last_sync_format" = "Последняя синхронизация %@";
 "prof_menu_personal" = "Личные данные";
 "prof_menu_personal_sub" = "Имя, возраст, пол, рост, вес";
 "prof_menu_metrics" = "Мои показатели";
@@ -445,6 +446,9 @@
 "goals_category_taken" = "Цель этой категории уже существует.";
 "goals_history_title" = "История прогресса";
 "goals_history_stub" = "История появится после связи с часами.";
+"goals_history_empty" = "Истории прогресса пока нет. Обновляйте цели — прошлые периоды появятся здесь.";
+"goals_history_close" = "Закрыть";
+"goals_history_target_format" = "%@ / %@";
 "goals_summary_format" = "%d из %d целей выполнено";
 "goals_step_category_title" = "Выберите категорию";
 "goals_step_category_sub" = "Одна активная цель на категорию.";
@@ -721,6 +725,7 @@
 "pulse_update_hint" = "Нажмите «Обновить» — измерим пульс на часах";
 "pulse_sync_hint" = "Синхронизация или новое измерение";
 "pulse_measure_now" = "Измерить пульс";
+"pulse_live_measure_off" = "Живое измерение появится в следующем обновлении. Нажмите «Обновить», чтобы загрузить сохранённые данные.";
 "pulse_measuring_title" = "Измеряем пульс";
 "pulse_measuring_body" = "Держите часы плотно на запястье. Обычно 15–25 секунд…";
 "pulse_average_title" = "Средний пульс";

@@ -20,6 +20,7 @@ struct OnboardingFlowView: View {
     @State private var forgotEmail = ""
 
     var body: some View {
+        let _ = language.revision
         ZStack {
             switch step {
             case .importantInfo:

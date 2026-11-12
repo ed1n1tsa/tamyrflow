@@ -86,10 +86,13 @@ struct AppSettingsView: View {
                     language.set(code)
                     flash(L10n.Settings.languageSaved)
                 } label: {
-                    HStack {
-                        Text(code.shortLabel)
+                    HStack(spacing: 12) {
+                        Text(code.nativeName)
                             .font(AppFont.interBold(15))
                             .foregroundStyle(.white)
+                        Text(code.shortLabel)
+                            .font(AppFont.interBold(12))
+                            .foregroundStyle(ProfileTheme.muted)
                         Spacer()
                         if language.code == code {
                             Image(systemName: "checkmark.circle.fill")
@@ -113,10 +116,6 @@ struct AppSettingsView: View {
             toggleRow(L10n.Settings.metric, systemImage: "ruler", isOn: $vm.useMetric)
             divider
             toggleRow(L10n.Settings.time24, systemImage: "clock", isOn: $vm.use24h)
-            divider
-            toggleRow(L10n.Settings.autoHr, systemImage: "heart.text.square", isOn: $vm.autoHR)
-            divider
-            toggleRow(L10n.Settings.autoTemp, systemImage: "thermometer", isOn: $vm.autoTemperature)
 
             Button {
                 vm.applyDeviceTogglesToWatch()

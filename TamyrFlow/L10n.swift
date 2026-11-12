@@ -3,8 +3,7 @@ import Foundation
 /// Centralized keys for `Localizable.strings` (en / ru / kk).
 enum L10n {
     private static func tr(_ key: String) -> String {
-        let bundle = LanguageStoreBootstrap.bundle
-        return bundle.localizedString(forKey: key, value: nil, table: nil)
+        LanguageStoreBootstrap.bundle.localizedString(forKey: key, value: key, table: "Localizable")
     }
 
     enum Home {
@@ -151,11 +150,17 @@ enum L10n {
         static var weight: String { tr("prof_weight") }
         static var genderUnspecifiedShort: String { tr("prof_gender_unspecified_short") }
         static var goalsTitle: String { tr("prof_goals_title") }
-        static var goalsSubMock: String { tr("prof_goals_sub_mock") }
+        static var goalsEmpty: String { tr("prof_goals_empty") }
+        static func goalsSummary(done: Int, total: Int) -> String {
+            String(format: tr("goals_summary_format"), done, total)
+        }
         static var myWatch: String { tr("prof_my_watch") }
         static var connected: String { tr("prof_connected") }
         static var disconnected: String { tr("prof_disconnected") }
-        static var lastSyncMock: String { tr("prof_last_sync_mock") }
+        static var lastSyncNever: String { tr("prof_last_sync_never") }
+        static func lastSync(_ value: String) -> String {
+            String(format: tr("prof_last_sync_format"), value)
+        }
         static var menuPersonal: String { tr("prof_menu_personal") }
         static var menuPersonalSub: String { tr("prof_menu_personal_sub") }
         static var menuMetrics: String { tr("prof_menu_metrics") }
@@ -788,6 +793,7 @@ enum L10n {
         static var updateHint: String { tr("pulse_update_hint") }
         static var syncHint: String { tr("pulse_sync_hint") }
         static var measureNow: String { tr("pulse_measure_now") }
+        static var liveMeasureOff: String { tr("pulse_live_measure_off") }
         static var measuringTitle: String { tr("pulse_measuring_title") }
         static var measuringBody: String { tr("pulse_measuring_body") }
         static var averageTitle: String { tr("pulse_average_title") }
@@ -940,6 +946,9 @@ enum L10n {
         static var categoryTaken: String { tr("goals_category_taken") }
         static var historyTitle: String { tr("goals_history_title") }
         static var historyStub: String { tr("goals_history_stub") }
+        static var historyEmpty: String { tr("goals_history_empty") }
+        static var historyClose: String { tr("goals_history_close") }
+        static var historyTargetFormat: String { tr("goals_history_target_format") }
         static var summaryFormat: String { tr("goals_summary_format") }
         static var stepCategoryTitle: String { tr("goals_step_category_title") }
         static var stepCategorySub: String { tr("goals_step_category_sub") }

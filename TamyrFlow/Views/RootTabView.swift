@@ -3,6 +3,7 @@ import SwiftUI
 struct RootTabView: View {
     @EnvironmentObject private var vm: BluetoothViewModel
     @EnvironmentObject private var auth: AuthService
+    @EnvironmentObject private var language: LanguageStore
     @State private var tab: MainTab = .home
 
     var body: some View {
@@ -21,7 +22,7 @@ struct RootTabView: View {
                 GoalsPageView(auth: auth)
                     .opacity(tab == .goals ? 1 : 0)
                     .allowsHitTesting(tab == .goals)
-                ProfilePage(selectedTab: $tab)
+                ProfilePage(selectedTab: $tab, auth: auth)
                     .opacity(tab == .profile ? 1 : 0)
                     .allowsHitTesting(tab == .profile)
             }
@@ -32,6 +33,9 @@ struct RootTabView: View {
                 .padding(.horizontal, 13)
                 .padding(.bottom, 8)
         }
+        // Observe language so tab titles and any child that reads L10n re-render.
+        // Avoid `.id(language…)` on tab roots — it remounts Profile and pops Settings.
+        .environment(\.locale, Locale(identifier: language.code.bundleCode))
         // Home has its own watch status card; other tabs don't need the legacy BLE strip.
         .overlay {
             if let hud = vm.healthService.measurementHUD {
@@ -70,8 +74,10 @@ struct RootTabView: View {
 
 private struct FloatingTabBar: View {
     @Binding var selection: MainTab
+    @EnvironmentObject private var language: LanguageStore
 
     var body: some View {
+        let _ = language.revision
         HStack(spacing: 0) {
             ForEach(MainTab.allCases, id: \.self) { tab in
                 Button {

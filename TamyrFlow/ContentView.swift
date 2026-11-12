@@ -10,12 +10,14 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject private var vm: BluetoothViewModel
     @EnvironmentObject private var auth: AuthService
+    @EnvironmentObject private var language: LanguageStore
     @Environment(\.scenePhase) private var scenePhase
 
     /// Animated splash overlays the auth gate once per cold start of this view tree.
     @State private var showSplash = true
 
     var body: some View {
+        let _ = language.revision
         ZStack {
             appRoot
 
@@ -29,7 +31,9 @@ struct ContentView: View {
                 .zIndex(100)
             }
         }
+        .environment(\.locale, Locale(identifier: language.code.bundleCode))
         .animation(.easeInOut(duration: 0.3), value: showSplash)
+        .animation(.easeInOut(duration: 0.2), value: language.revision)
     }
 
     @ViewBuilder

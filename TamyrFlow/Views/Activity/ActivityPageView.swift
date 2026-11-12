@@ -3,6 +3,7 @@ import SwiftUI
 struct ActivityPageView: View {
     @EnvironmentObject private var vm: BluetoothViewModel
     @EnvironmentObject private var auth: AuthService
+    @EnvironmentObject private var language: LanguageStore
     @Binding var selectedTab: MainTab
     @StateObject private var service: ActivityService
     @State private var showAdd = false
@@ -17,6 +18,7 @@ struct ActivityPageView: View {
     }
 
     var body: some View {
+        let _ = language.revision
         ZStack {
             GoalsBackgroundView()
 

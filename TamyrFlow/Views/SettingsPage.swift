@@ -35,22 +35,6 @@ struct SettingsPage: View {
                         }
                         .tint(AppTheme.accent)
                         .foregroundStyle(.white)
-                        VStack(alignment: .leading, spacing: 6) {
-                            Toggle(isOn: $vm.autoHR) {
-                                Label(L10n.Settings.autoHr, systemImage: "heart.text.square")
-                            }
-                            .tint(AppTheme.accent)
-                            .foregroundStyle(.white)
-                            Text(L10n.Settings.autoHrHint)
-                                .font(.caption2)
-                                .foregroundStyle(.white.opacity(0.4))
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        Toggle(isOn: $vm.autoTemperature) {
-                            Label(L10n.Settings.autoTemp, systemImage: "thermometer")
-                        }
-                        .tint(AppTheme.accent)
-                        .foregroundStyle(.white)
                         TFPrimaryButton(L10n.Settings.applyToggles, systemImage: "arrow.triangle.2.circlepath") {
                             vm.applyDeviceTogglesToWatch()
                         }

@@ -121,6 +121,23 @@ struct GoalProgress: Codable, Identifiable, Equatable {
     }
 }
 
+struct GoalHistoryEntry: Identifiable, Equatable, Hashable {
+    let id: UUID
+    let goalId: UUID
+    let category: GoalCategory
+    let period: GoalPeriod
+    let periodStart: String
+    let currentValue: Double
+    let targetValue: Double
+    let unit: String
+    let source: String
+
+    var ratio: Double {
+        guard targetValue > 0 else { return 0 }
+        return min(1, max(0, currentValue / targetValue))
+    }
+}
+
 struct GoalDraft: Equatable {
     var category: GoalCategory = .steps
     var targetValue: Double = GoalCategory.steps.defaultTarget

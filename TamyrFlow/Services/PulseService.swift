@@ -146,6 +146,10 @@ final class PulseService: ObservableObject {
 
     /// Explicit «Измерить пульс»: live SDK test → Supabase + Apple Health.
     func measureHeartNow() async {
+        guard AppFeatureFlags.liveWatchMeasureEnabled else {
+            syncState = .idle
+            return
+        }
         guard isWatchConnected else {
             syncState = .noSource
             return

@@ -295,24 +295,33 @@ struct VitalMetricPageView: View {
                     }
                     .buttonStyle(.plain)
 
-                    Button {
-                        Task { await service.measureNow() }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: iconName)
-                                .font(.system(size: 13, weight: .bold))
-                            Text(L10n.Vital.measureNow(for: service.kind))
-                                .font(AppFont.interBold(14))
+                    if AppFeatureFlags.liveWatchMeasureEnabled {
+                        Button {
+                            Task { await service.measureNow() }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: iconName)
+                                    .font(.system(size: 13, weight: .bold))
+                                Text(L10n.Vital.measureNow(for: service.kind))
+                                    .font(AppFont.interBold(14))
+                            }
+                            .foregroundStyle(accent)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(
+                                Capsule(style: .continuous)
+                                    .strokeBorder(accent.opacity(0.85), lineWidth: 1.5)
+                            )
                         }
-                        .foregroundStyle(accent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(
-                            Capsule(style: .continuous)
-                                .strokeBorder(accent.opacity(0.85), lineWidth: 1.5)
-                        )
+                        .buttonStyle(.plain)
+                    } else {
+                        Text(L10n.Pulse.liveMeasureOff)
+                            .font(AppFont.interBold(12))
+                            .foregroundStyle(ProfileTheme.muted)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 4)
                     }
-                    .buttonStyle(.plain)
                 }
                 .disabled(service.syncState == .loading)
                 .opacity(service.syncState == .loading ? 0.7 : 1)

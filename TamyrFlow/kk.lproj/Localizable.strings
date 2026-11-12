@@ -148,7 +148,7 @@
 "settings_auto_temp" = "Авто температура";
 "settings_apply" = "Білезікке қолдану";
 "settings_time_card" = "Уақыт";
-"settings_time_sub" = "SDK API арқылы";
+"settings_time_sub" = "Сағатты телефон уақытымен сәйкестендіру";
 "settings_sync_time_band" = "Уақытты білезікпен синхрондау";
 
 /* States */
@@ -379,11 +379,12 @@
 "prof_weight" = "Салмақ";
 "prof_gender_unspecified_short" = "Көрсетілмеген";
 "prof_goals_title" = "Мақсаттар мен прогресс";
-"prof_goals_sub_mock" = "5 мақсаттың 3-і орындалды";
+"prof_goals_empty" = "Мақсат жоқ — қосу үшін басыңыз";
 "prof_my_watch" = "Сағатым";
 "prof_connected" = "Қосылған";
 "prof_disconnected" = "Қосылмаған";
-"prof_last_sync_mock" = "Соңғы синхрон Бүгін, 09:40";
+"prof_last_sync_never" = "Әлі синхрондалмаған";
+"prof_last_sync_format" = "Соңғы синхрон %@";
 "prof_menu_personal" = "Жеке деректер";
 "prof_menu_personal_sub" = "Аты, жас, жыныс, бой, салмақ";
 "prof_menu_metrics" = "Көрсеткіштерім";
@@ -445,6 +446,9 @@
 "goals_category_taken" = "Бұл санатта мақсат бар.";
 "goals_history_title" = "Прогресс тарихы";
 "goals_history_stub" = "Тарих сағатпен байланысқаннан кейін пайда болады.";
+"goals_history_empty" = "Прогресс тарихы әлі жоқ. Мақсаттарды жаңартсаңыз, өткен кезеңдер осында көрінеді.";
+"goals_history_close" = "Жабу";
+"goals_history_target_format" = "%@ / %@";
 "goals_summary_format" = "%d / %d мақсат орындалды";
 "goals_step_category_title" = "Санатты таңдаңыз";
 "goals_step_category_sub" = "Әр санатқа бір белсенді мақсат.";
@@ -721,6 +725,7 @@
 "pulse_update_hint" = "«Жаңарту» басыңыз — сағатта пульс өлшейміз";
 "pulse_sync_hint" = "Синхрондау немесе жаңа өлшем";
 "pulse_measure_now" = "Пульс өлшеу";
+"pulse_live_measure_off" = "Тікелей өлшеу кейінгі жаңартуда қосылады. Сақталған деректер үшін «Жаңарту» басыңыз.";
 "pulse_measuring_title" = "Пульс өлшенеді";
 "pulse_measuring_body" = "Сағатты қолда тығыз ұстаңыз. Әдетте 15–25 секунд…";
 "pulse_average_title" = "Орташа пульс";

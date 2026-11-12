@@ -6,7 +6,9 @@ import Supabase
 final class GoalsService: ObservableObject {
     @Published private(set) var goals: [Goal] = []
     @Published private(set) var progressByGoalId: [UUID: GoalProgress] = [:]
+    @Published private(set) var historyEntries: [GoalHistoryEntry] = []
     @Published private(set) var isLoading = false
+    @Published private(set) var isLoadingHistory = false
     @Published var lastError: String?
 
     private let auth: AuthService
@@ -161,6 +163,54 @@ final class GoalsService: ObservableObject {
             .eq("id", value: goal.id.uuidString)
             .execute()
         await refresh()
+    }
+
+    // MARK: - History
+
+    func loadHistory() async {
+        guard let uid = auth.session?.user.id else {
+            historyEntries = []
+            return
+        }
+        isLoadingHistory = true
+        defer { isLoadingHistory = false }
+
+        do {
+            let goalsResponse: PostgrestResponse<[Goal]> = try await auth.client
+                .from("goals")
+                .select()
+                .eq("user_id", value: uid.uuidString)
+                .execute()
+            let goalsById = Dictionary(uniqueKeysWithValues: goalsResponse.value.map { ($0.id, $0) })
+
+            let progressResponse: PostgrestResponse<[GoalProgress]> = try await auth.client
+                .from("goal_progress")
+                .select()
+                .eq("user_id", value: uid.uuidString)
+                .order("period_start", ascending: false)
+                .limit(80)
+                .execute()
+
+            historyEntries = progressResponse.value.compactMap { row in
+                guard let goal = goalsById[row.goalId] else { return nil }
+                // Skip empty current periods — history should show meaningful progress.
+                guard row.currentValue > 0 else { return nil }
+                return GoalHistoryEntry(
+                    id: row.id,
+                    goalId: goal.id,
+                    category: goal.category,
+                    period: goal.period,
+                    periodStart: row.periodStart,
+                    currentValue: row.currentValue,
+                    targetValue: goal.targetValue,
+                    unit: goal.unit,
+                    source: row.source
+                )
+            }
+        } catch {
+            lastError = error.localizedDescription
+            historyEntries = []
+        }
     }
 
     // MARK: - Progress

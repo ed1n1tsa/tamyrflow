@@ -160,6 +160,10 @@ final class VitalMetricService: ObservableObject {
 
     /// Explicit measure / refresh → Supabase.
     func measureNow() async {
+        guard AppFeatureFlags.liveWatchMeasureEnabled else {
+            syncState = .idle
+            return
+        }
         if kind != .sleep, !isWatchConnected {
             syncState = .noSource
             return
