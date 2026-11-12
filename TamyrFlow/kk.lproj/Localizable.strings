@@ -524,7 +524,7 @@
 "about_disclaimer_warn" = "Қосымша деректері бойынша өздігінен диагноз қоймаңыз және емдеу шешімін қабылдамаңыз. Денсаулыққа қатысты сұрақтарда дәрігерге немесе басқа білікті маманға жүгініңіз.";
 "about_contact_title" = "Бізбен байланысу";
 "about_contact_sub" = "Сұрақ, ұсыныс немесе идея бар ма? Біз әрдайым байланыстамыз.";
-"about_contact_email" = "support@tamyrflow.app";
+"about_contact_email" = "tamyrflow@gmail.com";
 
 /* Activity */
 "act_screen_title" = "Белсенділік";

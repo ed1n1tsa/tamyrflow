@@ -770,7 +770,8 @@ enum L10n {
         static var disclaimerWarn: String { tr("about_disclaimer_warn") }
         static var contactTitle: String { tr("about_contact_title") }
         static var contactSub: String { tr("about_contact_sub") }
-        static var contactEmail: String { tr("about_contact_email") }
+        /// Canonical support inbox (same in all languages).
+        static var contactEmail: String { "tamyrflow@gmail.com" }
     }
 
     enum Pulse {

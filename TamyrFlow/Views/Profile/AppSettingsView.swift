@@ -93,14 +93,18 @@ struct AppSettingsView: View {
                         Text(code.shortLabel)
                             .font(AppFont.interBold(12))
                             .foregroundStyle(ProfileTheme.muted)
-                        Spacer()
+                        Spacer(minLength: 0)
                         if language.code == code {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(ProfileTheme.accent)
+                        } else {
+                            Color.clear.frame(width: 20, height: 20)
                         }
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 if index < AppLanguageCode.allCases.count - 1 {

@@ -524,7 +524,7 @@
 "about_disclaimer_warn" = "Не ставьте себе диагнозы и не принимайте решения о лечении на основе данных приложения. При любых вопросах, связанных со здоровьем, обратитесь к врачу или другому квалифицированному медицинскому специалисту.";
 "about_contact_title" = "Связаться с нами";
 "about_contact_sub" = "Есть вопросы, предложения или идеи? Мы всегда на связи.";
-"about_contact_email" = "support@tamyrflow.app";
+"about_contact_email" = "tamyrflow@gmail.com";
 
 /* Activity */
 "act_screen_title" = "Активность";

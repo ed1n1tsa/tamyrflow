@@ -528,7 +528,7 @@ Open the email and enter the code below.";
 "about_disclaimer_warn" = "Do not self-diagnose or make treatment decisions based on app data. For any health-related questions, consult a doctor or other qualified medical professional.";
 "about_contact_title" = "Contact us";
 "about_contact_sub" = "Questions, ideas, or feedback? We're always here.";
-"about_contact_email" = "support@tamyrflow.app";
+"about_contact_email" = "tamyrflow@gmail.com";
 
 /* Activity */
 "act_screen_title" = "Activity";
