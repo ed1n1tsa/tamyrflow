@@ -39,9 +39,10 @@ struct NotificationsPage: View {
         .onAppear {
             let connected = vm.bleService.connectionStatus == .connected
                 || vm.bleService.connectionStatus == .verified
+            let name = vm.currentDeviceName
             store.refreshContextual(
                 watchConnected: connected,
-                deviceName: vm.bleService.connectedDevice?.deviceName,
+                deviceName: (name == "-" || name.isEmpty) ? nil : name,
                 lastSyncAt: vm.healthService.lastDailySyncAt
             )
         }
