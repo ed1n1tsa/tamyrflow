@@ -332,6 +332,77 @@ final class BleService: ObservableObject {
         }
     }
 
+    // MARK: - Watch faces (built-in styles)
+
+    /// Number of built-in dial styles the connected band exposes (`1…count`). `0` = unsupported.
+    var builtInDialStyleCount: Int {
+        guard let model = bleManager?.peripheralModel else { return 0 }
+        return max(Int(model.screenTypes), Int(model.dialCount))
+    }
+
+    /// Read current built-in dial style index (1-based). Nil if unsupported / failed.
+    func readBuiltInDialStyle() async -> Int? {
+        configureSDKIfNeeded()
+        guard bleManager?.isConnected == true,
+              let manage = bleManager?.peripheralManage,
+              builtInDialStyleCount > 0 else { return nil }
+
+        return await withCheckedContinuation { (cont: CheckedContinuation<Int?, Never>) in
+            var resumed = false
+            let finish: (Int?) -> Void = { value in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: value)
+            }
+            manage.veepooSDKSettingDeviceScreenStyle(
+                0,
+                settingMode: 2,
+                dialType: VPDeviceDialType(rawValue: 0)!
+            ) { _, style, success in
+                Task { @MainActor in
+                    finish(success && style > 0 ? Int(style) : nil)
+                }
+            }
+            Task {
+                try? await Task.sleep(nanoseconds: 6_000_000_000)
+                finish(nil)
+            }
+        }
+    }
+
+    /// Apply built-in dial style (`1…builtInDialStyleCount`).
+    @discardableResult
+    func setBuiltInDialStyle(_ style: Int) async -> Bool {
+        configureSDKIfNeeded()
+        let count = builtInDialStyleCount
+        guard bleManager?.isConnected == true,
+              let manage = bleManager?.peripheralManage,
+              count > 0,
+              (1...count).contains(style) else { return false }
+
+        return await withCheckedContinuation { (cont: CheckedContinuation<Bool, Never>) in
+            var resumed = false
+            let finish: (Bool) -> Void = { ok in
+                guard !resumed else { return }
+                resumed = true
+                cont.resume(returning: ok)
+            }
+            manage.veepooSDKSettingDeviceScreenStyle(
+                Int32(style),
+                settingMode: 1,
+                dialType: VPDeviceDialType(rawValue: 0)!
+            ) { _, resultStyle, success in
+                Task { @MainActor in
+                    finish(success && Int(resultStyle) == style)
+                }
+            }
+            Task {
+                try? await Task.sleep(nanoseconds: 8_000_000_000)
+                finish(false)
+            }
+        }
+    }
+
     private static func mapConnectionState(_ state: VPDeviceConnectState) -> DeviceConnectionStatus {
         switch state.rawValue {
         case 0: return .disconnected

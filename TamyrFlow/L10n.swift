@@ -701,6 +701,18 @@ enum L10n {
         static var featWaterSub: String { tr("watch_feat_water_sub") }
         static var settingsTitle: String { tr("watch_settings_title") }
         static var setFaces: String { tr("watch_set_faces") }
+        static var facesTitle: String { tr("watch_faces_title") }
+        static var facesSubtitle: String { tr("watch_faces_subtitle") }
+        static var facesHint: String { tr("watch_faces_hint") }
+        static var facesStyleFormat: String { tr("watch_faces_style_format") }
+        static var facesActive: String { tr("watch_faces_active") }
+        static var facesApply: String { tr("watch_faces_apply") }
+        static var facesApplied: String { tr("watch_faces_applied") }
+        static var facesApplyFailed: String { tr("watch_faces_apply_failed") }
+        static var facesNeedWatchTitle: String { tr("watch_faces_need_watch_title") }
+        static var facesNeedWatchBody: String { tr("watch_faces_need_watch_body") }
+        static var facesUnsupportedTitle: String { tr("watch_faces_unsupported_title") }
+        static var facesUnsupportedBody: String { tr("watch_faces_unsupported_body") }
         static var setNotifications: String { tr("watch_set_notifications") }
         static var setNotificationsSub: String { tr("watch_set_notifications_sub") }
         static var setSync: String { tr("watch_set_sync") }

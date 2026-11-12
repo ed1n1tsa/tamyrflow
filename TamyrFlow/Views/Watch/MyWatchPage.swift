@@ -87,7 +87,7 @@ struct MyWatchPage: View {
             AppSettingsView()
         }
         .navigationDestination(isPresented: $showDialInfo) {
-            DeferredFeatureView(title: L10n.Watch.setFaces, bodyText: L10n.Watch.deferredFacesBody)
+            WatchFacesPageView()
         }
     }
 
