@@ -50,6 +50,8 @@ struct VitalMetricPageView: View {
                     .padding(.top, 12)
                     .padding(.bottom, 36)
                 }
+                // Block parent Home refreshable while this detail is open.
+                .refreshable { }
             }
 
             if case .loading = service.syncState {

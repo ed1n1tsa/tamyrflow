@@ -837,10 +837,14 @@ final class VeepooHealthService: ObservableObject {
                     if sys >= 70, sys <= 220, dia >= 40, dia <= 140, sys > dia {
                         best = (sys, dia)
                     }
+                    // VPTestBloodStateTesting = 0. Finish on progress complete with a sample,
+                    // or on a terminal state once measuring actually started — never abort on
+                    // an immediate nonzero busy/error before any progress (client DeviceBusy).
                     if testProgress >= 95, best != nil {
                         finish(best)
+                        return
                     }
-                    if testState.rawValue != 0 {
+                    if testState.rawValue != 0, testProgress > 0 || best != nil {
                         finish(best)
                     }
                 }
@@ -1332,29 +1336,8 @@ final class VeepooHealthService: ObservableObject {
     }
 
     func startBloodPressureTest() {
-        guard canStart(.bloodPressureTest, needsManualFreeState: true) else { return }
-        ensureLiveMeasurementChannel()
-        measurementHUD = MeasurementHUDState(kind: .bloodPressure, progress01: 0.08)
-        scheduleManualMeasurementTimeout(for: .bloodPressureTest, seconds: defaultManualMeasurementSeconds)
-        manager?.veepooSDKTestBloodStart(true, testMode: 0) { [weak self] testState, testProgress, highBlood, lowBlood in
-            Task { @MainActor in
-                guard let self else { return }
-                self.bloodPressure = BloodPressureReading(
-                    state: testState,
-                    progress: Int(testProgress),
-                    systolic: Int(highBlood),
-                    diastolic: Int(lowBlood)
-                )
-                let frac = min(1, max(0.08, Double(testProgress) / 100.0))
-                self.measurementHUD = MeasurementHUDState(kind: .bloodPressure, progress01: frac)
-                if testProgress >= 95 {
-                    self.scheduleQuietFinishForLiveMeasurement(expected: .bloodPressureTest)
-                }
-                // VPTestBloodStateTesting = 0 — keep measuring; any other state ends the session.
-                if testState.rawValue != 0 {
-                    self.finishOperation()
-                }
-            }
+        Task { @MainActor in
+            _ = await self.captureLiveBloodPressureSample()
         }
     }
 
@@ -1364,32 +1347,88 @@ final class VeepooHealthService: ObservableObject {
         }
     }
 
-    func startBloodGlucoseTest() {
-        guard canStart(.bloodGlucoseTest, needsManualFreeState: true) else { return }
-        ensureLiveMeasurementChannel()
+    /// Exclusive glucose test — same DeviceBusy protection as pulse / BP.
+    func captureLiveBloodGlucoseSample(
+        timeoutSeconds: Double = 55
+    ) async -> (date: Date, value: Double)? {
+        await withExclusiveLiveMeasure {
+            await self.captureLiveBloodGlucoseSampleExclusive(timeoutSeconds: timeoutSeconds)
+        }
+    }
+
+    private func captureLiveBloodGlucoseSampleExclusive(
+        timeoutSeconds: Double
+    ) async -> (date: Date, value: Double)? {
+        guard canStart(.bloodGlucoseTest, needsManualFreeState: true) else {
+            print("[VitalMetric] glucose blocked: \(lastError ?? "busy")")
+            return nil
+        }
+        cancelManualMeasurementTimeout()
         measurementHUD = MeasurementHUDState(kind: .bloodGlucose, progress01: nil)
-        scheduleManualMeasurementTimeout(for: .bloodGlucoseTest, seconds: defaultManualMeasurementSeconds)
-        manager?.veepooSDKTestBloodGlucoseStart(true, isPersonalModel: false) { [weak self] testState, testProgress, value, _ in
-            Task { @MainActor in
-                guard let self else { return }
-                self.bloodGlucose = BloodGlucoseReading(state: testState, progress: Int(testProgress), valueRaw: value)
-                let frac = min(1, max(0.08, Double(testProgress) / 100.0))
-                // VPDeviceBloodGlucoseTestStateOpen = 1 — in progress; stay on overlay until a terminal state.
-                if testState.rawValue == 1 {
-                    self.measurementHUD = MeasurementHUDState(
-                        kind: .bloodGlucose,
-                        progress01: testProgress > 0 ? frac : nil
-                    )
-                    if testProgress >= 90, value > 0 {
-                        self.scheduleQuietFinishForLiveMeasurement(expected: .bloodGlucoseTest)
-                    }
-                } else {
-                    self.measurementHUD = MeasurementHUDState(kind: .bloodGlucose, progress01: frac)
+
+        let result: Double? = await withCheckedContinuation { (cont: CheckedContinuation<Double?, Never>) in
+            var resumed = false
+            var best: Double?
+
+            let finish: (Double?) -> Void = { [weak self] value in
+                guard let self else {
+                    if !resumed { resumed = true; cont.resume(returning: value) }
+                    return
                 }
-                if testState.rawValue != 1 {
-                    self.finishOperation()
+                guard !resumed else { return }
+                resumed = true
+                self.manager?.veepooSDKTestBloodGlucoseStart(false, isPersonalModel: false) { [weak self] _, _, _, _ in
+                    Task { @MainActor in self?.finishOperation() }
+                }
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 600_000_000)
+                    if self.operation == .bloodGlucoseTest { self.finishOperation() }
+                }
+                cont.resume(returning: value)
+            }
+
+            manager?.veepooSDKTestBloodGlucoseStart(true, isPersonalModel: false) { [weak self] testState, testProgress, value, _ in
+                Task { @MainActor in
+                    guard let self, self.operation == .bloodGlucoseTest else { return }
+                    self.bloodGlucose = BloodGlucoseReading(
+                        state: testState,
+                        progress: Int(testProgress),
+                        valueRaw: value
+                    )
+                    let frac = min(1, max(0.08, Double(testProgress) / 100.0))
+                    let reading = Double(value)
+                    if reading > 0 {
+                        best = reading
+                    }
+                    // VPDeviceBloodGlucoseTestStateOpen = 1 — in progress.
+                    if testState.rawValue == 1 {
+                        self.measurementHUD = MeasurementHUDState(
+                            kind: .bloodGlucose,
+                            progress01: testProgress > 0 ? frac : nil
+                        )
+                        if testProgress >= 90, best != nil {
+                            finish(best)
+                        }
+                    } else if testProgress > 0 || best != nil {
+                        self.measurementHUD = MeasurementHUDState(kind: .bloodGlucose, progress01: frac)
+                        finish(best)
+                    }
                 }
             }
+
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(timeoutSeconds * 1_000_000_000))
+                finish(best)
+            }
+        }
+
+        guard let value = result, value > 0 else { return nil }
+        return (Date(), value)
+    }
+
+    func startBloodGlucoseTest() {
+        Task { @MainActor in
+            _ = await self.captureLiveBloodGlucoseSample()
         }
     }
 

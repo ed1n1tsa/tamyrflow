@@ -33,6 +33,7 @@ enum L10n {
         static var periodWeek: String { tr("home_period_week") }
         static var periodMonth: String { tr("home_period_month") }
         static var noData: String { tr("home_no_data") }
+        static var statsFromHistory: String { tr("home_stats_from_history") }
         static var noActivityData: String { tr("home_no_activity_data") }
         static var weekdayMon: String { tr("home_weekday_mon") }
         static var weekdayTue: String { tr("home_weekday_tue") }

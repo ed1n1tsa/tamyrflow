@@ -9,7 +9,7 @@ struct RootTabView: View {
         ZStack(alignment: .bottom) {
             // Keep tab roots alive so Activity/Goals don’t reset to empty on every switch.
             ZStack {
-                DashboardPage(selectedTab: $tab)
+                DashboardPage(selectedTab: $tab, auth: auth)
                     .opacity(tab == .home ? 1 : 0)
                     .allowsHitTesting(tab == .home)
                 IndicatorsPageView(auth: auth, isActive: tab == .metrics)
@@ -43,11 +43,8 @@ struct RootTabView: View {
             }
         }
         .animation(.easeOut(duration: 0.2), value: vm.healthService.measurementHUD != nil)
-        // Watch daily-sync pull only on Home — on Activity/Goals it left the sync HUD stuck.
-        .refreshable(action: {
-            guard tab == .home || tab == .metrics else { return }
-            await vm.performPullToRefresh(auth: auth)
-        })
+        // Home/Indicators own their refreshable. Avoid a root refreshable — it also fires
+        // inside pushed Pulse/Vital pages and briefly shows a sync/measure overlay.
         .overlay(alignment: .bottom) {
             if let err = vm.healthService.lastError ?? vm.bleService.errorText, tab != .profile {
                 HStack(spacing: 10) {

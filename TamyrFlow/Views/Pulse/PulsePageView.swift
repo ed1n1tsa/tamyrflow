@@ -47,6 +47,9 @@ struct PulsePageView: View {
                     .padding(.top, 12)
                     .padding(.bottom, 36)
                 }
+                // Swallow pull-to-refresh so Home's refreshable doesn't fire here
+                // and flash a sync/measure overlay on swipe-down.
+                .refreshable { }
             }
 
             if case .loading = service.syncState {

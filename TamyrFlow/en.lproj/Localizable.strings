@@ -290,6 +290,7 @@
 "home_period_week" = "Week";
 "home_period_month" = "Month";
 "home_no_data" = "No data";
+"home_stats_from_history" = "Measure to update";
 "home_no_activity_data" = "No activity data";
 "home_weekday_mon" = "Mon";
 "home_weekday_tue" = "Tue";
