@@ -793,7 +793,6 @@ enum L10n {
         static var updateHint: String { tr("pulse_update_hint") }
         static var syncHint: String { tr("pulse_sync_hint") }
         static var measureNow: String { tr("pulse_measure_now") }
-        static var liveMeasureOff: String { tr("pulse_live_measure_off") }
         static var measuringTitle: String { tr("pulse_measuring_title") }
         static var measuringBody: String { tr("pulse_measuring_body") }
         static var averageTitle: String { tr("pulse_average_title") }

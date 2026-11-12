@@ -283,33 +283,24 @@ struct PulsePageView: View {
                     }
                     .buttonStyle(.plain)
 
-                    if AppFeatureFlags.liveWatchMeasureEnabled {
-                        Button {
-                            Task { await service.measureHeartNow() }
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "heart.fill")
-                                    .font(.system(size: 13, weight: .bold))
-                                Text(L10n.Pulse.measureNow)
-                                    .font(AppFont.interBold(14))
-                            }
-                            .foregroundStyle(ProfileTheme.accent)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                Capsule(style: .continuous)
-                                    .strokeBorder(ProfileTheme.accent.opacity(0.85), lineWidth: 1.5)
-                            )
+                    Button {
+                        Task { await service.measureHeartNow() }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 13, weight: .bold))
+                            Text(L10n.Pulse.measureNow)
+                                .font(AppFont.interBold(14))
                         }
-                        .buttonStyle(.plain)
-                    } else {
-                        Text(L10n.Pulse.liveMeasureOff)
-                            .font(AppFont.interBold(12))
-                            .foregroundStyle(ProfileTheme.muted)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 4)
+                        .foregroundStyle(ProfileTheme.accent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule(style: .continuous)
+                                .strokeBorder(ProfileTheme.accent.opacity(0.85), lineWidth: 1.5)
+                        )
                     }
+                    .buttonStyle(.plain)
                 }
                 .disabled(service.syncState == .loading)
                 .opacity(service.syncState == .loading ? 0.7 : 1)
@@ -328,15 +319,6 @@ struct PulsePageView: View {
                 }
                 .buttonStyle(.plain)
             }
-
-            #if DEBUG
-            if !service.lastSyncDebug.isEmpty {
-                Text(service.lastSyncDebug)
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(ProfileTheme.muted.opacity(0.7))
-                    .lineLimit(3)
-            }
-            #endif
         }
         .padding(16)
         .pulseCardBackground()
