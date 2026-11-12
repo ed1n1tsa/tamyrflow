@@ -62,12 +62,21 @@ struct LegalDocumentView: View {
                         }
                     }
                     .padding(.horizontal, ProfileTheme.contentInset)
-                    .padding(.top, 10)
-                    .padding(.bottom, 28)
+                    .padding(.top, 12)
+                    .padding(.bottom, 36)
+                    .id("legal-\(kindTitleKey)-\(language.code.rawValue)-\(language.revision)")
                 }
             }
         }
         .navigationBarHidden(true)
+    }
+
+    private var kindTitleKey: String {
+        switch kind {
+        case .terms: return "terms"
+        case .privacyPolicy: return "privacy"
+        case .privacyControls: return "controls"
+        }
     }
 
     private var topBar: some View {
@@ -91,100 +100,114 @@ struct LegalDocumentView: View {
     }
 
     private var simpleParagraphsBody: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(kind.title)
-                .font(AppFont.interBold(28))
-                .foregroundStyle(.white)
-
+        VStack(alignment: .leading, spacing: 12) {
             ForEach(Array(kind.paragraphs.enumerated()), id: \.offset) { _, text in
                 Text(text)
                     .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(Color.white.opacity(0.86))
+                    .foregroundStyle(Color.white.opacity(0.88))
                     .lineSpacing(5)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .profileCard()
+                    .background(sectionChrome)
             }
         }
     }
 
-    /// Continuous document layout — no per-section cards, compact readable spacing.
+    /// App Store–friendly: clear section separation, readable body, no wall of text.
     private func richLegalBody(
         title: String,
         updated: String,
         sections: [LegalRichDocument.Section]
     ) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(title)
-                .font(AppFont.interBold(22))
-                .foregroundStyle(.white)
-                .fixedSize(horizontal: false, vertical: true)
-
-            Text(updated)
-                .font(.system(size: 13, weight: .regular))
-                .foregroundStyle(ProfileTheme.muted)
-                .padding(.top, 6)
-                .padding(.bottom, 14)
-
-            ForEach(Array(sections.enumerated()), id: \.element.id) { index, section in
-                Text(section.title)
-                    .font(AppFont.interBold(16))
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
+                    .font(AppFont.interBold(24))
                     .foregroundStyle(.white)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, index == 0 ? 0 : 16)
-                    .padding(.bottom, 6)
 
-                ForEach(Array(section.blocks.enumerated()), id: \.offset) { _, block in
-                    switch block {
-                    case .paragraph(let text):
-                        if isSubhead(text) {
-                            Text(text)
-                                .font(AppFont.interBold(14))
-                                .foregroundStyle(.white.opacity(0.95))
-                                .padding(.top, 8)
-                                .padding(.bottom, 2)
-                        } else {
-                            Text(text)
-                                .font(.system(size: 14, weight: .regular))
-                                .foregroundStyle(Color.white.opacity(0.88))
-                                .lineSpacing(3)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .padding(.bottom, 6)
-                        }
-                    case .bullets(let items):
-                        VStack(alignment: .leading, spacing: 3) {
-                            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                                HStack(alignment: .top, spacing: 8) {
-                                    Text("•")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundStyle(Color.white.opacity(0.88))
-                                    Text(item)
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundStyle(Color.white.opacity(0.88))
-                                        .lineSpacing(2)
-                                        .fixedSize(horizontal: false, vertical: true)
+                Text(updated)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(ProfileTheme.muted)
+            }
+            .padding(.bottom, 4)
+
+            ForEach(sections) { section in
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(section.title)
+                        .font(AppFont.interBold(17))
+                        .foregroundStyle(.white)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Rectangle()
+                        .fill(ProfileTheme.accent.opacity(0.55))
+                        .frame(width: 36, height: 2)
+                        .padding(.bottom, 2)
+
+                    ForEach(Array(section.blocks.enumerated()), id: \.offset) { _, block in
+                        switch block {
+                        case .paragraph(let text):
+                            if isSubhead(text) {
+                                Text(text)
+                                    .font(AppFont.interBold(15))
+                                    .foregroundStyle(ProfileTheme.accent)
+                                    .padding(.top, 4)
+                            } else {
+                                Text(text)
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundStyle(Color.white.opacity(0.90))
+                                    .lineSpacing(5)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        case .bullets(let items):
+                            VStack(alignment: .leading, spacing: 6) {
+                                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                                    HStack(alignment: .top, spacing: 10) {
+                                        Circle()
+                                            .fill(ProfileTheme.accent)
+                                            .frame(width: 5, height: 5)
+                                            .padding(.top, 7)
+                                        Text(item)
+                                            .font(.system(size: 15, weight: .regular))
+                                            .foregroundStyle(Color.white.opacity(0.90))
+                                            .lineSpacing(4)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
                                 }
                             }
+                        case .contact(let label, let value):
+                            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                Text("\(label):")
+                                    .font(AppFont.interBold(14))
+                                    .foregroundStyle(ProfileTheme.muted)
+                                Text(value)
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .textSelection(.enabled)
+                            }
                         }
-                        .padding(.bottom, 6)
-                    case .contact(let label, let value):
-                        Text("\(label): \(value)")
-                            .font(.system(size: 14, weight: .regular))
-                            .foregroundStyle(Color.white.opacity(0.88))
-                            .textSelection(.enabled)
-                            .padding(.bottom, 2)
                     }
                 }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(sectionChrome)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var sectionChrome: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(Color(red: 6 / 255, green: 18 / 255, blue: 40 / 255).opacity(0.88))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(ProfileTheme.cardBorder.opacity(0.75), lineWidth: 1)
+            )
     }
 
     private func isSubhead(_ text: String) -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count < 40, !trimmed.contains(".") else { return false }
-        // Labels like “Bluetooth”, “Персональная информация”, “Технические данные”
         return true
     }
 }

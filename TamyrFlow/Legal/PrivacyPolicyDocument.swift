@@ -6,25 +6,25 @@ enum PrivacyPolicyDocument {
     typealias Block = LegalRichDocument.Block
 
     static var updatedLabel: String {
-        switch LanguageStoreBootstrap.bundle.preferredLocalizations.first {
-        case "en": return "Last updated: November 12, 2026"
-        case "kk": return "Соңғы жаңарту: 12 қараша 2026 жыл"
+        switch LanguageStoreBootstrap.code {
+        case AppLanguageCode.en.rawValue: return "Last updated: November 12, 2026"
+        case AppLanguageCode.kk.rawValue: return "Соңғы жаңарту: 12 қараша 2026 жыл"
         default: return "Дата последнего обновления: 12 ноября 2026 года"
         }
     }
 
     static var documentTitle: String {
-        switch LanguageStoreBootstrap.bundle.preferredLocalizations.first {
-        case "en": return "TamyrFlow Privacy Policy"
-        case "kk": return "TamyrFlow құпиялылық саясаты"
+        switch LanguageStoreBootstrap.code {
+        case AppLanguageCode.en.rawValue: return "TamyrFlow Privacy Policy"
+        case AppLanguageCode.kk.rawValue: return "TamyrFlow құпиялылық саясаты"
         default: return "Политика конфиденциальности TamyrFlow"
         }
     }
 
     static var sections: [Section] {
-        switch LanguageStoreBootstrap.bundle.preferredLocalizations.first {
-        case "en": return english
-        case "kk": return kazakh
+        switch LanguageStoreBootstrap.code {
+        case AppLanguageCode.en.rawValue: return english
+        case AppLanguageCode.kk.rawValue: return kazakh
         default: return russian
         }
     }

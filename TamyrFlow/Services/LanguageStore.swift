@@ -70,6 +70,7 @@ final class LanguageStore: ObservableObject {
         UserDefaults.standard.set(code.rawValue, forKey: Self.defaultsKey)
         UserDefaults.standard.set([code.bundleCode], forKey: "AppleLanguages")
         LanguageStoreBootstrap.bundle = Self.bundle(for: code)
+        LanguageStoreBootstrap.code = code.rawValue
         if bumpRevision {
             revision &+= 1
         }

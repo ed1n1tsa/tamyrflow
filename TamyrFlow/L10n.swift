@@ -1051,4 +1051,6 @@ enum L10n {
 /// Non-observable access to the active language bundle (set by `LanguageStore`).
 enum LanguageStoreBootstrap {
     nonisolated(unsafe) static var bundle: Bundle = .main
+    /// Active in-app language (`kk` / `ru` / `en`). Do not use `bundle.preferredLocalizations`.
+    nonisolated(unsafe) static var code: String = "ru"
 }
