@@ -62,8 +62,8 @@ struct LegalDocumentView: View {
                         }
                     }
                     .padding(.horizontal, ProfileTheme.contentInset)
-                    .padding(.top, 14)
-                    .padding(.bottom, 40)
+                    .padding(.top, 10)
+                    .padding(.bottom, 28)
                 }
             }
         }
@@ -109,85 +109,83 @@ struct LegalDocumentView: View {
         }
     }
 
+    /// Continuous document layout — no per-section cards, compact readable spacing.
     private func richLegalBody(
         title: String,
         updated: String,
         sections: [LegalRichDocument.Section]
     ) -> some View {
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: 0) {
             Text(title)
-                .font(AppFont.interBold(26))
+                .font(AppFont.interBold(22))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text(updated)
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 13, weight: .regular))
                 .foregroundStyle(ProfileTheme.muted)
+                .padding(.top, 6)
+                .padding(.bottom, 14)
 
-            ForEach(sections) { section in
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(section.title)
-                        .font(AppFont.interBold(18))
-                        .foregroundStyle(.white)
-                        .fixedSize(horizontal: false, vertical: true)
+            ForEach(Array(sections.enumerated()), id: \.element.id) { index, section in
+                Text(section.title)
+                    .font(AppFont.interBold(16))
+                    .foregroundStyle(.white)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, index == 0 ? 0 : 16)
+                    .padding(.bottom, 6)
 
-                    ForEach(Array(section.blocks.enumerated()), id: \.offset) { _, block in
-                        switch block {
-                        case .paragraph(let text):
-                            // Short standalone labels (e.g. “Bluetooth”) read as subheads.
-                            if text.count < 28, !text.contains(".") {
-                                Text(text)
-                                    .font(AppFont.interBold(15))
-                                    .foregroundStyle(ProfileTheme.accent)
-                                    .padding(.top, 4)
-                            } else {
-                                Text(text)
-                                    .font(.system(size: 15, weight: .regular))
-                                    .foregroundStyle(Color.white.opacity(0.88))
-                                    .lineSpacing(6)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                        case .bullets(let items):
-                            VStack(alignment: .leading, spacing: 8) {
-                                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                                    HStack(alignment: .top, spacing: 10) {
-                                        Text("•")
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundStyle(ProfileTheme.accent)
-                                        Text(item)
-                                            .font(.system(size: 15, weight: .regular))
-                                            .foregroundStyle(Color.white.opacity(0.88))
-                                            .lineSpacing(5)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
+                ForEach(Array(section.blocks.enumerated()), id: \.offset) { _, block in
+                    switch block {
+                    case .paragraph(let text):
+                        if isSubhead(text) {
+                            Text(text)
+                                .font(AppFont.interBold(14))
+                                .foregroundStyle(.white.opacity(0.95))
+                                .padding(.top, 8)
+                                .padding(.bottom, 2)
+                        } else {
+                            Text(text)
+                                .font(.system(size: 14, weight: .regular))
+                                .foregroundStyle(Color.white.opacity(0.88))
+                                .lineSpacing(3)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.bottom, 6)
+                        }
+                    case .bullets(let items):
+                        VStack(alignment: .leading, spacing: 3) {
+                            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                                HStack(alignment: .top, spacing: 8) {
+                                    Text("•")
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundStyle(Color.white.opacity(0.88))
+                                    Text(item)
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundStyle(Color.white.opacity(0.88))
+                                        .lineSpacing(2)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                             }
-                            .padding(.leading, 2)
-                        case .contact(let label, let value):
-                            HStack(alignment: .firstTextBaseline) {
-                                Text("\(label):")
-                                    .font(AppFont.interBold(14))
-                                    .foregroundStyle(ProfileTheme.muted)
-                                Text(value)
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundStyle(.white)
-                                    .textSelection(.enabled)
-                            }
                         }
+                        .padding(.bottom, 6)
+                    case .contact(let label, let value):
+                        Text("\(label): \(value)")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundStyle(Color.white.opacity(0.88))
+                            .textSelection(.enabled)
+                            .padding(.bottom, 2)
                     }
                 }
-                .padding(16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(ProfileTheme.cardFill.opacity(0.92))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .strokeBorder(ProfileTheme.cardBorder.opacity(0.7), lineWidth: 1)
-                        )
-                )
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func isSubhead(_ text: String) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count < 40, !trimmed.contains(".") else { return false }
+        // Labels like “Bluetooth”, “Персональная информация”, “Технические данные”
+        return true
     }
 }
 
