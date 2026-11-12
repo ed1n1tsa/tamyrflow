@@ -12,6 +12,7 @@ struct IndicatorsPageView: View {
     @State private var calendarDate = Date()
     @State private var detailKind: IndicatorKind?
     @State private var errorAlert: String?
+    @State private var showNotifications = false
 
     init(auth: AuthService, isActive: Bool = true) {
         self.auth = auth
@@ -50,6 +51,9 @@ struct IndicatorsPageView: View {
             .navigationBarHidden(true)
             .navigationDestination(item: $detailKind) { kind in
                 detailDestination(for: kind)
+            }
+            .navigationDestination(isPresented: $showNotifications) {
+                NotificationsPage()
             }
         }
         .id(language.code)
@@ -116,23 +120,7 @@ struct IndicatorsPageView: View {
                         .foregroundStyle(.white)
                 }
                 Spacer()
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bell.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 40, height: 40)
-                        .background(
-                            Circle()
-                                .fill(ProfileTheme.cardFill)
-                                .overlay(
-                                    Circle().strokeBorder(ProfileTheme.cardBorder, lineWidth: 1)
-                                )
-                        )
-                    Circle()
-                        .fill(AppTheme.danger)
-                        .frame(width: 8, height: 8)
-                        .offset(x: -2, y: 2)
-                }
+                NotificationsBellButton { showNotifications = true }
             }
 
             VStack(alignment: .leading, spacing: 6) {

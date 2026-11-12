@@ -11,6 +11,7 @@ struct DashboardPage: View {
     @State private var activityPeriod: HomeActivityPeriod = .week
     @State private var showConnectWatch = false
     @State private var showMyWatch = false
+    @State private var showNotifications = false
 
     init(selectedTab: Binding<MainTab>, auth: AuthService) {
         _selectedTab = selectedTab
@@ -61,6 +62,9 @@ struct DashboardPage: View {
             .navigationDestination(isPresented: $showMyWatch) {
                 MyWatchPage()
             }
+            .navigationDestination(isPresented: $showNotifications) {
+                NotificationsPage()
+            }
             .fullScreenCover(isPresented: $showConnectWatch) {
                 WatchConnectFlowView {
                     showConnectWatch = false
@@ -86,21 +90,7 @@ struct DashboardPage: View {
                     .foregroundStyle(ProfileTheme.muted)
             }
             Spacer()
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: "bell.fill")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
-                    .background(
-                        Circle()
-                            .fill(ProfileTheme.cardFill)
-                            .overlay(Circle().strokeBorder(ProfileTheme.cardBorder, lineWidth: 1))
-                    )
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: 8, height: 8)
-                    .offset(x: -4, y: 4)
-            }
+            NotificationsBellButton { showNotifications = true }
         }
     }
 

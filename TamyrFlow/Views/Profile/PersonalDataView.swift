@@ -7,6 +7,8 @@ struct PersonalDataView: View {
     @EnvironmentObject private var language: LanguageStore
     @Environment(\.dismiss) private var dismiss
 
+    @State private var showNotifications = false
+
     private var profile: UserProfile? { auth.profile }
 
     var body: some View {
@@ -56,6 +58,9 @@ struct PersonalDataView: View {
         }
         .navigationBarHidden(true)
         .id(language.code)
+        .navigationDestination(isPresented: $showNotifications) {
+            NotificationsPage()
+        }
         .task {
             await auth.refreshProfile()
         }
@@ -83,16 +88,7 @@ struct PersonalDataView: View {
 
             Spacer()
 
-            ZStack(alignment: .topTrailing) {
-                Image(systemName: "bell.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(8)
-                Circle()
-                    .fill(AppTheme.danger)
-                    .frame(width: 8, height: 8)
-                    .offset(x: -4, y: 4)
-            }
+            NotificationsBellButton { showNotifications = true }
         }
     }
 

@@ -6,9 +6,18 @@ struct MyWatchPage: View {
     @EnvironmentObject private var language: LanguageStore
     @Environment(\.dismiss) private var dismiss
 
+    @EnvironmentObject private var auth: AuthService
+
     @State private var showConnectFlow = false
-    @State private var stubAlert: String?
     @State private var lastSyncText: String = ""
+    @State private var showPulse = false
+    @State private var showSteps = false
+    @State private var showDeferredSleep = false
+    @State private var showDeferredWater = false
+    @State private var showSettings = false
+    @State private var showWatchAlerts = false
+    @State private var showDialInfo = false
+    @State private var showMoreInfo = false
 
     private var isConnected: Bool {
         vm.bleService.connectionStatus == .connected
@@ -68,13 +77,29 @@ struct MyWatchPage: View {
             .environmentObject(vm)
             .environmentObject(language)
         }
-        .alert(L10n.Profile.stubTitle, isPresented: Binding(
-            get: { stubAlert != nil },
-            set: { if !$0 { stubAlert = nil } }
-        )) {
-            Button(L10n.Goals.ok, role: .cancel) {}
-        } message: {
-            Text(stubAlert ?? "")
+        .navigationDestination(isPresented: $showPulse) {
+            PulsePageView(auth: auth, health: vm.healthService, ble: vm.bleService)
+        }
+        .navigationDestination(isPresented: $showSteps) {
+            VitalMetricPageView(kind: .steps, auth: auth, health: vm.healthService, ble: vm.bleService)
+        }
+        .navigationDestination(isPresented: $showDeferredSleep) {
+            DeferredFeatureView(title: L10n.Watch.featSleep, bodyText: L10n.Watch.deferredSleepBody)
+        }
+        .navigationDestination(isPresented: $showDeferredWater) {
+            DeferredFeatureView(title: L10n.Watch.featWater, bodyText: L10n.Watch.deferredWaterBody)
+        }
+        .navigationDestination(isPresented: $showSettings) {
+            AppSettingsView()
+        }
+        .navigationDestination(isPresented: $showWatchAlerts) {
+            AppSettingsView()
+        }
+        .navigationDestination(isPresented: $showDialInfo) {
+            DeferredFeatureView(title: L10n.Watch.setFaces, bodyText: L10n.Watch.deferredFacesBody)
+        }
+        .navigationDestination(isPresented: $showMoreInfo) {
+            DeferredFeatureView(title: L10n.Watch.setMore, bodyText: L10n.Watch.deferredMoreBody)
         }
     }
 
@@ -160,7 +185,10 @@ struct MyWatchPage: View {
 
     private var rowSync: some View {
         Button {
-            stubAlert = L10n.Profile.stubBody
+            Task {
+                await vm.performPullToRefresh(auth: auth)
+                refreshSyncLabel()
+            }
         } label: {
             HStack(spacing: 12) {
                 Image("WatchIconSync")
@@ -172,7 +200,7 @@ struct MyWatchPage: View {
                 Text(lastSyncText.isEmpty ? "—" : lastSyncText)
                     .font(AppFont.interBold(12))
                     .foregroundStyle(ProfileTheme.muted)
-                Image(systemName: "chevron.right")
+                Image(systemName: "arrow.triangle.2.circlepath")
                     .foregroundStyle(ProfileTheme.muted)
             }
         }
@@ -243,19 +271,43 @@ struct MyWatchPage: View {
             // Fixed equal cells so columns/rows stay level.
             Grid(horizontalSpacing: 12, verticalSpacing: 12) {
                 GridRow {
-                    stubFeature(asset: "GoalIconSteps", title: L10n.Watch.featActivity, sub: L10n.Watch.featActivitySub)
-                    stubFeature(systemImage: "heart.fill", tint: .red, title: L10n.Watch.featHeart, sub: L10n.Watch.featHeartSub)
+                    featureTile(
+                        asset: "GoalIconSteps",
+                        title: L10n.Watch.featActivity,
+                        sub: L10n.Watch.featActivitySub
+                    ) { showSteps = true }
+                    featureTile(
+                        systemImage: "heart.fill",
+                        tint: .red,
+                        title: L10n.Watch.featHeart,
+                        sub: L10n.Watch.featHeartSub
+                    ) { showPulse = true }
                 }
                 GridRow {
-                    stubFeature(asset: "GoalIconSleep", title: L10n.Watch.featSleep, sub: L10n.Watch.featSleepSub)
-                    stubFeature(asset: "GoalIconWater", title: L10n.Watch.featWater, sub: L10n.Watch.featWaterSub)
+                    featureTile(
+                        asset: "GoalIconSleep",
+                        title: L10n.Watch.featSleep,
+                        sub: L10n.Watch.featSleepSub
+                    ) { showDeferredSleep = true }
+                    featureTile(
+                        asset: "GoalIconWater",
+                        title: L10n.Watch.featWater,
+                        sub: L10n.Watch.featWaterSub
+                    ) { showDeferredWater = true }
                 }
             }
         }
     }
 
-    private func stubFeature(asset: String? = nil, systemImage: String? = nil, tint: Color = ProfileTheme.accent, title: String, sub: String) -> some View {
-        Button { stubAlert = L10n.Profile.stubBody } label: {
+    private func featureTile(
+        asset: String? = nil,
+        systemImage: String? = nil,
+        tint: Color = ProfileTheme.accent,
+        title: String,
+        sub: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     if let asset {
@@ -303,13 +355,29 @@ struct MyWatchPage: View {
                 .foregroundStyle(.white)
 
             VStack(spacing: 0) {
-                settingsRow(asset: "WatchIconFaces", title: L10n.Watch.setFaces, sub: nil)
+                settingsRow(asset: "WatchIconFaces", title: L10n.Watch.setFaces, sub: nil) {
+                    showDialInfo = true
+                }
                 divider
-                settingsRow(asset: "WatchIconBell", title: L10n.Watch.setNotifications, sub: L10n.Watch.setNotificationsSub)
+                settingsRow(
+                    asset: "WatchIconBell",
+                    title: L10n.Watch.setNotifications,
+                    sub: L10n.Watch.setNotificationsSub
+                ) {
+                    showWatchAlerts = true
+                }
                 divider
-                settingsRow(asset: "WatchIconSettings", title: L10n.Watch.setSync, sub: L10n.Watch.setSyncSub)
+                settingsRow(
+                    asset: "WatchIconSettings",
+                    title: L10n.Watch.setSync,
+                    sub: L10n.Watch.setSyncSub
+                ) {
+                    showSettings = true
+                }
                 divider
-                settingsRow(asset: "WatchIconMore", title: L10n.Watch.setMore, sub: L10n.Watch.setMoreSub)
+                settingsRow(asset: "WatchIconMore", title: L10n.Watch.setMore, sub: L10n.Watch.setMoreSub) {
+                    showMoreInfo = true
+                }
             }
             .profileCard()
         }
@@ -319,8 +387,13 @@ struct MyWatchPage: View {
         Rectangle().fill(ProfileTheme.rowDivider).frame(height: 0.5).padding(.leading, 58)
     }
 
-    private func settingsRow(asset: String, title: String, sub: String?) -> some View {
-        Button { stubAlert = L10n.Profile.stubBody } label: {
+    private func settingsRow(
+        asset: String,
+        title: String,
+        sub: String?,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
             HStack(spacing: 12) {
                 Image(asset).resizable().scaledToFit().frame(width: 36, height: 36)
                 VStack(alignment: .leading, spacing: 3) {
