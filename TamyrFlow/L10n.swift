@@ -705,6 +705,17 @@ enum L10n {
         static var facesSubtitle: String { tr("watch_faces_subtitle") }
         static var facesHint: String { tr("watch_faces_hint") }
         static var facesStyleFormat: String { tr("watch_faces_style_format") }
+        static var facesStyle1Title: String { tr("watch_faces_style1_title") }
+        static var facesStyle1Sub: String { tr("watch_faces_style1_sub") }
+        static var facesStyle1Tag: String { tr("watch_faces_style1_tag") }
+        static var facesStyle2Title: String { tr("watch_faces_style2_title") }
+        static var facesStyle2Sub: String { tr("watch_faces_style2_sub") }
+        static var facesStyle2Tag: String { tr("watch_faces_style2_tag") }
+        static var facesStyle3Title: String { tr("watch_faces_style3_title") }
+        static var facesStyle3Sub: String { tr("watch_faces_style3_sub") }
+        static var facesStyle3Tag: String { tr("watch_faces_style3_tag") }
+        static var facesStyleGenericSub: String { tr("watch_faces_style_generic_sub") }
+        static var facesStyleGenericTag: String { tr("watch_faces_style_generic_tag") }
         static var facesActive: String { tr("watch_faces_active") }
         static var facesApply: String { tr("watch_faces_apply") }
         static var facesApplied: String { tr("watch_faces_applied") }
