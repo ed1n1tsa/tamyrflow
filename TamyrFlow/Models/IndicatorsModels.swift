@@ -21,6 +21,11 @@ enum IndicatorKind: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
+    /// First App Store release — sleep deferred (Veepoo accurate-sleep parse is unsafe).
+    static var firstReleaseCases: [IndicatorKind] {
+        [.heartRate, .spo2, .temperature, .bloodPressure, .steps]
+    }
+
     /// Supabase `metric_type` raw value.
     var metricKey: String {
         switch self {

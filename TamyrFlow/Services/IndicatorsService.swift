@@ -15,7 +15,7 @@ final class IndicatorsService: ObservableObject {
 
     init(auth: AuthService) {
         self.auth = auth
-        cards = IndicatorKind.allCases.map { emptyCard(for: $0) }
+        cards = IndicatorKind.firstReleaseCases.map { emptyCard(for: $0) }
     }
 
     var rangeStart: Date {
@@ -37,7 +37,7 @@ final class IndicatorsService: ObservableObject {
 
     func refresh() async {
         guard let uid = auth.session?.user.id else {
-            cards = IndicatorKind.allCases.map { emptyCard(for: $0) }
+            cards = IndicatorKind.firstReleaseCases.map { emptyCard(for: $0) }
             return
         }
         isLoading = true
@@ -73,14 +73,14 @@ final class IndicatorsService: ObservableObject {
             }
 
             var built: [IndicatorCardModel] = []
-            for kind in IndicatorKind.allCases {
+            for kind in IndicatorKind.firstReleaseCases {
                 let rows = parsed.filter { $0.metric == kind.metricKey }
                 built.append(buildCard(kind: kind, rows: rows, start: start, end: rangeEnd))
             }
             cards = built
         } catch {
             lastError = error.localizedDescription
-            cards = IndicatorKind.allCases.map { emptyCard(for: $0) }
+            cards = IndicatorKind.firstReleaseCases.map { emptyCard(for: $0) }
         }
     }
 

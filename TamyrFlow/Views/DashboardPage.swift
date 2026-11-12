@@ -7,9 +7,15 @@ struct DashboardPage: View {
     @EnvironmentObject private var language: LanguageStore
     @Binding var selectedTab: MainTab
 
+    @StateObject private var indicators: IndicatorsService
     @State private var activityPeriod: HomeActivityPeriod = .week
     @State private var showConnectWatch = false
     @State private var showMyWatch = false
+
+    init(selectedTab: Binding<MainTab>, auth: AuthService) {
+        _selectedTab = selectedTab
+        _indicators = StateObject(wrappedValue: IndicatorsService(auth: auth))
+    }
 
     private var isWatchConnected: Bool {
         switch vm.bleService.connectionStatus {
@@ -40,9 +46,16 @@ struct DashboardPage: View {
             .toolbarBackground(.hidden, for: .navigationBar)
             .task {
                 await vm.performPullToRefresh(auth: auth)
+                await indicators.refresh()
+            }
+            .onAppear {
+                Task { await indicators.refresh() }
             }
             .refreshable {
+                // Never leave a stuck measuring HUD after Home pull.
+                vm.healthService.dismissMeasurementOverlay()
                 await vm.performPullToRefresh(auth: auth)
+                await indicators.refresh()
             }
             .id(language.code)
             .navigationDestination(isPresented: $showMyWatch) {
@@ -232,9 +245,9 @@ struct DashboardPage: View {
                     smallMetricCard(
                         title: L10n.Home.oxygen,
                         value: oxygenText,
+                        subtitle: statSubtitle(for: .spo2, unit: "%"),
                         tint: Color(red: 0.25, green: 0.65, blue: 1.0),
-                        icon: "drop.fill",
-                        wave: true
+                        icon: "drop.fill"
                     )
                 }
                 .buttonStyle(.plain)
@@ -250,9 +263,9 @@ struct DashboardPage: View {
                     smallMetricCard(
                         title: L10n.Home.temperature,
                         value: temperatureText,
+                        subtitle: statSubtitle(for: .temperature, unit: "°C"),
                         tint: Color(red: 1.0, green: 0.55, blue: 0.2),
-                        icon: "thermometer.medium",
-                        wave: true
+                        icon: "thermometer.medium"
                     )
                 }
                 .buttonStyle(.plain)
@@ -268,9 +281,9 @@ struct DashboardPage: View {
                     smallMetricCard(
                         title: L10n.Home.pressure,
                         value: pressureText,
+                        subtitle: statSubtitle(for: .bloodPressure, unit: "mmHg"),
                         tint: Color(red: 0.7, green: 0.4, blue: 1.0),
-                        icon: "waveform.path.ecg",
-                        wave: true
+                        icon: "waveform.path.ecg"
                     )
                 }
                 .buttonStyle(.plain)
@@ -287,18 +300,6 @@ struct DashboardPage: View {
                 }
                 .buttonStyle(.plain)
             }
-
-            NavigationLink {
-                VitalMetricPageView(
-                    kind: .sleep,
-                    auth: auth,
-                    health: vm.healthService,
-                    ble: vm.bleService
-                )
-            } label: {
-                sleepCard
-            }
-            .buttonStyle(.plain)
         }
     }
 
@@ -321,23 +322,28 @@ struct DashboardPage: View {
                 Text(pulseText)
                     .font(AppFont.interBold(28))
                     .foregroundStyle(.white)
-                if pulseValue != nil {
-                    Text(L10n.Home.bpm)
-                        .font(AppFont.interBold(11))
-                        .foregroundStyle(ProfileTheme.muted)
-                }
+                Text(pulseStatLine)
+                    .font(AppFont.interBold(11))
+                    .foregroundStyle(ProfileTheme.muted)
             }
 
             Spacer(minLength: 8)
 
-            MiniSparkline(values: pulseSpark, tint: .red)
-                .frame(width: 110, height: 44)
+            if let trend = card(for: .heartRate)?.trendPercent {
+                trendChip(trend)
+            }
         }
         .padding(16)
         .homeGlassCard()
     }
 
-    private func smallMetricCard(title: String, value: String, tint: Color, icon: String, wave: Bool) -> some View {
+    private func smallMetricCard(
+        title: String,
+        value: String,
+        subtitle: String,
+        tint: Color,
+        icon: String
+    ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: icon)
@@ -355,14 +361,32 @@ struct DashboardPage: View {
                 .foregroundStyle(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
-            if wave {
-                MiniSparkline(values: placeholderWave, tint: tint.opacity(0.85))
-                    .frame(height: 28)
-            }
+            Text(subtitle)
+                .font(AppFont.interBold(11))
+                .foregroundStyle(ProfileTheme.muted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .padding(14)
         .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
         .homeGlassCard()
+    }
+
+    private func trendChip(_ trend: Double) -> some View {
+        let up = trend >= 0
+        return HStack(spacing: 4) {
+            Image(systemName: up ? "arrow.up.right" : "arrow.down.right")
+                .font(.system(size: 10, weight: .bold))
+            Text(String(format: "%+.0f%%", trend))
+                .font(AppFont.interBold(11))
+        }
+        .foregroundStyle(up ? ProfileTheme.connected : Color.orange)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(
+            Capsule()
+                .fill((up ? ProfileTheme.connected : Color.orange).opacity(0.16))
+        )
     }
 
     private var stepsCard: some View {
@@ -410,67 +434,6 @@ struct DashboardPage: View {
         .padding(14)
         .frame(maxWidth: .infinity, minHeight: 128, alignment: .topLeading)
         .homeGlassCard()
-    }
-
-    private var sleepCard: some View {
-        ZStack(alignment: .trailing) {
-            Image("HomeSleepMoon")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity)
-                .frame(height: 110)
-                .clipped()
-                .opacity(0.9)
-                .mask(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                )
-
-            LinearGradient(
-                colors: [
-                    Color(red: 0.02, green: 0.05, blue: 0.12).opacity(0.92),
-                    Color(red: 0.02, green: 0.05, blue: 0.12).opacity(0.35),
-                    .clear
-                ],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-
-            HStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.purple.opacity(0.7), Color.blue.opacity(0.45)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 44, height: 44)
-                    Image(systemName: "moon.stars.fill")
-                        .foregroundStyle(.white)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(L10n.Home.sleep)
-                        .font(AppFont.interBold(13))
-                        .foregroundStyle(ProfileTheme.muted)
-                    Text(sleepText)
-                        .font(AppFont.interBold(20))
-                        .foregroundStyle(.white)
-                    Text(L10n.Home.sleepToday)
-                        .font(AppFont.interBold(11))
-                        .foregroundStyle(ProfileTheme.muted.opacity(0.9))
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(16)
-        }
-        .frame(height: 110)
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(ProfileTheme.cardBorder.opacity(0.85), lineWidth: 1)
-        )
     }
 
     // MARK: - Activity
@@ -558,10 +521,17 @@ struct DashboardPage: View {
         return "\(L10n.Home.syncPrefix): —"
     }
 
+    private func card(for kind: IndicatorKind) -> IndicatorCardModel? {
+        indicators.cards.first(where: { $0.kind == kind })
+    }
+
     private var pulseValue: Int? {
         if let hr = vm.healthService.heartRate?.value, (30...250).contains(hr) { return hr }
         if let last = vm.healthService.heartRateHistory.last?.value, last >= 30 {
             return Int(last.rounded())
+        }
+        if let stored = card(for: .heartRate)?.primaryValue, stored >= 30 {
+            return Int(stored.rounded())
         }
         return nil
     }
@@ -571,14 +541,21 @@ struct DashboardPage: View {
         return L10n.Home.noData
     }
 
-    private var pulseSpark: [Double] {
-        let pts = vm.healthService.heartRateHistory.map(\.value).filter { $0 > 0 }
-        if pts.count >= 2 { return pts }
-        return placeholderWave
+    private var pulseStatLine: String {
+        if pulseValue != nil {
+            if let trend = card(for: .heartRate)?.trendPercent {
+                return "\(L10n.Home.bpm) · \(String(format: "%+.0f%%", trend))"
+            }
+            return L10n.Home.bpm
+        }
+        return L10n.Home.statsFromHistory
     }
 
     private var oxygenText: String {
         if let v = vm.healthService.oxygen?.value, v > 0 { return "\(v)%" }
+        if let stored = card(for: .spo2)?.primaryValue, stored > 0 {
+            return "\(Int(stored.rounded()))%"
+        }
         return L10n.Home.noData
     }
 
@@ -586,6 +563,12 @@ struct DashboardPage: View {
         if let bp = vm.healthService.bloodPressure,
            bp.systolic > 0, bp.diastolic > 0 {
             return "\(bp.systolic)/\(bp.diastolic)"
+        }
+        if let card = card(for: .bloodPressure), let sys = card.primaryValue, sys > 0 {
+            if let dia = card.secondaryValue, dia > 0 {
+                return "\(Int(sys.rounded()))/\(Int(dia.rounded()))"
+            }
+            return "\(Int(sys.rounded()))"
         }
         return L10n.Home.noData
     }
@@ -597,20 +580,28 @@ struct DashboardPage: View {
         if let last = vm.healthService.bodyTemperatureHistory.last?.value, last > 30 {
             return String(format: "%.1f °C", last)
         }
+        if let stored = card(for: .temperature)?.primaryValue, stored > 30 {
+            return String(format: "%.1f °C", stored)
+        }
         return L10n.Home.noData
     }
 
-    private var sleepText: String {
-        guard let minutes = vm.healthService.todaySleepMinutes, minutes > 0 else {
-            return L10n.Home.noData
+    private func statSubtitle(for kind: IndicatorKind, unit: String) -> String {
+        guard let card = card(for: kind), card.primaryValue != nil else {
+            return L10n.Home.statsFromHistory
         }
-        let h = minutes / 60
-        let m = minutes % 60
-        return String(format: L10n.Home.sleepDurationFormat, h, m)
+        if let trend = card.trendPercent {
+            return "\(unit) · \(String(format: "%+.0f%%", trend))"
+        }
+        return unit
     }
 
     private var weekBarValues: [Double] {
-        // Only today known from band realtime — put it on today's weekday index.
+        // Prefer 7-day steps series from Supabase; fall back to today's realtime band steps.
+        if let series = card(for: .steps)?.series, series.count >= 7 {
+            let last7 = Array(series.suffix(7))
+            return last7.map(\.value)
+        }
         var vals = Array(repeating: 0.0, count: 7)
         if let steps = vm.healthService.todaySteps, steps > 0 {
             let idx = (Calendar.current.component(.weekday, from: Date()) + 5) % 7 // Mon=0
@@ -621,11 +612,8 @@ struct DashboardPage: View {
 
     private var highlightIndex: Int? {
         let idx = (Calendar.current.component(.weekday, from: Date()) + 5) % 7
+        guard weekBarValues.indices.contains(idx) else { return nil }
         return weekBarValues[idx] > 0 ? idx : nil
-    }
-
-    private var placeholderWave: [Double] {
-        [0.35, 0.55, 0.42, 0.7, 0.5, 0.78, 0.6, 0.45]
     }
 
     private func formatInt(_ n: Int) -> String {
@@ -653,29 +641,6 @@ enum HomeActivityPeriod: String, CaseIterable, Identifiable {
         case .day: return L10n.Home.periodDay
         case .week: return L10n.Home.periodWeek
         case .month: return L10n.Home.periodMonth
-        }
-    }
-}
-
-private struct MiniSparkline: View {
-    let values: [Double]
-    let tint: Color
-
-    var body: some View {
-        Canvas { context, size in
-            guard values.count >= 2, size.width > 1 else { return }
-            let minV = values.min() ?? 0
-            let maxV = values.max() ?? 1
-            let span = max(maxV - minV, 0.001)
-            let step = size.width / CGFloat(values.count - 1)
-            var path = Path()
-            for (i, v) in values.enumerated() {
-                let x = CGFloat(i) * step
-                let y = size.height - CGFloat((v - minV) / span) * size.height
-                if i == 0 { path.move(to: CGPoint(x: x, y: y)) }
-                else { path.addLine(to: CGPoint(x: x, y: y)) }
-            }
-            context.stroke(path, with: .color(tint), style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
         }
     }
 }

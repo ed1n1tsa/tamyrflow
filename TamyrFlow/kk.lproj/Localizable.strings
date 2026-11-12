@@ -286,6 +286,7 @@
 "home_period_week" = "Апта";
 "home_period_month" = "Ай";
 "home_no_data" = "Дерек жоқ";
+"home_stats_from_history" = "Жаңарту үшін өлшеңіз";
 "home_no_activity_data" = "Белсенділік деректері жоқ";
 "home_weekday_mon" = "Дс";
 "home_weekday_tue" = "Сс";

@@ -286,6 +286,7 @@
 "home_period_week" = "Неделя";
 "home_period_month" = "Месяц";
 "home_no_data" = "Нет данных";
+"home_stats_from_history" = "Измерьте, чтобы обновить";
 "home_no_activity_data" = "Нет данных об активности";
 "home_weekday_mon" = "Пн";
 "home_weekday_tue" = "Вт";
