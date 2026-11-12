@@ -360,6 +360,57 @@ enum L10n {
         static var timeCard: String { tr("settings_time_card") }
         static var timeCardSub: String { tr("settings_time_sub") }
         static var syncTimeBand: String { tr("settings_sync_time_band") }
+        static var languageSection: String { tr("settings_language_section") }
+        static var languageSaved: String { tr("settings_language_saved") }
+        static var togglesApplied: String { tr("settings_toggles_applied") }
+        static var timeSynced: String { tr("settings_time_synced") }
+    }
+
+    enum Notifications {
+        static var title: String { tr("notif_title") }
+        static var emptyTitle: String { tr("notif_empty_title") }
+        static var emptyBody: String { tr("notif_empty_body") }
+        static var markAllRead: String { tr("notif_mark_all") }
+        static var clearAll: String { tr("notif_clear_all") }
+        static var welcomeTitle: String { tr("notif_welcome_title") }
+        static var welcomeBody: String { tr("notif_welcome_body") }
+        static var watchConnectedTitle: String { tr("notif_watch_on_title") }
+        static var watchConnectedBody: String { tr("notif_watch_on_body") }
+        static var watchDisconnectedTitle: String { tr("notif_watch_off_title") }
+        static var watchDisconnectedBody: String { tr("notif_watch_off_body") }
+        static var syncTitle: String { tr("notif_sync_title") }
+        static var syncBody: String { tr("notif_sync_body") }
+        static var measureTitle: String { tr("notif_measure_title") }
+        static var measureBody: String { tr("notif_measure_body") }
+        static var goalTitle: String { tr("notif_goal_title") }
+        static var goalBody: String { tr("notif_goal_body") }
+    }
+
+    enum Support {
+        static var title: String { tr("support_title") }
+        static var subtitle: String { tr("support_subtitle") }
+        static var emailTitle: String { tr("support_email_title") }
+        static var faqTitle: String { tr("support_faq_title") }
+        static var faq1Title: String { tr("support_faq1_title") }
+        static var faq1Body: String { tr("support_faq1_body") }
+        static var faq2Title: String { tr("support_faq2_title") }
+        static var faq2Body: String { tr("support_faq2_body") }
+        static var faq3Title: String { tr("support_faq3_title") }
+        static var faq3Body: String { tr("support_faq3_body") }
+    }
+
+    enum Legal {
+        static var terms1: String { tr("legal_terms_1") }
+        static var terms2: String { tr("legal_terms_2") }
+        static var terms3: String { tr("legal_terms_3") }
+        static var terms4: String { tr("legal_terms_4") }
+        static var policy1: String { tr("legal_policy_1") }
+        static var policy2: String { tr("legal_policy_2") }
+        static var policy3: String { tr("legal_policy_3") }
+        static var policy4: String { tr("legal_policy_4") }
+        static var controls1: String { tr("legal_controls_1") }
+        static var controls2: String { tr("legal_controls_2") }
+        static var controls3: String { tr("legal_controls_3") }
     }
 
     enum State {
@@ -647,6 +698,10 @@ enum L10n {
         static var setSyncSub: String { tr("watch_set_sync_sub") }
         static var setMore: String { tr("watch_set_more") }
         static var setMoreSub: String { tr("watch_set_more_sub") }
+        static var deferredSleepBody: String { tr("watch_deferred_sleep") }
+        static var deferredWaterBody: String { tr("watch_deferred_water") }
+        static var deferredFacesBody: String { tr("watch_deferred_faces") }
+        static var deferredMoreBody: String { tr("watch_deferred_more") }
 
         static var flowTitle: String { tr("watch_flow_title") }
         static var flowSearchTitle: String { tr("watch_flow_search_title") }

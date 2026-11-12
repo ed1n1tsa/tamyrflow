@@ -6,14 +6,21 @@ struct ProfilePage: View {
     @EnvironmentObject private var auth: AuthService
     @EnvironmentObject private var vm: BluetoothViewModel
     @EnvironmentObject private var language: LanguageStore
+    @Binding var selectedTab: MainTab
 
     @State private var showLogoutConfirm = false
     @State private var showDeleteConfirm = false
-    @State private var stubAlert: String?
+    @State private var errorAlert: String?
     @State private var showEditProfile = false
     @State private var showPersonalData = false
     @State private var showAboutApp = false
     @State private var showMyWatch = false
+    @State private var showNotifications = false
+    @State private var showSettings = false
+    @State private var showSupport = false
+    @State private var showPrivacyControls = false
+    @State private var showTerms = false
+    @State private var showPrivacyPolicy = false
 
     private var profile: UserProfile? { auth.profile }
 
@@ -67,6 +74,24 @@ struct ProfilePage: View {
             .navigationDestination(isPresented: $showMyWatch) {
                 MyWatchPage()
             }
+            .navigationDestination(isPresented: $showNotifications) {
+                NotificationsPage()
+            }
+            .navigationDestination(isPresented: $showSettings) {
+                AppSettingsView()
+            }
+            .navigationDestination(isPresented: $showSupport) {
+                SupportPageView()
+            }
+            .navigationDestination(isPresented: $showPrivacyControls) {
+                LegalDocumentView(kind: .privacyControls)
+            }
+            .navigationDestination(isPresented: $showTerms) {
+                LegalDocumentView(kind: .terms)
+            }
+            .navigationDestination(isPresented: $showPrivacyPolicy) {
+                LegalDocumentView(kind: .privacyPolicy)
+            }
         }
         .id(language.code)
         .alert(L10n.Profile.logoutConfirmTitle, isPresented: $showLogoutConfirm) {
@@ -85,20 +110,20 @@ struct ProfilePage: View {
                         try await auth.deleteAccount()
                     } catch {
                         auth.lastError = error.localizedDescription
-                        stubAlert = error.localizedDescription
+                        errorAlert = error.localizedDescription
                     }
                 }
             }
         } message: {
             Text(L10n.Profile.deleteConfirmBody)
         }
-        .alert(L10n.Profile.stubTitle, isPresented: Binding(
-            get: { stubAlert != nil },
-            set: { if !$0 { stubAlert = nil } }
+        .alert(L10n.Goals.errorTitle, isPresented: Binding(
+            get: { errorAlert != nil },
+            set: { if !$0 { errorAlert = nil } }
         )) {
             Button(L10n.ProfileSetup.sheetDone, role: .cancel) {}
         } message: {
-            Text(stubAlert ?? "")
+            Text(errorAlert ?? "")
         }
         .task {
             await auth.refreshProfile()
@@ -118,16 +143,7 @@ struct ProfilePage: View {
                         .foregroundStyle(.white)
                 }
                 Spacer()
-                ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bell.fill")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(8)
-                    Circle()
-                        .fill(AppTheme.danger)
-                        .frame(width: 8, height: 8)
-                        .offset(x: -4, y: 4)
-                }
+                NotificationsBellButton { showNotifications = true }
             }
 
             Text(L10n.Profile.title)
@@ -219,7 +235,7 @@ struct ProfilePage: View {
 
     private var goalsCard: some View {
         Button {
-            stubAlert = L10n.Profile.stubBody
+            selectedTab = .goals
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "target")
@@ -347,13 +363,7 @@ struct ProfilePage: View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 Button {
-                    if item.title == L10n.Profile.menuPersonal {
-                        showPersonalData = true
-                    } else if item.title == L10n.Profile.menuAbout {
-                        showAboutApp = true
-                    } else {
-                        stubAlert = L10n.Profile.stubBody
-                    }
+                    route(menuItem: item)
                 } label: {
                     HStack(spacing: 14) {
                         Image(systemName: item.systemImage)
@@ -411,6 +421,31 @@ struct ProfilePage: View {
         }
         .buttonStyle(.plain)
         .disabled(auth.isBusy)
+    }
+
+    private func route(menuItem item: MenuItem) {
+        switch item.title {
+        case L10n.Profile.menuPersonal:
+            showPersonalData = true
+        case L10n.Profile.menuMetrics:
+            selectedTab = .metrics
+        case L10n.Profile.menuGoals:
+            selectedTab = .goals
+        case L10n.Profile.menuSettings:
+            showSettings = true
+        case L10n.Profile.menuPrivacy:
+            showPrivacyControls = true
+        case L10n.Profile.menuSupport:
+            showSupport = true
+        case L10n.Profile.menuTerms:
+            showTerms = true
+        case L10n.Profile.menuPolicy:
+            showPrivacyPolicy = true
+        case L10n.Profile.menuAbout:
+            showAboutApp = true
+        default:
+            break
+        }
     }
 
     // MARK: - Labels

@@ -21,7 +21,7 @@ struct RootTabView: View {
                 GoalsPageView(auth: auth)
                     .opacity(tab == .goals ? 1 : 0)
                     .allowsHitTesting(tab == .goals)
-                ProfilePage()
+                ProfilePage(selectedTab: $tab)
                     .opacity(tab == .profile ? 1 : 0)
                     .allowsHitTesting(tab == .profile)
             }
@@ -122,27 +122,3 @@ private struct FloatingTabBar: View {
     }
 }
 
-struct PlaceholderHubPage: View {
-    let title: String
-    let subtitle: String
-    let systemImage: String
-
-    var body: some View {
-        ZStack {
-            ProfileSetupBackground()
-            VStack(spacing: 14) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 36, weight: .bold))
-                    .foregroundStyle(ProfileTheme.accent)
-                Text(title)
-                    .font(AppFont.interBold(24))
-                    .foregroundStyle(.white)
-                Text(subtitle)
-                    .font(AppFont.interBold(13))
-                    .foregroundStyle(ProfileTheme.muted)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 28)
-            }
-        }
-    }
-}
