@@ -288,6 +288,10 @@
 "home_no_data" = "Нет данных";
 "home_stats_from_history" = "Измерьте, чтобы обновить";
 "home_no_activity_data" = "Нет данных об активности";
+"home_activity_total_format" = "%@ шагов сегодня";
+"home_activity_week_total_format" = "%@ шагов за неделю";
+"home_activity_month_total_format" = "%@ шагов за месяц";
+"home_activity_month_summary_format" = "%@ шагов · ср. %@ / день";
 "home_weekday_mon" = "Пн";
 "home_weekday_tue" = "Вт";
 "home_weekday_wed" = "Ср";

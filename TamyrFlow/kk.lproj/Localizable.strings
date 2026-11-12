@@ -288,6 +288,10 @@
 "home_no_data" = "Дерек жоқ";
 "home_stats_from_history" = "Жаңарту үшін өлшеңіз";
 "home_no_activity_data" = "Белсенділік деректері жоқ";
+"home_activity_total_format" = "Бүгін %@ қадам";
+"home_activity_week_total_format" = "Осы аптада %@ қадам";
+"home_activity_month_total_format" = "Осы айда %@ қадам";
+"home_activity_month_summary_format" = "%@ қадам · орт. %@ / күн";
 "home_weekday_mon" = "Дс";
 "home_weekday_tue" = "Сс";
 "home_weekday_wed" = "Ср";

@@ -34,6 +34,10 @@ enum L10n {
         static var noData: String { tr("home_no_data") }
         static var statsFromHistory: String { tr("home_stats_from_history") }
         static var noActivityData: String { tr("home_no_activity_data") }
+        static var activityTotalFormat: String { tr("home_activity_total_format") }
+        static var activityWeekTotalFormat: String { tr("home_activity_week_total_format") }
+        static var activityMonthTotalFormat: String { tr("home_activity_month_total_format") }
+        static var activityMonthSummaryFormat: String { tr("home_activity_month_summary_format") }
         static var weekdayMon: String { tr("home_weekday_mon") }
         static var weekdayTue: String { tr("home_weekday_tue") }
         static var weekdayWed: String { tr("home_weekday_wed") }

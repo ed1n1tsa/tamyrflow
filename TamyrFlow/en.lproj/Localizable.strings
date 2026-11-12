@@ -292,6 +292,10 @@
 "home_no_data" = "No data";
 "home_stats_from_history" = "Measure to update";
 "home_no_activity_data" = "No activity data";
+"home_activity_total_format" = "%@ steps today";
+"home_activity_week_total_format" = "%@ steps this week";
+"home_activity_month_total_format" = "%@ steps this month";
+"home_activity_month_summary_format" = "%@ steps · avg %@ / day";
 "home_weekday_mon" = "Mon";
 "home_weekday_tue" = "Tue";
 "home_weekday_wed" = "Wed";
