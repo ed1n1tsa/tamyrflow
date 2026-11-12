@@ -15,14 +15,7 @@ enum LegalDocumentKind {
 
     var paragraphs: [String] {
         switch self {
-        case .terms:
-            return [
-                L10n.Legal.terms1,
-                L10n.Legal.terms2,
-                L10n.Legal.terms3,
-                L10n.Legal.terms4
-            ]
-        case .privacyPolicy:
+        case .terms, .privacyPolicy:
             return []
         case .privacyControls:
             return [
@@ -51,9 +44,20 @@ struct LegalDocumentView: View {
 
                 ScrollView(showsIndicators: true) {
                     Group {
-                        if kind == .privacyPolicy {
-                            privacyPolicyBody
-                        } else {
+                        switch kind {
+                        case .privacyPolicy:
+                            richLegalBody(
+                                title: PrivacyPolicyDocument.documentTitle,
+                                updated: PrivacyPolicyDocument.updatedLabel,
+                                sections: PrivacyPolicyDocument.sections
+                            )
+                        case .terms:
+                            richLegalBody(
+                                title: TermsOfUseDocument.documentTitle,
+                                updated: TermsOfUseDocument.updatedLabel,
+                                sections: TermsOfUseDocument.sections
+                            )
+                        case .privacyControls:
                             simpleParagraphsBody
                         }
                     }
@@ -105,18 +109,22 @@ struct LegalDocumentView: View {
         }
     }
 
-    private var privacyPolicyBody: some View {
+    private func richLegalBody(
+        title: String,
+        updated: String,
+        sections: [LegalRichDocument.Section]
+    ) -> some View {
         VStack(alignment: .leading, spacing: 22) {
-            Text(PrivacyPolicyDocument.documentTitle)
+            Text(title)
                 .font(AppFont.interBold(26))
                 .foregroundStyle(.white)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text(PrivacyPolicyDocument.updatedLabel)
+            Text(updated)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(ProfileTheme.muted)
 
-            ForEach(PrivacyPolicyDocument.sections) { section in
+            ForEach(sections) { section in
                 VStack(alignment: .leading, spacing: 12) {
                     Text(section.title)
                         .font(AppFont.interBold(18))

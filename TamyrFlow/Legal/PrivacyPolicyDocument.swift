@@ -2,25 +2,8 @@ import Foundation
 
 /// Structured privacy policy — rendered as a readable scrolling document.
 enum PrivacyPolicyDocument {
-    struct Section: Identifiable {
-        let id: String
-        let title: String
-        let blocks: [Block]
-    }
-
-    enum Block: Identifiable {
-        case paragraph(String)
-        case bullets([String])
-        case contact(label: String, value: String)
-
-        var id: String {
-            switch self {
-            case .paragraph(let t): return "p-\(t.prefix(48))"
-            case .bullets(let items): return "b-\(items.first?.prefix(32) ?? "x")"
-            case .contact(let label, let value): return "c-\(label)-\(value)"
-            }
-        }
-    }
+    typealias Section = LegalRichDocument.Section
+    typealias Block = LegalRichDocument.Block
 
     static var updatedLabel: String {
         switch LanguageStoreBootstrap.bundle.preferredLocalizations.first {
