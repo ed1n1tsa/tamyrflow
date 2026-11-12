@@ -90,7 +90,7 @@ struct CreateGoalFlowView: View {
         VStack(alignment: .leading, spacing: 16) {
             stepTitle(L10n.Goals.stepCategoryTitle, L10n.Goals.stepCategorySub)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                ForEach(GoalCategory.allCases) { cat in
+                ForEach(GoalCategory.selectableCases) { cat in
                     let taken = service.hasCategory(cat) && existing?.category != cat
                     Button {
                         guard !taken else { return }

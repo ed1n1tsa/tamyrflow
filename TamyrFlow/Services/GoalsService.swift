@@ -55,7 +55,7 @@ final class GoalsService: ObservableObject {
                 .eq("is_active", value: true)
                 .order("sort_order", ascending: true)
                 .execute()
-            goals = response.value
+            goals = response.value.filter { GoalCategory.selectableCases.contains($0.category) }
 
             var map: [UUID: GoalProgress] = [:]
             for goal in goals {
@@ -192,7 +192,8 @@ final class GoalsService: ObservableObject {
                 .execute()
 
             historyEntries = progressResponse.value.compactMap { row in
-                guard let goal = goalsById[row.goalId] else { return nil }
+                guard let goal = goalsById[row.goalId],
+                      GoalCategory.selectableCases.contains(goal.category) else { return nil }
                 // Skip empty current periods — history should show meaningful progress.
                 guard row.currentValue > 0 else { return nil }
                 return GoalHistoryEntry(

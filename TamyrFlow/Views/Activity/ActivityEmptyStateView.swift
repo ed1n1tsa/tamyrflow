@@ -18,9 +18,9 @@ struct ActivityEmptyStateView: View {
                     // Orbiting metric chips (from Goals icons).
                     Group {
                         orbitIcon("GoalIconActivity", x: -88, y: -40)
-                        orbitIcon("GoalIconWater", x: 88, y: -36)
+                        orbitIcon("GoalIconSteps", x: 88, y: -36)
                         orbitIcon("GoalIconWeight", x: -80, y: 56)
-                        orbitIcon("GoalIconSleep", x: 82, y: 52)
+                        orbitIcon("ActCatWorkouts", x: 82, y: 52)
                     }
                 }
                 .padding(.top, 12)
@@ -83,8 +83,8 @@ struct ActivityEmptyStateView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 trackCell(asset: "ActCatWorkouts", title: L10n.Activity.trackWorkouts, sub: L10n.Activity.trackWorkoutsSub)
                 trackCell(asset: "GoalIconActivity", title: L10n.Activity.trackCalories, sub: L10n.Activity.trackCaloriesSub)
-                trackCell(asset: "GoalIconSleep", title: L10n.Activity.trackSleep, sub: L10n.Activity.trackSleepSub)
-                trackCell(asset: "GoalIconWater", title: L10n.Activity.trackWater, sub: L10n.Activity.trackWaterSub)
+                trackCell(asset: "GoalIconSteps", title: L10n.Goals.title(for: .steps), sub: L10n.Watch.featActivitySub)
+                trackCell(asset: "GoalIconWeight", title: L10n.Goals.title(for: .weight), sub: L10n.Goals.stepTargetSub(for: .weight))
             }
         }
         .padding(16)

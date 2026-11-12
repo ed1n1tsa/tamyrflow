@@ -9,6 +9,9 @@ enum GoalCategory: String, Codable, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
+    /// Categories offered in create/edit UI (sleep & water removed from first release).
+    static var selectableCases: [GoalCategory] { [.steps, .activity, .weight] }
+
     var defaultUnit: String {
         switch self {
         case .steps: return "steps"
