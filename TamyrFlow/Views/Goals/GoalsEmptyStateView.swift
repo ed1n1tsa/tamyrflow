@@ -3,7 +3,7 @@ import SwiftUI
 struct GoalsEmptyStateView: View {
     var onCreate: () -> Void
 
-    private let previewCategories: [GoalCategory] = [.steps, .activity, .sleep, .water]
+    private let previewCategories: [GoalCategory] = [.steps, .activity, .weight]
 
     var body: some View {
         VStack(spacing: 0) {

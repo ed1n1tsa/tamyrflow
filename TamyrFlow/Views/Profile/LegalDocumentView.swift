@@ -15,20 +15,8 @@ enum LegalDocumentKind {
 
     var paragraphs: [String] {
         switch self {
-        case .terms:
-            return [
-                L10n.Legal.terms1,
-                L10n.Legal.terms2,
-                L10n.Legal.terms3,
-                L10n.Legal.terms4
-            ]
-        case .privacyPolicy:
-            return [
-                L10n.Legal.policy1,
-                L10n.Legal.policy2,
-                L10n.Legal.policy3,
-                L10n.Legal.policy4
-            ]
+        case .terms, .privacyPolicy:
+            return []
         case .privacyControls:
             return [
                 L10n.Legal.controls1,
@@ -45,6 +33,7 @@ struct LegalDocumentView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
+        let _ = language.revision
         ZStack {
             ProfileSetupBackground()
 
@@ -53,31 +42,41 @@ struct LegalDocumentView: View {
                     .padding(.horizontal, ProfileTheme.contentInset)
                     .padding(.top, 6)
 
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 14) {
-                        Text(kind.title)
-                            .font(AppFont.interBold(28))
-                            .foregroundStyle(.white)
-
-                        ForEach(Array(kind.paragraphs.enumerated()), id: \.offset) { _, text in
-                            Text(text)
-                                .font(AppFont.interBold(14))
-                                .foregroundStyle(Color.white.opacity(0.78))
-                                .lineSpacing(5)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .padding(16)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .profileCard()
+                ScrollView(showsIndicators: true) {
+                    Group {
+                        switch kind {
+                        case .privacyPolicy:
+                            richLegalBody(
+                                title: PrivacyPolicyDocument.documentTitle,
+                                updated: PrivacyPolicyDocument.updatedLabel,
+                                sections: PrivacyPolicyDocument.sections
+                            )
+                        case .terms:
+                            richLegalBody(
+                                title: TermsOfUseDocument.documentTitle,
+                                updated: TermsOfUseDocument.updatedLabel,
+                                sections: TermsOfUseDocument.sections
+                            )
+                        case .privacyControls:
+                            simpleParagraphsBody
                         }
                     }
                     .padding(.horizontal, ProfileTheme.contentInset)
-                    .padding(.top, 14)
-                    .padding(.bottom, 32)
+                    .padding(.top, 12)
+                    .padding(.bottom, 36)
+                    .id("legal-\(kindTitleKey)-\(language.code.rawValue)-\(language.revision)")
                 }
             }
         }
         .navigationBarHidden(true)
-        .id(language.code)
+    }
+
+    private var kindTitleKey: String {
+        switch kind {
+        case .terms: return "terms"
+        case .privacyPolicy: return "privacy"
+        case .privacyControls: return "controls"
+        }
     }
 
     private var topBar: some View {
@@ -98,6 +97,118 @@ struct LegalDocumentView: View {
             Spacer()
             Color.clear.frame(width: 36, height: 36)
         }
+    }
+
+    private var simpleParagraphsBody: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(Array(kind.paragraphs.enumerated()), id: \.offset) { _, text in
+                Text(text)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(Color.white.opacity(0.88))
+                    .lineSpacing(5)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(sectionChrome)
+            }
+        }
+    }
+
+    /// App Store–friendly: clear section separation, readable body, no wall of text.
+    private func richLegalBody(
+        title: String,
+        updated: String,
+        sections: [LegalRichDocument.Section]
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
+                    .font(AppFont.interBold(24))
+                    .foregroundStyle(.white)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(updated)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(ProfileTheme.muted)
+            }
+            .padding(.bottom, 4)
+
+            ForEach(sections) { section in
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(section.title)
+                        .font(AppFont.interBold(17))
+                        .foregroundStyle(.white)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Rectangle()
+                        .fill(ProfileTheme.accent.opacity(0.55))
+                        .frame(width: 36, height: 2)
+                        .padding(.bottom, 2)
+
+                    ForEach(Array(section.blocks.enumerated()), id: \.offset) { _, block in
+                        switch block {
+                        case .paragraph(let text):
+                            if isSubhead(text) {
+                                Text(text)
+                                    .font(AppFont.interBold(15))
+                                    .foregroundStyle(ProfileTheme.accent)
+                                    .padding(.top, 4)
+                            } else {
+                                Text(text)
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundStyle(Color.white.opacity(0.90))
+                                    .lineSpacing(5)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        case .bullets(let items):
+                            VStack(alignment: .leading, spacing: 6) {
+                                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                                    HStack(alignment: .top, spacing: 10) {
+                                        Circle()
+                                            .fill(ProfileTheme.accent)
+                                            .frame(width: 5, height: 5)
+                                            .padding(.top, 7)
+                                        Text(item)
+                                            .font(.system(size: 15, weight: .regular))
+                                            .foregroundStyle(Color.white.opacity(0.90))
+                                            .lineSpacing(4)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                            }
+                        case .contact(let label, let value):
+                            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                Text("\(label):")
+                                    .font(AppFont.interBold(14))
+                                    .foregroundStyle(ProfileTheme.muted)
+                                Text(value)
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundStyle(.white)
+                                    .textSelection(.enabled)
+                            }
+                        }
+                    }
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(sectionChrome)
+            }
+        }
+    }
+
+    private var sectionChrome: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(Color(red: 6 / 255, green: 18 / 255, blue: 40 / 255).opacity(0.88))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(ProfileTheme.cardBorder.opacity(0.75), lineWidth: 1)
+            )
+    }
+
+    private func isSubhead(_ text: String) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count < 40, !trimmed.contains(".") else { return false }
+        return true
     }
 }
 
@@ -123,26 +234,26 @@ struct DeferredFeatureView: View {
                     Text(title)
                         .font(AppFont.interBold(17))
                         .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                     Spacer()
                     Color.clear.frame(width: 36, height: 36)
                 }
                 .padding(.horizontal, ProfileTheme.contentInset)
                 .padding(.top, 6)
 
-                VStack(spacing: 16) {
-                    Spacer()
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 36, weight: .semibold))
-                        .foregroundStyle(ProfileTheme.accent)
-                    Text(title)
-                        .font(AppFont.interBold(22))
-                        .foregroundStyle(.white)
+                ScrollView {
                     Text(bodyText)
-                        .font(AppFont.interBold(14))
-                        .foregroundStyle(ProfileTheme.muted)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 28)
-                    Spacer()
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundStyle(Color.white.opacity(0.85))
+                        .lineSpacing(6)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .profileCard()
+                        .padding(.horizontal, ProfileTheme.contentInset)
+                        .padding(.top, 18)
+                        .padding(.bottom, 32)
                 }
             }
         }

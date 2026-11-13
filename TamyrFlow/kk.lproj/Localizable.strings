@@ -148,7 +148,7 @@
 "settings_auto_temp" = "Авто температура";
 "settings_apply" = "Білезікке қолдану";
 "settings_time_card" = "Уақыт";
-"settings_time_sub" = "SDK API арқылы";
+"settings_time_sub" = "Сағатты телефон уақытымен сәйкестендіру";
 "settings_sync_time_band" = "Уақытты білезікпен синхрондау";
 
 /* States */
@@ -288,6 +288,10 @@
 "home_no_data" = "Дерек жоқ";
 "home_stats_from_history" = "Жаңарту үшін өлшеңіз";
 "home_no_activity_data" = "Белсенділік деректері жоқ";
+"home_activity_total_format" = "Бүгін %@ қадам";
+"home_activity_week_total_format" = "Осы аптада %@ қадам";
+"home_activity_month_total_format" = "Осы айда %@ қадам";
+"home_activity_month_summary_format" = "%@ қадам · орт. %@ / күн";
 "home_weekday_mon" = "Дс";
 "home_weekday_tue" = "Сс";
 "home_weekday_wed" = "Ср";
@@ -379,11 +383,12 @@
 "prof_weight" = "Салмақ";
 "prof_gender_unspecified_short" = "Көрсетілмеген";
 "prof_goals_title" = "Мақсаттар мен прогресс";
-"prof_goals_sub_mock" = "5 мақсаттың 3-і орындалды";
+"prof_goals_empty" = "Мақсат жоқ — қосу үшін басыңыз";
 "prof_my_watch" = "Сағатым";
 "prof_connected" = "Қосылған";
 "prof_disconnected" = "Қосылмаған";
-"prof_last_sync_mock" = "Соңғы синхрон Бүгін, 09:40";
+"prof_last_sync_never" = "Әлі синхрондалмаған";
+"prof_last_sync_format" = "Соңғы синхрон %@";
 "prof_menu_personal" = "Жеке деректер";
 "prof_menu_personal_sub" = "Аты, жас, жыныс, бой, салмақ";
 "prof_menu_metrics" = "Көрсеткіштерім";
@@ -432,7 +437,7 @@
 /* Goals */
 "goals_screen_title" = "Мақсаттар";
 "goals_empty_headline" = "Әзірге мақсат жоқ";
-"goals_empty_sub" = "Бірінші мақсатты жасаңыз — қадам, белсенділік, ұйқы, су немесе салмақ.";
+"goals_empty_sub" = "Бірінші мақсатты жасаңыз — қадам, белсенділік немесе салмақ.";
 "goals_create_cta" = "Мақсат жасау";
 "goals_create_title" = "Жаңа мақсат";
 "goals_edit_title" = "Мақсатты өңдеу";
@@ -445,6 +450,9 @@
 "goals_category_taken" = "Бұл санатта мақсат бар.";
 "goals_history_title" = "Прогресс тарихы";
 "goals_history_stub" = "Тарих сағатпен байланысқаннан кейін пайда болады.";
+"goals_history_empty" = "Прогресс тарихы әлі жоқ. Мақсаттарды жаңартсаңыз, өткен кезеңдер осында көрінеді.";
+"goals_history_close" = "Жабу";
+"goals_history_target_format" = "%@ / %@";
 "goals_summary_format" = "%d / %d мақсат орындалды";
 "goals_step_category_title" = "Санатты таңдаңыз";
 "goals_step_category_sub" = "Әр санатқа бір белсенді мақсат.";
@@ -516,14 +524,14 @@
 "about_disclaimer_warn" = "Қосымша деректері бойынша өздігінен диагноз қоймаңыз және емдеу шешімін қабылдамаңыз. Денсаулыққа қатысты сұрақтарда дәрігерге немесе басқа білікті маманға жүгініңіз.";
 "about_contact_title" = "Бізбен байланысу";
 "about_contact_sub" = "Сұрақ, ұсыныс немесе идея бар ма? Біз әрдайым байланыстамыз.";
-"about_contact_email" = "support@tamyrflow.app";
+"about_contact_email" = "tamyrflow@gmail.com";
 
 /* Activity */
 "act_screen_title" = "Белсенділік";
 "act_subtitle_empty" = "Мұнда барлық белсенділігіңіз болады: жаттығу, қадам және прогресс.";
 "act_subtitle_filled" = "Күнделікті белсенділік пен прогресті қадағалаңыз.";
 "act_empty_title" = "Белсенділік әзірге бос";
-"act_empty_sub" = "Жаттығу, қадам, белсенділік, ұйқы, су балансы және басқа көрсеткіштерді көру үшін қозғалысты бастаңыз.";
+"act_empty_sub" = "Жаттығу, қадам, белсенділік және басқа көрсеткіштерді көру үшін қозғалысты бастаңыз.";
 "act_add_first" = "Бірінші белсенділікті қосу";
 "act_add_title" = "Белсенділік қосу";
 "act_add_cta" = "Белсенділік қосу";
@@ -619,9 +627,9 @@
 "watch_today_time" = "Бүгін, %@";
 "watch_never_synced" = "Дерек жоқ";
 "watch_banner_off_title" = "Сағатты қосыңыз";
-"watch_banner_off_sub" = "Жаттығу, белсенділік, ұйқы және басқа көрсеткіштерді синхрондау үшін.";
+"watch_banner_off_sub" = "Жаттығу, белсенділік және басқа көрсеткіштерді синхрондау үшін.";
 "watch_banner_on_title" = "Сағат қосылған";
-"watch_banner_on_sub" = "Жаттығу, белсенділік, ұйқы деректері автоматты синхрондалады.";
+"watch_banner_on_sub" = "Жаттығу, белсенділік және басқа көрсеткіштер автоматты синхрондалады.";
 "watch_functions_title" = "Негізгі функциялар";
 "watch_feat_activity" = "Белсенділікті бақылау";
 "watch_feat_activity_sub" = "Қадам, жаттығу, калория.";
@@ -633,6 +641,29 @@
 "watch_feat_water_sub" = "Еске салғыш пен статистика.";
 "watch_settings_title" = "Құрылғы баптаулары";
 "watch_set_faces" = "Циферблаттар";
+"watch_faces_title" = "Құрылғыдағы циферблаттар";
+"watch_faces_subtitle" = "Кірістірілген стильді таңдаңыз — сағат бірден қолданады.";
+"watch_faces_hint" = "Сәтті қолданылғаннан кейін сағат жаңа циферблатты көрсетеді. Білезікті жақын ұстаңыз.";
+"watch_faces_style_format" = "Стиль %d";
+"watch_faces_style1_title" = "Драйв";
+"watch_faces_style1_sub" = "Спорттық панель: уақыт, қадам және энергия";
+"watch_faces_style1_tag" = "Жылы қызғылт сары";
+"watch_faces_style2_title" = "Витал";
+"watch_faces_style2_sub" = "Жүректі неон циферблат және қос сақина";
+"watch_faces_style2_tag" = "Неон қызыл";
+"watch_faces_style3_title" = "Реактор";
+"watch_faces_style3_sub" = "Минимал жарқын өзек және уақыт";
+"watch_faces_style3_tag" = "Көгілдір жарқыл";
+"watch_faces_style_generic_sub" = "Сағаттағы кірістірілген стиль";
+"watch_faces_style_generic_tag" = "Кірістірілген";
+"watch_faces_active" = "Белсенді";
+"watch_faces_apply" = "Қолдану";
+"watch_faces_applied" = "Циферблат қолданылды";
+"watch_faces_apply_failed" = "Қолдану мүмкін болмады. Сағат қосулы тұрғанда қайталаңыз.";
+"watch_faces_need_watch_title" = "Сағатты қосыңыз";
+"watch_faces_need_watch_body" = "Циферблатты ауыстыру үшін Tamyr Watch қосулы болуы керек.";
+"watch_faces_unsupported_title" = "Бұл сағатта қолжетімсіз";
+"watch_faces_unsupported_body" = "Бұл модель қолданбаға кірістірілген стильдерді бермейді.";
 "watch_set_notifications" = "Хабарламалар";
 "watch_set_notifications_sub" = "Қоңырау, хабар, қолданбалар.";
 "watch_set_sync" = "Синхрон баптаулары";
@@ -670,7 +701,7 @@
 "watch_perm_notif" = "Хабарламалар";
 "watch_perm_notif_sub" = "Еске салғыштар мен оқиғалар";
 "watch_perm_health" = "Денсаулық және белсенділік";
-"watch_perm_health_sub" = "Қадам, пульс, ұйқы";
+"watch_perm_health_sub" = "Қадам, пульс және белсенділік";
 "watch_perm_location" = "Геолокация";
 "watch_perm_location_sub" = "Жақын құрылғыларды іздеу";
 "watch_success_sub" = "Дайын — Tamyr Flow-та сағатты пайдалана аласыз.";
@@ -721,6 +752,7 @@
 "pulse_update_hint" = "«Жаңарту» басыңыз — сағатта пульс өлшейміз";
 "pulse_sync_hint" = "Синхрондау немесе жаңа өлшем";
 "pulse_measure_now" = "Пульс өлшеу";
+"pulse_live_measure_off" = "Тікелей өлшеу кейінгі жаңартуда қосылады. Сақталған деректер үшін «Жаңарту» басыңыз.";
 "pulse_measuring_title" = "Пульс өлшенеді";
 "pulse_measuring_body" = "Сағатты қолда тығыз ұстаңыз. Әдетте 15–25 секунд…";
 "pulse_average_title" = "Орташа пульс";
@@ -819,8 +851,8 @@
 "support_faq1_body" = "Bluetooth қосыңыз, сағатты жақын ұстаңыз және басқа фитнес қолданбаларды жабыңыз.";
 "support_faq2_title" = "Өлшеу басталмайды";
 "support_faq2_body" = "Сағатты тығыз киіңіз, қосылғаннан кейін сәл күтіп, көрсеткіш бетінде «Өлшеу» басыңыз.";
-"support_faq3_title" = "Ұйқы қайда?";
-"support_faq3_body" = "Ұйқы бірінші шығарылымда кейінге қалдырылған — accurate-sleep қауіпсіз синхрондауын аяқтағанша.";
+"support_faq3_title" = "Аккаунтты қалай жоюға болады?";
+"support_faq3_body" = "Профиль → Аккаунтты жою. Бұлттағы деректер Құпиялылық саясатына сәйкес жойылады. Телефоннан қолданбаны өшіру аккаунтты автоматты жоймайды.";
 "legal_terms_1" = "Tamyr Flow үйлесімді сағаттан белсенділік пен көрсеткіштерді бақылауға көмектеседі. Бұл медициналық құрал емес.";
 "legal_terms_2" = "Қолданбаны пайдалану және аккаунт қауіпсіздігі сіздің жауапкершілігіңізде.";
 "legal_terms_3" = "Тірі өлшемдер сағат прошивкасына, кию сапасына және Bluetooth-қа тәуелді.";
@@ -829,7 +861,7 @@
 "legal_policy_2" = "Сағат деректері телефонда SDK арқылы өңделеді және кіргенде backend-ке жүктелуі мүмкін.";
 "legal_policy_3" = "Денсаулық деректерін сатпаймыз. Қолжетімділік сервис пен қолдауға шектелген.";
 "legal_policy_4" = "Аккаунтты Профильден жоюға болады — бұлттық профиль деректері өшіріледі.";
-"legal_controls_1" = "Bluetooth, хабарлама және Health рұқсаттары жұптау, еске салғыштар және Apple Health ұйқысына керек.";
+"legal_controls_1" = "Bluetooth, хабарлама және Health рұқсаттары жұптау, еске салғыштар және рұқсат етілген Apple Health көрсеткіштерін оқу үшін керек.";
 "legal_controls_2" = "Тіл, бірліктер, Auto HR және авто-температураны Баптаулардан өзгертіп сағатқа жіберуге болады.";
 "legal_controls_3" = "Синхрондауды тоқтату үшін сағатты ажыратыңыз немесе аккаунттан шығыңыз.";
 "watch_deferred_sleep" = "Ұйқы трекингі бірінші шығарылымда кейінге қалдырылған.";

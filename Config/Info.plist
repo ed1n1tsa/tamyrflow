@@ -22,5 +22,8 @@
 	<array>
 		<string>bluetooth-central</string>
 	</array>
+	<!-- Standard HTTPS/BLE only — skip App Store Connect export-compliance prompt. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>

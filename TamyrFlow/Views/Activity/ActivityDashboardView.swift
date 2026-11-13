@@ -96,22 +96,6 @@ struct ActivityDashboardView: View {
                     tint: Color.orange
                 )
                 metricCard(
-                    asset: "GoalIconSleep",
-                    value: String(format: L10n.Activity.sleepValue, formatDec(service.metrics.sleepHours)),
-                    sub: String(format: L10n.Activity.outOfHours, formatDec(service.metrics.sleepTarget)),
-                    ratio: ratio(service.metrics.sleepHours, service.metrics.sleepTarget),
-                    tint: Color.purple
-                )
-            }
-            GridRow {
-                metricCard(
-                    asset: "GoalIconWater",
-                    value: String(format: L10n.Activity.waterValue, formatDec(service.metrics.waterLiters)),
-                    sub: String(format: L10n.Activity.outOfLiters, formatDec(service.metrics.waterTarget)),
-                    ratio: ratio(service.metrics.waterLiters, service.metrics.waterTarget),
-                    tint: Color.cyan
-                )
-                metricCard(
                     asset: "GoalIconWeight",
                     value: String(format: L10n.Activity.weightValue, formatDec(service.metrics.weightKg)),
                     sub: String(format: L10n.Activity.weightGoal, formatDec(service.metrics.weightTarget)),
@@ -202,7 +186,7 @@ struct ActivityDashboardView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(service.achievementDefs) { def in
+                    ForEach(service.achievementDefs.filter { $0.kind != "sleep" && $0.kind != "water" }) { def in
                         let on = service.unlockedIds.contains(def.id)
                         VStack(spacing: 8) {
                             Image(systemName: achievementSymbol(def.kind))

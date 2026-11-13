@@ -3,8 +3,7 @@ import Foundation
 /// Centralized keys for `Localizable.strings` (en / ru / kk).
 enum L10n {
     private static func tr(_ key: String) -> String {
-        let bundle = LanguageStoreBootstrap.bundle
-        return bundle.localizedString(forKey: key, value: nil, table: nil)
+        LanguageStoreBootstrap.bundle.localizedString(forKey: key, value: key, table: "Localizable")
     }
 
     enum Home {
@@ -35,6 +34,10 @@ enum L10n {
         static var noData: String { tr("home_no_data") }
         static var statsFromHistory: String { tr("home_stats_from_history") }
         static var noActivityData: String { tr("home_no_activity_data") }
+        static var activityTotalFormat: String { tr("home_activity_total_format") }
+        static var activityWeekTotalFormat: String { tr("home_activity_week_total_format") }
+        static var activityMonthTotalFormat: String { tr("home_activity_month_total_format") }
+        static var activityMonthSummaryFormat: String { tr("home_activity_month_summary_format") }
         static var weekdayMon: String { tr("home_weekday_mon") }
         static var weekdayTue: String { tr("home_weekday_tue") }
         static var weekdayWed: String { tr("home_weekday_wed") }
@@ -151,11 +154,17 @@ enum L10n {
         static var weight: String { tr("prof_weight") }
         static var genderUnspecifiedShort: String { tr("prof_gender_unspecified_short") }
         static var goalsTitle: String { tr("prof_goals_title") }
-        static var goalsSubMock: String { tr("prof_goals_sub_mock") }
+        static var goalsEmpty: String { tr("prof_goals_empty") }
+        static func goalsSummary(done: Int, total: Int) -> String {
+            String(format: tr("goals_summary_format"), done, total)
+        }
         static var myWatch: String { tr("prof_my_watch") }
         static var connected: String { tr("prof_connected") }
         static var disconnected: String { tr("prof_disconnected") }
-        static var lastSyncMock: String { tr("prof_last_sync_mock") }
+        static var lastSyncNever: String { tr("prof_last_sync_never") }
+        static func lastSync(_ value: String) -> String {
+            String(format: tr("prof_last_sync_format"), value)
+        }
         static var menuPersonal: String { tr("prof_menu_personal") }
         static var menuPersonalSub: String { tr("prof_menu_personal_sub") }
         static var menuMetrics: String { tr("prof_menu_metrics") }
@@ -692,6 +701,29 @@ enum L10n {
         static var featWaterSub: String { tr("watch_feat_water_sub") }
         static var settingsTitle: String { tr("watch_settings_title") }
         static var setFaces: String { tr("watch_set_faces") }
+        static var facesTitle: String { tr("watch_faces_title") }
+        static var facesSubtitle: String { tr("watch_faces_subtitle") }
+        static var facesHint: String { tr("watch_faces_hint") }
+        static var facesStyleFormat: String { tr("watch_faces_style_format") }
+        static var facesStyle1Title: String { tr("watch_faces_style1_title") }
+        static var facesStyle1Sub: String { tr("watch_faces_style1_sub") }
+        static var facesStyle1Tag: String { tr("watch_faces_style1_tag") }
+        static var facesStyle2Title: String { tr("watch_faces_style2_title") }
+        static var facesStyle2Sub: String { tr("watch_faces_style2_sub") }
+        static var facesStyle2Tag: String { tr("watch_faces_style2_tag") }
+        static var facesStyle3Title: String { tr("watch_faces_style3_title") }
+        static var facesStyle3Sub: String { tr("watch_faces_style3_sub") }
+        static var facesStyle3Tag: String { tr("watch_faces_style3_tag") }
+        static var facesStyleGenericSub: String { tr("watch_faces_style_generic_sub") }
+        static var facesStyleGenericTag: String { tr("watch_faces_style_generic_tag") }
+        static var facesActive: String { tr("watch_faces_active") }
+        static var facesApply: String { tr("watch_faces_apply") }
+        static var facesApplied: String { tr("watch_faces_applied") }
+        static var facesApplyFailed: String { tr("watch_faces_apply_failed") }
+        static var facesNeedWatchTitle: String { tr("watch_faces_need_watch_title") }
+        static var facesNeedWatchBody: String { tr("watch_faces_need_watch_body") }
+        static var facesUnsupportedTitle: String { tr("watch_faces_unsupported_title") }
+        static var facesUnsupportedBody: String { tr("watch_faces_unsupported_body") }
         static var setNotifications: String { tr("watch_set_notifications") }
         static var setNotificationsSub: String { tr("watch_set_notifications_sub") }
         static var setSync: String { tr("watch_set_sync") }
@@ -761,7 +793,8 @@ enum L10n {
         static var disclaimerWarn: String { tr("about_disclaimer_warn") }
         static var contactTitle: String { tr("about_contact_title") }
         static var contactSub: String { tr("about_contact_sub") }
-        static var contactEmail: String { tr("about_contact_email") }
+        /// Canonical support inbox (same in all languages).
+        static var contactEmail: String { "tamyrflow@gmail.com" }
     }
 
     enum Pulse {
@@ -940,6 +973,9 @@ enum L10n {
         static var categoryTaken: String { tr("goals_category_taken") }
         static var historyTitle: String { tr("goals_history_title") }
         static var historyStub: String { tr("goals_history_stub") }
+        static var historyEmpty: String { tr("goals_history_empty") }
+        static var historyClose: String { tr("goals_history_close") }
+        static var historyTargetFormat: String { tr("goals_history_target_format") }
         static var summaryFormat: String { tr("goals_summary_format") }
         static var stepCategoryTitle: String { tr("goals_step_category_title") }
         static var stepCategorySub: String { tr("goals_step_category_sub") }
@@ -1039,4 +1075,6 @@ enum L10n {
 /// Non-observable access to the active language bundle (set by `LanguageStore`).
 enum LanguageStoreBootstrap {
     nonisolated(unsafe) static var bundle: Bundle = .main
+    /// Active in-app language (`kk` / `ru` / `en`). Do not use `bundle.preferredLocalizations`.
+    nonisolated(unsafe) static var code: String = "ru"
 }

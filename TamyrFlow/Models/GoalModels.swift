@@ -9,6 +9,9 @@ enum GoalCategory: String, Codable, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
+    /// Categories offered in create/edit UI (sleep & water removed from first release).
+    static var selectableCases: [GoalCategory] { [.steps, .activity, .weight] }
+
     var defaultUnit: String {
         switch self {
         case .steps: return "steps"
@@ -118,6 +121,23 @@ struct GoalProgress: Codable, Identifiable, Equatable {
         case source
         case createdAt = "created_at"
         case updatedAt = "updated_at"
+    }
+}
+
+struct GoalHistoryEntry: Identifiable, Equatable, Hashable {
+    let id: UUID
+    let goalId: UUID
+    let category: GoalCategory
+    let period: GoalPeriod
+    let periodStart: String
+    let currentValue: Double
+    let targetValue: Double
+    let unit: String
+    let source: String
+
+    var ratio: Double {
+        guard targetValue > 0 else { return 0 }
+        return min(1, max(0, currentValue / targetValue))
     }
 }
 

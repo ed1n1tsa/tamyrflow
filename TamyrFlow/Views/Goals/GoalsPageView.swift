@@ -2,10 +2,11 @@ import SwiftUI
 
 /// Root of the Goals tab: empty state ↔ list, plus create/edit wizard.
 struct GoalsPageView: View {
+    @EnvironmentObject private var language: LanguageStore
     @StateObject private var service: GoalsService
     @State private var showCreate = false
     @State private var editingGoal: Goal?
-    @State private var historyStub = false
+    @State private var showHistory = false
     @State private var errorAlert: String?
 
     init(auth: AuthService) {
@@ -13,6 +14,7 @@ struct GoalsPageView: View {
     }
 
     var body: some View {
+        let _ = language.revision
         ZStack {
             GoalsBackgroundView()
 
@@ -29,7 +31,7 @@ struct GoalsPageView: View {
                         service: service,
                         onCreate: { showCreate = true },
                         onEdit: { editingGoal = $0 },
-                        onHistory: { historyStub = true }
+                        onHistory: { showHistory = true }
                     )
                 }
             }
@@ -45,10 +47,9 @@ struct GoalsPageView: View {
                 editingGoal = nil
             }
         }
-        .alert(L10n.Goals.historyTitle, isPresented: $historyStub) {
-            Button(L10n.Goals.ok, role: .cancel) {}
-        } message: {
-            Text(L10n.Goals.historyStub)
+        .fullScreenCover(isPresented: $showHistory) {
+            GoalsHistoryView(service: service)
+                .environmentObject(language)
         }
         .onChange(of: service.lastError) { _, err in
             if let err { errorAlert = err }

@@ -7,6 +7,7 @@ struct ProfilePage: View {
     @EnvironmentObject private var vm: BluetoothViewModel
     @EnvironmentObject private var language: LanguageStore
     @Binding var selectedTab: MainTab
+    @StateObject private var goalsService: GoalsService
 
     @State private var showLogoutConfirm = false
     @State private var showDeleteConfirm = false
@@ -24,7 +25,13 @@ struct ProfilePage: View {
 
     private var profile: UserProfile? { auth.profile }
 
+    init(selectedTab: Binding<MainTab>, auth: AuthService) {
+        _selectedTab = selectedTab
+        _goalsService = StateObject(wrappedValue: GoalsService(auth: auth))
+    }
+
     var body: some View {
+        let _ = language.revision
         NavigationStack {
             ZStack {
                 ProfileSetupBackground()
@@ -93,7 +100,7 @@ struct ProfilePage: View {
                 LegalDocumentView(kind: .privacyPolicy)
             }
         }
-        .id(language.code)
+        // Do not `.id(language.code)` on this NavigationStack — it pops Settings mid-switch.
         .alert(L10n.Profile.logoutConfirmTitle, isPresented: $showLogoutConfirm) {
             Button(L10n.Profile.cancel, role: .cancel) {}
             Button(L10n.Profile.logout, role: .destructive) {
@@ -127,6 +134,12 @@ struct ProfilePage: View {
         }
         .task {
             await auth.refreshProfile()
+            await goalsService.refresh()
+        }
+        .onChange(of: selectedTab) { _, tab in
+            if tab == .profile {
+                Task { await goalsService.refresh() }
+            }
         }
     }
 
@@ -234,7 +247,15 @@ struct ProfilePage: View {
     }
 
     private var goalsCard: some View {
-        Button {
+        let done = goalsService.completedCount
+        let total = goalsService.goals.count
+        let ratio = total > 0 ? CGFloat(done) / CGFloat(total) : 0
+        let subtitle = total == 0
+            ? L10n.Profile.goalsEmpty
+            : L10n.Profile.goalsSummary(done: done, total: total)
+        let percentLabel = total == 0 ? "—" : "\(Int((ratio * 100).rounded()))%"
+
+        return Button {
             selectedTab = .goals
         } label: {
             HStack(spacing: 14) {
@@ -248,7 +269,7 @@ struct ProfilePage: View {
                     Text(L10n.Profile.goalsTitle)
                         .font(AppFont.interBold(15))
                         .foregroundStyle(.white)
-                    Text(L10n.Profile.goalsSubMock)
+                    Text(subtitle)
                         .font(AppFont.interBold(12))
                         .foregroundStyle(ProfileTheme.muted)
                     GeometryReader { geo in
@@ -256,13 +277,13 @@ struct ProfilePage: View {
                             Capsule().fill(Color.white.opacity(0.1))
                             Capsule()
                                 .fill(ProfileTheme.accent)
-                                .frame(width: geo.size.width * 0.6)
+                                .frame(width: max(0, geo.size.width * ratio))
                         }
                     }
                     .frame(height: 7)
                 }
 
-                Text("60%")
+                Text(percentLabel)
                     .font(AppFont.interBold(14))
                     .foregroundStyle(ProfileTheme.accent)
                 Image(systemName: "chevron.right")
@@ -312,7 +333,7 @@ struct ProfilePage: View {
                         }
                     }
 
-                    Label(L10n.Profile.lastSyncMock, systemImage: "arrow.triangle.2.circlepath")
+                    Label(watchLastSyncLabel, systemImage: "arrow.triangle.2.circlepath")
                         .font(AppFont.interBold(11))
                         .foregroundStyle(ProfileTheme.accentSoft)
                 }
@@ -449,6 +470,20 @@ struct ProfilePage: View {
     }
 
     // MARK: - Labels
+
+    private var watchLastSyncLabel: String {
+        guard let at = vm.healthService.lastDailySyncAt else {
+            return L10n.Profile.lastSyncNever
+        }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: language.code.bundleCode)
+        formatter.timeStyle = .short
+        formatter.dateStyle = Calendar.current.isDateInToday(at) ? .none : .short
+        if Calendar.current.isDateInToday(at) {
+            return L10n.Profile.lastSync("\(L10n.Home.syncToday), \(formatter.string(from: at))")
+        }
+        return L10n.Profile.lastSync(formatter.string(from: at))
+    }
 
     private var genderLabel: String {
         switch profile?.gender {

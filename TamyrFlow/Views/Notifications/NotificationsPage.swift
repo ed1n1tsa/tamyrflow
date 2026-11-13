@@ -170,15 +170,22 @@ struct NotificationsBellButton: View {
                             .fill(ProfileTheme.cardFill)
                             .overlay(Circle().strokeBorder(ProfileTheme.cardBorder, lineWidth: 1))
                     )
+                // Red dot only for unread items — never when the inbox is empty.
                 if store.unreadCount > 0 {
                     Circle()
                         .fill(Color.red)
                         .frame(width: 8, height: 8)
                         .offset(x: -4, y: 4)
+                        .accessibilityHidden(true)
                 }
             }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(L10n.Notifications.title)
+        .accessibilityValue(
+            store.unreadCount > 0
+                ? "\(store.unreadCount)"
+                : L10n.Notifications.emptyTitle
+        )
     }
 }

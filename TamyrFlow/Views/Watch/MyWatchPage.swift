@@ -12,12 +12,9 @@ struct MyWatchPage: View {
     @State private var lastSyncText: String = ""
     @State private var showPulse = false
     @State private var showSteps = false
-    @State private var showDeferredSleep = false
-    @State private var showDeferredWater = false
     @State private var showSettings = false
     @State private var showWatchAlerts = false
     @State private var showDialInfo = false
-    @State private var showMoreInfo = false
 
     private var isConnected: Bool {
         vm.bleService.connectionStatus == .connected
@@ -83,12 +80,6 @@ struct MyWatchPage: View {
         .navigationDestination(isPresented: $showSteps) {
             VitalMetricPageView(kind: .steps, auth: auth, health: vm.healthService, ble: vm.bleService)
         }
-        .navigationDestination(isPresented: $showDeferredSleep) {
-            DeferredFeatureView(title: L10n.Watch.featSleep, bodyText: L10n.Watch.deferredSleepBody)
-        }
-        .navigationDestination(isPresented: $showDeferredWater) {
-            DeferredFeatureView(title: L10n.Watch.featWater, bodyText: L10n.Watch.deferredWaterBody)
-        }
         .navigationDestination(isPresented: $showSettings) {
             AppSettingsView()
         }
@@ -96,10 +87,7 @@ struct MyWatchPage: View {
             AppSettingsView()
         }
         .navigationDestination(isPresented: $showDialInfo) {
-            DeferredFeatureView(title: L10n.Watch.setFaces, bodyText: L10n.Watch.deferredFacesBody)
-        }
-        .navigationDestination(isPresented: $showMoreInfo) {
-            DeferredFeatureView(title: L10n.Watch.setMore, bodyText: L10n.Watch.deferredMoreBody)
+            WatchFacesPageView()
         }
     }
 
@@ -283,18 +271,6 @@ struct MyWatchPage: View {
                         sub: L10n.Watch.featHeartSub
                     ) { showPulse = true }
                 }
-                GridRow {
-                    featureTile(
-                        asset: "GoalIconSleep",
-                        title: L10n.Watch.featSleep,
-                        sub: L10n.Watch.featSleepSub
-                    ) { showDeferredSleep = true }
-                    featureTile(
-                        asset: "GoalIconWater",
-                        title: L10n.Watch.featWater,
-                        sub: L10n.Watch.featWaterSub
-                    ) { showDeferredWater = true }
-                }
             }
         }
     }
@@ -373,10 +349,6 @@ struct MyWatchPage: View {
                     sub: L10n.Watch.setSyncSub
                 ) {
                     showSettings = true
-                }
-                divider
-                settingsRow(asset: "WatchIconMore", title: L10n.Watch.setMore, sub: L10n.Watch.setMoreSub) {
-                    showMoreInfo = true
                 }
             }
             .profileCard()

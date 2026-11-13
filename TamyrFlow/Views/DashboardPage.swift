@@ -438,35 +438,45 @@ struct DashboardPage: View {
                 activityPeriodPills
             }
 
-            ZStack {
-                HomeWeekBars(values: weekBarValues, highlightIndex: highlightIndex)
-                    .frame(height: 160)
-                    .padding(.top, 8)
+            VStack(alignment: .leading, spacing: 10) {
+                Text(activitySummaryText)
+                    .font(AppFont.interBold(13))
+                    .foregroundStyle(ProfileTheme.muted)
 
-                if weekBarValues.allSatisfy({ $0 <= 0 }) {
-                    VStack(spacing: 10) {
-                        Image(systemName: "applewatch")
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundStyle(ProfileTheme.accent)
-                        Text(L10n.Home.noActivityData)
-                            .font(AppFont.interBold(13))
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color.black.opacity(0.55))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .strokeBorder(ProfileTheme.cardBorder.opacity(0.6), lineWidth: 1)
+                ZStack {
+                    Group {
+                        switch activityPeriod {
+                        case .day:
+                            homeDayActivityView
+                        case .week:
+                            HomeActivityBars(
+                                values: weekBarValues,
+                                labels: weekBarLabels,
+                                highlightIndex: weekHighlightIndex,
+                                labelEvery: 1
                             )
-                    )
+                        case .month:
+                            HomeActivityBars(
+                                values: monthBarValues,
+                                labels: monthBarLabels,
+                                highlightIndex: monthHighlightIndex,
+                                labelEvery: 5
+                            )
+                        }
+                    }
+                    .frame(height: 160)
+                    .padding(.top, 4)
+
+                    if activityValuesForPeriod.allSatisfy({ $0 <= 0 }) {
+                        activityEmptyOverlay
+                    }
                 }
             }
             .padding(14)
             .homeGlassCard()
+        }
+        .onChange(of: activityPeriod) { _, period in
+            Task { await loadActivityPeriod(period) }
         }
     }
 
@@ -491,6 +501,87 @@ struct DashboardPage: View {
         }
         .padding(3)
         .background(Capsule().fill(Color.white.opacity(0.06)))
+    }
+
+    private var activityEmptyOverlay: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "applewatch")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(ProfileTheme.accent)
+            Text(L10n.Home.noActivityData)
+                .font(AppFont.interBold(13))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.black.opacity(0.55))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(ProfileTheme.cardBorder.opacity(0.6), lineWidth: 1)
+                )
+        )
+    }
+
+    /// Day = today progress (not a fake week chart).
+    private var homeDayActivityView: some View {
+        let steps = todayStepsValue
+        let target = max(Int(vm.targetSteps) ?? 8_000, 1)
+        let ratio = min(1, Double(steps) / Double(target))
+
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(formatInt(steps))
+                    .font(AppFont.interBold(36))
+                    .foregroundStyle(.white)
+                Text(String(format: L10n.Home.stepsOf, formatInt(target)))
+                    .font(AppFont.interBold(14))
+                    .foregroundStyle(ProfileTheme.muted)
+                Spacer()
+                Text("\(Int((ratio * 100).rounded()))%")
+                    .font(AppFont.interBold(15))
+                    .foregroundStyle(ProfileTheme.accent)
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.1))
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [ProfileTheme.accent, Color.cyan.opacity(0.75)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: max(10, geo.size.width * CGFloat(ratio)))
+                        .shadow(color: ProfileTheme.accent.opacity(0.45), radius: 8, y: 0)
+                }
+            }
+            .frame(height: 14)
+
+            Text(L10n.Home.syncToday)
+                .font(AppFont.interBold(12))
+                .foregroundStyle(ProfileTheme.muted)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(.top, 8)
+    }
+
+    private func loadActivityPeriod(_ period: HomeActivityPeriod) async {
+        switch period {
+        case .day, .week:
+            if indicators.period != .days7 {
+                await indicators.setPeriod(.days7)
+            }
+        case .month:
+            if indicators.period != .days30 {
+                await indicators.setPeriod(.days30)
+            }
+        }
     }
 
     // MARK: - Data helpers
@@ -586,24 +677,118 @@ struct DashboardPage: View {
         return unit
     }
 
+    private var todayStepsValue: Int {
+        if let live = vm.healthService.todaySteps, live > 0 { return live }
+        if let series = card(for: .steps)?.series,
+           let today = series.last(where: { Calendar.current.isDateInToday($0.date) }),
+           today.value > 0 {
+            return Int(today.value.rounded())
+        }
+        if let primary = card(for: .steps)?.primaryValue, primary > 0 {
+            return Int(primary.rounded())
+        }
+        return 0
+    }
+
+    private var stepsSeries: [IndicatorDayPoint] {
+        card(for: .steps)?.series ?? []
+    }
+
     private var weekBarValues: [Double] {
-        // Prefer 7-day steps series from Supabase; fall back to today's realtime band steps.
-        if let series = card(for: .steps)?.series, series.count >= 7 {
-            let last7 = Array(series.suffix(7))
-            return last7.map(\.value)
+        // Prefer last 7 days from Supabase; fall back to today's realtime band steps.
+        if stepsSeries.count >= 7 {
+            return Array(stepsSeries.suffix(7)).map(\.value)
         }
         var vals = Array(repeating: 0.0, count: 7)
-        if let steps = vm.healthService.todaySteps, steps > 0 {
+        if todayStepsValue > 0 {
             let idx = (Calendar.current.component(.weekday, from: Date()) + 5) % 7 // Mon=0
-            vals[idx] = Double(steps)
+            vals[idx] = Double(todayStepsValue)
         }
         return vals
     }
 
-    private var highlightIndex: Int? {
+    private var weekBarLabels: [String] {
+        [
+            L10n.Home.weekdayMon, L10n.Home.weekdayTue, L10n.Home.weekdayWed,
+            L10n.Home.weekdayThu, L10n.Home.weekdayFri, L10n.Home.weekdaySat, L10n.Home.weekdaySun
+        ]
+    }
+
+    private var weekHighlightIndex: Int? {
         let idx = (Calendar.current.component(.weekday, from: Date()) + 5) % 7
-        guard weekBarValues.indices.contains(idx) else { return nil }
-        return weekBarValues[idx] > 0 ? idx : nil
+        guard weekBarValues.indices.contains(idx), weekBarValues[idx] > 0 else { return nil }
+        return idx
+    }
+
+    private var monthSeries: [IndicatorDayPoint] {
+        let series = stepsSeries
+        if series.count >= 28 {
+            return Array(series.suffix(30))
+        }
+        // Pad to calendar days in current month window from available series / today.
+        let cal = Calendar.current
+        let end = cal.startOfDay(for: Date())
+        let start = cal.date(byAdding: .day, value: -29, to: end) ?? end
+        var byKey = Dictionary(uniqueKeysWithValues: series.map { ($0.dayKey, $0.value) })
+        if todayStepsValue > 0 {
+            byKey[GoalPeriodMath.dateOnlyString(end)] = Double(todayStepsValue)
+        }
+        var points: [IndicatorDayPoint] = []
+        var day = start
+        while day <= end {
+            let key = GoalPeriodMath.dateOnlyString(day)
+            points.append(
+                IndicatorDayPoint(dayKey: key, date: day, value: byKey[key] ?? 0, valueSecondary: nil)
+            )
+            day = cal.date(byAdding: .day, value: 1, to: day) ?? day.addingTimeInterval(86_400)
+        }
+        return points
+    }
+
+    private var monthBarValues: [Double] {
+        monthSeries.map(\.value)
+    }
+
+    private var monthBarLabels: [String] {
+        let cal = Calendar.current
+        return monthSeries.map { "\(cal.component(.day, from: $0.date))" }
+    }
+
+    private var monthHighlightIndex: Int? {
+        guard let idx = monthSeries.lastIndex(where: { Calendar.current.isDateInToday($0.date) }) else {
+            return nil
+        }
+        return monthBarValues[idx] > 0 ? idx : nil
+    }
+
+    private var activityValuesForPeriod: [Double] {
+        switch activityPeriod {
+        case .day: return [Double(todayStepsValue)]
+        case .week: return weekBarValues
+        case .month: return monthBarValues
+        }
+    }
+
+    private var activitySummaryText: String {
+        switch activityPeriod {
+        case .day:
+            return String(format: L10n.Home.activityTotalFormat, formatInt(todayStepsValue))
+        case .week:
+            let total = Int(weekBarValues.reduce(0, +).rounded())
+            return String(format: L10n.Home.activityWeekTotalFormat, formatInt(total))
+        case .month:
+            let vals = monthBarValues.filter { $0 > 0 }
+            let total = Int(monthBarValues.reduce(0, +).rounded())
+            if vals.isEmpty {
+                return String(format: L10n.Home.activityMonthTotalFormat, formatInt(0))
+            }
+            let avg = Int((vals.reduce(0, +) / Double(vals.count)).rounded())
+            return String(
+                format: L10n.Home.activityMonthSummaryFormat,
+                formatInt(total),
+                formatInt(avg)
+            )
+        }
     }
 
     private func formatInt(_ n: Int) -> String {
@@ -635,27 +820,28 @@ enum HomeActivityPeriod: String, CaseIterable, Identifiable {
     }
 }
 
-private struct HomeWeekBars: View {
+private struct HomeActivityBars: View {
     let values: [Double]
+    let labels: [String]
     let highlightIndex: Int?
-
-    private var labels: [String] {
-        [
-            L10n.Home.weekdayMon, L10n.Home.weekdayTue, L10n.Home.weekdayWed,
-            L10n.Home.weekdayThu, L10n.Home.weekdayFri, L10n.Home.weekdaySat, L10n.Home.weekdaySun
-        ]
-    }
+    /// Show every N-th label (1 = all). Used for dense month charts.
+    var labelEvery: Int = 1
 
     var body: some View {
         GeometryReader { geo in
+            let count = max(values.count, 1)
+            let spacing: CGFloat = count > 14 ? 2 : 8
             let maxV = max(values.max() ?? 1, 1)
-            let barW = (geo.size.width - 6 * 8) / 7
-            HStack(alignment: .bottom, spacing: 8) {
-                ForEach(0..<7, id: \.self) { i in
-                    let h = max(8, CGFloat(values[i] / maxV) * (geo.size.height - 22))
+            let totalSpacing = spacing * CGFloat(max(count - 1, 0))
+            let barW = max(3, (geo.size.width - totalSpacing) / CGFloat(count))
+            HStack(alignment: .bottom, spacing: spacing) {
+                ForEach(0..<count, id: \.self) { i in
+                    let value = values.indices.contains(i) ? values[i] : 0
+                    let h = max(count > 14 ? 4 : 8, CGFloat(value / maxV) * (geo.size.height - 22))
                     let on = highlightIndex == i
+                    let showLabel = i % max(labelEvery, 1) == 0 || i == count - 1
                     VStack(spacing: 6) {
-                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        RoundedRectangle(cornerRadius: count > 14 ? 3 : 6, style: .continuous)
                             .fill(
                                 LinearGradient(
                                     colors: on
@@ -667,9 +853,11 @@ private struct HomeWeekBars: View {
                             )
                             .frame(width: barW, height: h)
                             .shadow(color: on ? ProfileTheme.accent.opacity(0.55) : .clear, radius: 8, y: 0)
-                        Text(labels[i])
-                            .font(AppFont.interBold(10))
+                        Text(showLabel && labels.indices.contains(i) ? labels[i] : " ")
+                            .font(AppFont.interBold(count > 14 ? 8 : 10))
                             .foregroundStyle(on ? .white : ProfileTheme.muted)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 }

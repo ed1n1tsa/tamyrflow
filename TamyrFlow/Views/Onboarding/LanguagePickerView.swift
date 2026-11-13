@@ -21,12 +21,14 @@ struct LanguagePickerView: View {
                     Text(code.shortLabel)
                         .font(AppFont.interBold(12))
                         .foregroundStyle(foreground(for: code))
+                        .frame(minWidth: 40, minHeight: 28)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 6)
                         .background(
                             Capsule(style: .continuous)
                                 .fill(background(for: code))
                         )
+                        .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
             }

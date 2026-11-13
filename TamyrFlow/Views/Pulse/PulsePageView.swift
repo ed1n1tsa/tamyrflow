@@ -319,15 +319,6 @@ struct PulsePageView: View {
                 }
                 .buttonStyle(.plain)
             }
-
-            #if DEBUG
-            if !service.lastSyncDebug.isEmpty {
-                Text(service.lastSyncDebug)
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(ProfileTheme.muted.opacity(0.7))
-                    .lineLimit(3)
-            }
-            #endif
         }
         .padding(16)
         .pulseCardBackground()
