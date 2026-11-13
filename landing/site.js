@@ -33,7 +33,7 @@
       footerPrivacy: "Политика конфиденциальности",
       footerTerms: "Условия использования",
       footerSupport: "Поддержка",
-      privacyTitle: "Политика конфиденциальности",
+      privacyTitle: "Политика конфиденциальности TamyrFlow",
       privacyMeta: "Дата последнего обновления: 12 ноября 2026 года",
       termsTitle: "Условия использования",
       termsMeta: "Дата последнего обновления: 12 ноября 2026 года",
@@ -82,7 +82,7 @@
       footerPrivacy: "Privacy Policy",
       footerTerms: "Terms of Use",
       footerSupport: "Support",
-      privacyTitle: "Privacy Policy",
+      privacyTitle: "TamyrFlow Privacy Policy",
       privacyMeta: "Last updated: November 12, 2026",
       termsTitle: "Terms of Use",
       termsMeta: "Last updated: November 12, 2026",
@@ -132,7 +132,7 @@
       footerPrivacy: "Құпиялылық саясаты",
       footerTerms: "Пайдалану шарттары",
       footerSupport: "Қолдау",
-      privacyTitle: "Құпиялылық саясаты",
+      privacyTitle: "TamyrFlow құпиялылық саясаты",
       privacyMeta: "Соңғы жаңарту: 12 қараша 2026 жыл",
       termsTitle: "Пайдалану шарттары",
       termsMeta: "Соңғы жаңарту: 12 қараша 2026 жыл",
@@ -187,6 +187,12 @@
   }
 
   function appendLegalBlock(parent, block) {
+    if (block.type === "h3") {
+      const h3 = document.createElement("h3");
+      h3.textContent = String(block.text ?? "");
+      parent.appendChild(h3);
+      return;
+    }
     if (block.type === "p") {
       const p = document.createElement("p");
       p.textContent = String(block.text ?? "");
