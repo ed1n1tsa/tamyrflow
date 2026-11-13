@@ -3,27 +3,36 @@
 
   const copy = {
     ru: {
-      navHome: "Главная",
-      navPrivacy: "Конфиденциальность",
-      navTerms: "Условия",
-      navSupport: "Поддержка",
-      eyebrow: "Фитнес и wellness",
-      heroTitle: "TamyrFlow",
-      heroLead:
-        "Приложение для отслеживания активности и показателей с совместимых умных часов и Apple Health.",
-      ctaPrivacy: "Политика конфиденциальности",
-      ctaSupport: "Поддержка",
-      featuresTitle: "Что внутри",
-      featuresLead: "Коротко о возможностях приложения для App Store и новых пользователей.",
-      f1Title: "Часы по Bluetooth",
-      f1Body: "Подключение совместимых часов, синхронизация шагов, пульса и других доступных метрик.",
-      f2Title: "Apple Health",
-      f2Body: "Чтение разрешённых показателей из Apple Health. Запись в HealthKit не выполняется.",
-      f3Title: "Цели и профиль",
-      f3Body: "Личный профиль, цели и история измерений в облаке при входе в аккаунт.",
-      disclaimer:
-        "TamyrFlow предназначен для фитнеса и общего wellness. Это не медицинское изделие и не заменяет консультацию врача.",
-      footerRights: "© TamyrFlow. Республика Казахстан.",
+      navFeatures: "Возможности",
+      navAbout: "О приложении",
+      navReviews: "Отзывы",
+      navDownload: "Скачать",
+      heroPill: "Фитнес и здоровье",
+      heroTitleBefore: "Лучше версия себя ",
+      heroTitleGrad: "каждый день",
+      heroLead: "TamyrFlow — твой личный помощник для здоровья, активности и баланса.",
+      ctaAppStore: "Скачать в App Store",
+      ctaVideo: "Смотреть видео",
+      f1Title: "Здоровье",
+      f1Body: "Пульс, давление, кислород и температура — всё под контролем.",
+      f2Title: "Активность",
+      f2Body: "Шаги, калории и тренировки для твоего прогресса.",
+      f3Title: "Восстановление",
+      f3Body: "Качественный сон и уровень энергии.",
+      f4Title: "Аналитика",
+      f4Body: "Персональные рекомендации на основе твоих данных.",
+      aboutPill: "Удобный интерфейс",
+      aboutTitleBefore: "Вся информация в одном ",
+      aboutTitleGrad: "приложении",
+      aboutLead:
+        "Простые и понятные метрики, стильный дизайн и всё, что нужно для заботы о своём здоровье.",
+      trustSafe: "Безопасно",
+      trustEasy: "Легко",
+      ctaTitle: "Начни заботиться о себе уже сегодня",
+      ctaBody: "Скачай TamyrFlow и сделай первый шаг к лучшей версии себя",
+      footerPrivacy: "Политика конфиденциальности",
+      footerTerms: "Условия использования",
+      footerSupport: "Поддержка",
       privacyTitle: "Политика конфиденциальности",
       privacyMeta: "Дата последнего обновления: 12 ноября 2026 года",
       termsTitle: "Условия использования",
@@ -38,29 +47,41 @@
         "Удаление аккаунта доступно в приложении: Профиль → Удалить аккаунт. При необходимости напишите на email поддержки.",
       loadingLegal: "Загрузка документа…",
       legalError: "Не удалось загрузить документ. Обновите страницу.",
+      navHome: "Главная",
+      navPrivacy: "Конфиденциальность",
+      navTerms: "Условия",
+      navSupport: "Поддержка",
     },
     en: {
-      navHome: "Home",
-      navPrivacy: "Privacy",
-      navTerms: "Terms",
-      navSupport: "Support",
-      eyebrow: "Fitness & wellness",
-      heroTitle: "TamyrFlow",
-      heroLead:
-        "Track activity and wellness metrics from compatible smartwatches and Apple Health.",
-      ctaPrivacy: "Privacy Policy",
-      ctaSupport: "Support",
-      featuresTitle: "What’s inside",
-      featuresLead: "A short overview for App Store visitors and new users.",
-      f1Title: "Bluetooth watch",
-      f1Body: "Connect a compatible watch and sync steps, heart rate, and other available metrics.",
-      f2Title: "Apple Health",
-      f2Body: "Read allowed metrics from Apple Health. TamyrFlow does not write to HealthKit.",
-      f3Title: "Goals & profile",
-      f3Body: "Personal profile, goals, and measurement history in the cloud when signed in.",
-      disclaimer:
-        "TamyrFlow is for fitness and general wellness. It is not a medical device and does not replace professional medical advice.",
-      footerRights: "© TamyrFlow. Republic of Kazakhstan.",
+      navFeatures: "Features",
+      navAbout: "About",
+      navReviews: "Reviews",
+      navDownload: "Download",
+      heroPill: "Fitness & health",
+      heroTitleBefore: "A better you ",
+      heroTitleGrad: "every day",
+      heroLead: "TamyrFlow — your personal helper for health, activity, and balance.",
+      ctaAppStore: "Download on the App Store",
+      ctaVideo: "Watch video",
+      f1Title: "Health",
+      f1Body: "Pulse, blood pressure, oxygen, and temperature — all in one place.",
+      f2Title: "Activity",
+      f2Body: "Steps, calories, and workouts for your progress.",
+      f3Title: "Recovery",
+      f3Body: "Quality sleep and energy levels.",
+      f4Title: "Analytics",
+      f4Body: "Personal insights based on your data.",
+      aboutPill: "Simple interface",
+      aboutTitleBefore: "Everything in one ",
+      aboutTitleGrad: "app",
+      aboutLead: "Clear metrics, polished design, and everything you need to care for your health.",
+      trustSafe: "Secure",
+      trustEasy: "Easy",
+      ctaTitle: "Start taking care of yourself today",
+      ctaBody: "Download TamyrFlow and take the first step toward a better you",
+      footerPrivacy: "Privacy Policy",
+      footerTerms: "Terms of Use",
+      footerSupport: "Support",
       privacyTitle: "Privacy Policy",
       privacyMeta: "Last updated: November 12, 2026",
       termsTitle: "Terms of Use",
@@ -75,6 +96,10 @@
         "You can delete your account in the app: Profile → Delete account. Contact support by email if you need help.",
       loadingLegal: "Loading document…",
       legalError: "Could not load the document. Please refresh.",
+      navHome: "Home",
+      navPrivacy: "Privacy",
+      navTerms: "Terms",
+      navSupport: "Support",
     },
   };
 
@@ -87,25 +112,16 @@
   function setLang(lang) {
     localStorage.setItem(STORAGE_KEY, lang);
     document.documentElement.lang = lang;
-    applyCopy(lang);
-    document.querySelectorAll(".lang-switch button").forEach((btn) => {
-      btn.setAttribute("aria-pressed", String(btn.dataset.lang === lang));
-    });
-    const host = document.getElementById("legal-root");
-    if (host && host.dataset.doc) {
-      renderLegal(host.dataset.doc, lang);
-    }
-  }
-
-  function applyCopy(lang) {
     const t = copy[lang];
     document.querySelectorAll("[data-i18n]").forEach((el) => {
       const key = el.getAttribute("data-i18n");
       if (t[key] != null) el.textContent = t[key];
     });
-    document.title = document.body.dataset.titleTemplate
-      ? document.body.dataset.titleTemplate.replace("{brand}", "TamyrFlow")
-      : "TamyrFlow";
+    document.querySelectorAll(".lang-switch button").forEach((btn) => {
+      btn.setAttribute("aria-pressed", String(btn.dataset.lang === lang));
+    });
+    const host = document.getElementById("legal-root");
+    if (host?.dataset.doc) renderLegal(host.dataset.doc, lang);
   }
 
   function escapeHtml(s) {

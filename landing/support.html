@@ -15,68 +15,57 @@
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body data-title-template="TamyrFlow — Support">
+  <body>
     <header class="site-header">
       <div class="wrap nav">
         <a class="brand" href="./index.html">
-          <img src="./icon-1024.png" alt="" width="36" height="36" />
-          TamyrFlow
+          <img src="./assets/logo.png" alt="" width="34" height="34" onerror="this.onerror=null;this.src='./assets/logo.svg'" />
+          <span>Tamyr Flow</span>
         </a>
-        <nav aria-label="Primary">
-          <ul class="nav-links">
-            <li><a href="./index.html" data-i18n="navHome">Главная</a></li>
-            <li><a href="./privacy.html" data-i18n="navPrivacy">Конфиденциальность</a></li>
-            <li><a href="./terms.html" data-i18n="navTerms">Условия</a></li>
-            <li><a href="./support.html" aria-current="page" data-i18n="navSupport">Поддержка</a></li>
-            <li>
-              <div class="lang-switch" role="group" aria-label="Language">
-                <button type="button" data-lang="ru" aria-pressed="true">RU</button>
-                <button type="button" data-lang="en" aria-pressed="false">EN</button>
-              </div>
-            </li>
-          </ul>
-        </nav>
+        <div class="nav-actions">
+          <div class="lang-switch" role="group" aria-label="Language">
+            <button type="button" data-lang="ru" aria-pressed="true">RU</button>
+            <button type="button" data-lang="en" aria-pressed="false">EN</button>
+          </div>
+          <a class="btn btn-purple btn-sm" href="./index.html" data-i18n="navHome">Главная</a>
+        </div>
       </div>
     </header>
-
     <main class="wrap">
       <header class="page-hero">
         <h1 data-i18n="supportTitle">Поддержка</h1>
         <p class="meta" data-i18n="supportLead">
-          Вопросы по приложению, аккаунту или персональным данным — напишите нам. Обычно отвечаем в рабочие дни.
+          Вопросы по приложению, аккаунту или персональным данным — напишите нам.
         </p>
       </header>
-
-      <div class="support-panel legal">
+      <div class="support-panel">
         <div>
           <p><strong data-i18n="supportEmailLabel">Email</strong></p>
           <a class="mail" href="mailto:tamyrflow@gmail.com">tamyrflow@gmail.com</a>
         </div>
         <div>
           <p><strong data-i18n="supportPhoneLabel">Телефон</strong></p>
-          <p class="phone"><a href="tel:+77066905506">+7 706 690 55 06</a></p>
+          <p><a href="tel:+77066905506">+7 706 690 55 06</a></p>
         </div>
         <p data-i18n="supportCountry">Страна: Республика Казахстан</p>
         <p data-i18n="supportDelete">
-          Удаление аккаунта доступно в приложении: Профиль → Удалить аккаунт. При необходимости напишите на email поддержки.
+          Удаление аккаунта доступно в приложении: Профиль → Удалить аккаунт.
         </p>
         <p>
-          <a href="./privacy.html" data-i18n="navPrivacy">Конфиденциальность</a>
+          <a href="./privacy.html" data-i18n="footerPrivacy">Политика конфиденциальности</a>
           ·
-          <a href="./terms.html" data-i18n="navTerms">Условия</a>
+          <a href="./terms.html" data-i18n="footerTerms">Условия использования</a>
         </p>
       </div>
     </main>
-
     <footer class="site-footer">
       <div class="wrap footer-grid">
-        <p data-i18n="footerRights">© TamyrFlow. Республика Казахстан.</p>
+        <a class="brand" href="./index.html"><span>Tamyr Flow</span></a>
         <div class="footer-links">
           <a href="mailto:tamyrflow@gmail.com">tamyrflow@gmail.com</a>
         </div>
       </div>
     </footer>
-
     <script src="./site.js" defer></script>
   </body>
 </html>

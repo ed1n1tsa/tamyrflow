@@ -15,30 +15,22 @@
     />
     <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body data-title-template="TamyrFlow — Privacy">
+  <body>
     <header class="site-header">
       <div class="wrap nav">
         <a class="brand" href="./index.html">
-          <img src="./icon-1024.png" alt="" width="36" height="36" />
-          TamyrFlow
+          <img src="./assets/logo.png" alt="" width="34" height="34" onerror="this.onerror=null;this.src='./assets/logo.svg'" />
+          <span>Tamyr Flow</span>
         </a>
-        <nav aria-label="Primary">
-          <ul class="nav-links">
-            <li><a href="./index.html" data-i18n="navHome">Главная</a></li>
-            <li><a href="./privacy.html" aria-current="page" data-i18n="navPrivacy">Конфиденциальность</a></li>
-            <li><a href="./terms.html" data-i18n="navTerms">Условия</a></li>
-            <li><a href="./support.html" data-i18n="navSupport">Поддержка</a></li>
-            <li>
-              <div class="lang-switch" role="group" aria-label="Language">
-                <button type="button" data-lang="ru" aria-pressed="true">RU</button>
-                <button type="button" data-lang="en" aria-pressed="false">EN</button>
-              </div>
-            </li>
-          </ul>
-        </nav>
+        <div class="nav-actions">
+          <div class="lang-switch" role="group" aria-label="Language">
+            <button type="button" data-lang="ru" aria-pressed="true">RU</button>
+            <button type="button" data-lang="en" aria-pressed="false">EN</button>
+          </div>
+          <a class="btn btn-purple btn-sm" href="./index.html" data-i18n="navHome">Главная</a>
+        </div>
       </div>
     </header>
-
     <main class="wrap">
       <header class="page-hero">
         <h1 data-i18n="privacyTitle">Политика конфиденциальности</h1>
@@ -46,17 +38,15 @@
       </header>
       <article class="legal" id="legal-root" data-doc="privacy"></article>
     </main>
-
     <footer class="site-footer">
       <div class="wrap footer-grid">
-        <p data-i18n="footerRights">© TamyrFlow. Республика Казахстан.</p>
+        <a class="brand" href="./index.html"><span>Tamyr Flow</span></a>
         <div class="footer-links">
-          <a href="./support.html" data-i18n="navSupport">Поддержка</a>
+          <a href="./support.html" data-i18n="footerSupport">Поддержка</a>
           <a href="mailto:tamyrflow@gmail.com">tamyrflow@gmail.com</a>
         </div>
       </div>
     </footer>
-
     <script src="./site.js" defer></script>
   </body>
 </html>
