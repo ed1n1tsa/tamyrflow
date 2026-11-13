@@ -128,8 +128,8 @@ a {
   color: var(--muted);
   font: inherit;
   font-weight: 700;
-  font-size: 0.75rem;
-  padding: 0.35rem 0.55rem;
+  font-size: 0.72rem;
+  padding: 0.35rem 0.48rem;
   cursor: pointer;
 }
 

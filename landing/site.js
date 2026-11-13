@@ -8,28 +8,28 @@
       navReviews: "Отзывы",
       navDownload: "Скачать",
       heroPill: "Фитнес и здоровье",
-      heroTitleBefore: "Лучше версия себя ",
+      heroTitleBefore: "Лучшая версия себя ",
       heroTitleGrad: "каждый день",
-      heroLead: "TamyrFlow — твой личный помощник для здоровья, активности и баланса.",
+      heroLead: "TamyrFlow — ваш личный помощник для здоровья, активности и баланса.",
       ctaAppStore: "Скачать в App Store",
       ctaVideo: "Смотреть видео",
       f1Title: "Здоровье",
       f1Body: "Пульс, давление, кислород и температура — всё под контролем.",
       f2Title: "Активность",
-      f2Body: "Шаги, калории и тренировки для твоего прогресса.",
+      f2Body: "Шаги, калории и тренировки для вашего прогресса.",
       f3Title: "Восстановление",
       f3Body: "Качественный сон и уровень энергии.",
       f4Title: "Аналитика",
-      f4Body: "Персональные рекомендации на основе твоих данных.",
+      f4Body: "Персональные рекомендации на основе ваших данных.",
       aboutPill: "Удобный интерфейс",
       aboutTitleBefore: "Вся информация в одном ",
       aboutTitleGrad: "приложении",
       aboutLead:
-        "Простые и понятные метрики, стильный дизайн и всё, что нужно для заботы о своём здоровье.",
+        "Понятные метрики, аккуратный дизайн и всё необходимое, чтобы заботиться о своём здоровье.",
       trustSafe: "Безопасно",
-      trustEasy: "Легко",
-      ctaTitle: "Начни заботиться о себе уже сегодня",
-      ctaBody: "Скачай TamyrFlow и сделай первый шаг к лучшей версии себя",
+      trustEasy: "Просто",
+      ctaTitle: "Начните заботиться о себе уже сегодня",
+      ctaBody: "Скачайте TamyrFlow и сделайте первый шаг к лучшей версии себя.",
       footerPrivacy: "Политика конфиденциальности",
       footerTerms: "Условия использования",
       footerSupport: "Поддержка",
@@ -44,7 +44,7 @@
       supportPhoneLabel: "Телефон",
       supportCountry: "Страна: Республика Казахстан",
       supportDelete:
-        "Удаление аккаунта доступно в приложении: Профиль → Удалить аккаунт. При необходимости напишите на email поддержки.",
+        "Удалить аккаунт можно в приложении: Профиль → Удалить аккаунт. Если нужна помощь — напишите на email поддержки.",
       loadingLegal: "Загрузка документа…",
       legalError: "Не удалось загрузить документ. Обновите страницу.",
       navHome: "Главная",
@@ -58,15 +58,15 @@
       navReviews: "Reviews",
       navDownload: "Download",
       heroPill: "Fitness & health",
-      heroTitleBefore: "A better you ",
+      heroTitleBefore: "A better version of you ",
       heroTitleGrad: "every day",
-      heroLead: "TamyrFlow — your personal helper for health, activity, and balance.",
+      heroLead: "TamyrFlow is your personal companion for health, activity, and balance.",
       ctaAppStore: "Download on the App Store",
       ctaVideo: "Watch video",
       f1Title: "Health",
-      f1Body: "Pulse, blood pressure, oxygen, and temperature — all in one place.",
+      f1Body: "Heart rate, blood pressure, oxygen, and temperature — all in one place.",
       f2Title: "Activity",
-      f2Body: "Steps, calories, and workouts for your progress.",
+      f2Body: "Steps, calories, and workouts to support your progress.",
       f3Title: "Recovery",
       f3Body: "Quality sleep and energy levels.",
       f4Title: "Analytics",
@@ -78,7 +78,7 @@
       trustSafe: "Secure",
       trustEasy: "Easy",
       ctaTitle: "Start taking care of yourself today",
-      ctaBody: "Download TamyrFlow and take the first step toward a better you",
+      ctaBody: "Download TamyrFlow and take the first step toward a better version of yourself.",
       footerPrivacy: "Privacy Policy",
       footerTerms: "Terms of Use",
       footerSupport: "Support",
@@ -93,7 +93,7 @@
       supportPhoneLabel: "Phone",
       supportCountry: "Country: Republic of Kazakhstan",
       supportDelete:
-        "You can delete your account in the app: Profile → Delete account. Contact support by email if you need help.",
+        "You can delete your account in the app: Profile → Delete account. Email support if you need help.",
       loadingLegal: "Loading document…",
       legalError: "Could not load the document. Please refresh.",
       navHome: "Home",
@@ -101,15 +101,69 @@
       navTerms: "Terms",
       navSupport: "Support",
     },
+    kk: {
+      navFeatures: "Мүмкіндіктер",
+      navAbout: "Қолданба туралы",
+      navReviews: "Пікірлер",
+      navDownload: "Жүктеу",
+      heroPill: "Фитнес және денсаулық",
+      heroTitleBefore: "Өзіңіздің үздік нұсқаңыз ",
+      heroTitleGrad: "әр күн сайын",
+      heroLead: "TamyrFlow — денсаулық, белсенділік және тепе-теңдік үшін жеке көмекшіңіз.",
+      ctaAppStore: "App Store-дан жүктеу",
+      ctaVideo: "Видеоны көру",
+      f1Title: "Денсаулық",
+      f1Body: "Пульс, қысым, оттегі және температура — бәрі бақылауда.",
+      f2Title: "Белсенділік",
+      f2Body: "Қадам, калория және жаттығулар — прогресіңіз үшін.",
+      f3Title: "Қалпына келу",
+      f3Body: "Сапалы ұйқы және энергия деңгейі.",
+      f4Title: "Аналитика",
+      f4Body: "Деректеріңізге негізделген жеке ұсыныстар.",
+      aboutPill: "Ыңғайлы интерфейс",
+      aboutTitleBefore: "Барлық ақпарат бір ",
+      aboutTitleGrad: "қолданбада",
+      aboutLead:
+        "Түсінікті көрсеткіштер, ұқыпты дизайн және денсаулығыңызға қамқорлық үшін қажеттінің бәрі.",
+      trustSafe: "Қауіпсіз",
+      trustEasy: "Оңай",
+      ctaTitle: "Өзіңізге бүгіннен бастап қамқор болыңыз",
+      ctaBody: "TamyrFlow-ды жүктеп, үздік нұсқаңызға алғашқы қадам жасаңыз.",
+      footerPrivacy: "Құпиялылық саясаты",
+      footerTerms: "Пайдалану шарттары",
+      footerSupport: "Қолдау",
+      privacyTitle: "Құпиялылық саясаты",
+      privacyMeta: "Соңғы жаңарту: 12 қараша 2026 жыл",
+      termsTitle: "Пайдалану шарттары",
+      termsMeta: "Соңғы жаңарту: 12 қараша 2026 жыл",
+      supportTitle: "Қолдау",
+      supportLead:
+        "Қолданба, аккаунт немесе жеке деректер бойынша сұрақтар болса — бізге жазыңыз. Әдетте жұмыс күндері жауап береміз.",
+      supportEmailLabel: "Email",
+      supportPhoneLabel: "Телефон",
+      supportCountry: "Ел: Қазақстан Республикасы",
+      supportDelete:
+        "Аккаунтты қолданбада жоюға болады: Профиль → Аккаунтты жою. Көмек керек болса — қолдау email-іне жазыңыз.",
+      loadingLegal: "Құжат жүктелуде…",
+      legalError: "Құжатты жүктеу мүмкін болмады. Бетті жаңартыңыз.",
+      navHome: "Басты бет",
+      navPrivacy: "Құпиялылық",
+      navTerms: "Шарттар",
+      navSupport: "Қолдау",
+    },
   };
 
   function getLang() {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "ru" || saved === "en") return saved;
-    return (navigator.language || "ru").toLowerCase().startsWith("en") ? "en" : "ru";
+    if (saved === "ru" || saved === "en" || saved === "kk") return saved;
+    const nav = (navigator.language || "ru").toLowerCase();
+    if (nav.startsWith("kk") || nav.startsWith("kz")) return "kk";
+    if (nav.startsWith("en")) return "en";
+    return "ru";
   }
 
   function setLang(lang) {
+    if (!copy[lang]) lang = "ru";
     localStorage.setItem(STORAGE_KEY, lang);
     document.documentElement.lang = lang;
     const t = copy[lang];
@@ -163,13 +217,13 @@
   async function renderLegal(docKey, lang) {
     const host = document.getElementById("legal-root");
     if (!host) return;
-    const t = copy[lang];
+    const t = copy[lang] || copy.ru;
     setStatusMessage(host, t.loadingLegal);
     try {
       const res = await fetch("./legal-data.json", { cache: "no-store" });
       if (!res.ok) throw new Error("fetch failed");
       const data = await res.json();
-      const sections = data[docKey]?.[lang] || [];
+      const sections = data[docKey]?.[lang] || data[docKey]?.ru || [];
       if (!sections.length) throw new Error("empty");
       while (host.firstChild) host.removeChild(host.firstChild);
       for (const section of sections) {
