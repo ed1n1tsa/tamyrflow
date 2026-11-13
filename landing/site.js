@@ -188,10 +188,45 @@
     }
   }
 
+  function initScrollReveals() {
+    const nodes = Array.from(document.querySelectorAll("[data-reveal]"));
+    if (!nodes.length) return;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      nodes.forEach((el) => el.classList.add("is-visible"));
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add("is-visible");
+          io.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.18, rootMargin: "0px 0px -8% 0px" }
+    );
+
+    nodes.forEach((el) => io.observe(el));
+  }
+
+  function initHeaderScroll() {
+    const header = document.querySelector(".site-header");
+    if (!header) return;
+    const onScroll = () => {
+      header.classList.toggle("is-scrolled", window.scrollY > 12);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".lang-switch button").forEach((btn) => {
       btn.addEventListener("click", () => setLang(btn.dataset.lang));
     });
     setLang(getLang());
+    initScrollReveals();
+    initHeaderScroll();
   });
 })();

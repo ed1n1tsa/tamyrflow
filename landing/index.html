@@ -50,20 +50,20 @@
       <section class="hero">
         <div class="wrap hero-grid">
           <div>
-            <p class="pill reveal">
+            <p class="pill" data-reveal style="--reveal-delay: 0s">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 21s-7-4.6-9.5-9A5.4 5.4 0 0 1 12 5.2 5.4 5.4 0 0 1 21.5 12C19 16.4 12 21 12 21z" />
               </svg>
               <span data-i18n="heroPill">Фитнес и здоровье</span>
             </p>
-            <h1 class="reveal reveal-d1">
+            <h1 data-reveal style="--reveal-delay: 0.08s">
               <span data-i18n="heroTitleBefore">Лучше версия себя</span>
               <span class="grad" data-i18n="heroTitleGrad">каждый день</span>
             </h1>
-            <p class="hero-lead reveal reveal-d2" data-i18n="heroLead">
+            <p class="hero-lead" data-reveal style="--reveal-delay: 0.16s" data-i18n="heroLead">
               TamyrFlow — твой личный помощник для здоровья, активности и баланса.
             </p>
-            <div class="cta-row reveal reveal-d3">
+            <div class="cta-row" data-reveal style="--reveal-delay: 0.24s">
               <a class="btn btn-black" href="#download">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 3 2.3s1.7-.8 3.2-.8 1.9.8 3.2.8 2.1-1.1 2.9-2.2c.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.5-1-2.5-3.8zM13.7 5.7c.7-.9 1.2-2.1 1.1-3.3-1 .1-2.3.7-3 1.6-.7.8-1.3 2.1-1.1 3.3 1.2.1 2.3-.6 3-1.6z" />
@@ -78,7 +78,7 @@
               </a>
             </div>
           </div>
-          <div class="hero-visual reveal reveal-d2">
+          <div class="hero-visual" data-reveal="scale" style="--reveal-delay: 0.18s">
             <img
               src="./assets/hero-devices.png"
               alt="TamyrFlow на iPhone и умных часах"
@@ -91,28 +91,28 @@
       <section class="features" id="features">
         <div class="wrap">
           <ul class="feature-grid">
-            <li>
+            <li data-reveal style="--reveal-delay: 0s">
               <div class="icon-bubble icon-heart" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.6-9.5-9A5.4 5.4 0 0 1 12 5.2 5.4 5.4 0 0 1 21.5 12C19 16.4 12 21 12 21z" /></svg>
               </div>
               <h3 data-i18n="f1Title">Здоровье</h3>
               <p data-i18n="f1Body">Пульс, давление, кислород и температура — всё под контролем.</p>
             </li>
-            <li>
+            <li data-reveal style="--reveal-delay: 0.1s">
               <div class="icon-bubble icon-run" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5a2 2 0 1 0-0.01-4 2 2 0 0 0 .01 4zM9.8 21l1.1-5.2 2.1 2v4h2v-5.5l-2.3-2.2.7-3.3c1.2 1.4 2.9 2.4 4.8 2.5v-2c-1.5-.1-2.8-.9-3.5-2.1l-1-1.6c-.4-.6-1-1-1.7-1-.5 0-1 .2-1.3.5L8 10.2V14h2v-2.7l1.1-.9-.8 4.1L7.4 21h2.4z" /></svg>
               </div>
               <h3 data-i18n="f2Title">Активность</h3>
               <p data-i18n="f2Body">Шаги, калории и тренировки для твоего прогресса.</p>
             </li>
-            <li>
+            <li data-reveal style="--reveal-delay: 0.2s">
               <div class="icon-bubble icon-moon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.4 2a9.8 9.8 0 0 0-1.2 19.5A10 10 0 1 1 12.4 2z" /></svg>
               </div>
               <h3 data-i18n="f3Title">Восстановление</h3>
               <p data-i18n="f3Body">Качественный сон и уровень энергии.</p>
             </li>
-            <li>
+            <li data-reveal style="--reveal-delay: 0.3s">
               <div class="icon-bubble icon-chart" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20h16v2H2V3h2v17zm4-7h2v5H8v-5zm5-4h2v9h-2V9zm5-5h2v14h-2V4z" /></svg>
               </div>
@@ -125,7 +125,7 @@
 
       <section class="about" id="about">
         <div class="wrap about-grid">
-          <div>
+          <div data-reveal="left">
             <p class="pill" data-i18n="aboutPill">Удобный интерфейс</p>
             <h2>
               <span data-i18n="aboutTitleBefore">Вся информация в одном</span>
@@ -149,7 +149,7 @@
               </li>
             </ul>
           </div>
-          <div class="about-visual">
+          <div class="about-visual" data-reveal="right" style="--reveal-delay: 0.12s">
             <img
               src="./assets/feature-phone.png"
               alt="Интерфейс TamyrFlow"
@@ -161,7 +161,7 @@
 
       <section class="cta-band-wrap" id="download">
         <div class="wrap">
-          <div class="cta-band">
+          <div class="cta-band" data-reveal="scale">
             <div>
               <h2 data-i18n="ctaTitle">Начни заботиться о себе уже сегодня</h2>
               <p data-i18n="ctaBody">Скачай TamyrFlow и сделай первый шаг к лучшей версии себя</p>
