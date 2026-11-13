@@ -35,7 +35,7 @@
       footerSupport: "Поддержка",
       privacyTitle: "Политика конфиденциальности TamyrFlow",
       privacyMeta: "Дата последнего обновления: 12 ноября 2026 года",
-      termsTitle: "Условия использования",
+      termsTitle: "Условия использования TamyrFlow",
       termsMeta: "Дата последнего обновления: 12 ноября 2026 года",
       supportTitle: "Поддержка",
       supportLead:
@@ -84,7 +84,7 @@
       footerSupport: "Support",
       privacyTitle: "TamyrFlow Privacy Policy",
       privacyMeta: "Last updated: November 12, 2026",
-      termsTitle: "Terms of Use",
+      termsTitle: "TamyrFlow Terms of Use",
       termsMeta: "Last updated: November 12, 2026",
       supportTitle: "Support",
       supportLead:
@@ -134,7 +134,7 @@
       footerSupport: "Қолдау",
       privacyTitle: "TamyrFlow құпиялылық саясаты",
       privacyMeta: "Соңғы жаңарту: 12 қараша 2026 жыл",
-      termsTitle: "Пайдалану шарттары",
+      termsTitle: "TamyrFlow пайдалану шарттары",
       termsMeta: "Соңғы жаңарту: 12 қараша 2026 жыл",
       supportTitle: "Қолдау",
       supportLead:
