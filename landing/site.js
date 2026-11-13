@@ -171,11 +171,52 @@
       const key = el.getAttribute("data-i18n");
       if (t[key] != null) el.textContent = t[key];
     });
-    document.querySelectorAll(".lang-switch button").forEach((btn) => {
-      btn.setAttribute("aria-pressed", String(btn.dataset.lang === lang));
+    document.querySelectorAll(".lang-menu [data-lang]").forEach((btn) => {
+      btn.setAttribute("aria-checked", String(btn.dataset.lang === lang));
     });
     const host = document.getElementById("legal-root");
     if (host?.dataset.doc) renderLegal(host.dataset.doc, lang);
+  }
+
+  function closeLangDropdowns() {
+    document.querySelectorAll(".lang-dropdown.is-open").forEach((dd) => {
+      dd.classList.remove("is-open");
+      const trigger = dd.querySelector(".lang-trigger");
+      const menu = dd.querySelector(".lang-menu");
+      if (trigger) trigger.setAttribute("aria-expanded", "false");
+      if (menu) menu.hidden = true;
+    });
+  }
+
+  function initLangDropdowns() {
+    document.querySelectorAll(".lang-dropdown").forEach((dd) => {
+      const trigger = dd.querySelector(".lang-trigger");
+      const menu = dd.querySelector(".lang-menu");
+      if (!trigger || !menu) return;
+
+      trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const willOpen = !dd.classList.contains("is-open");
+        closeLangDropdowns();
+        if (!willOpen) return;
+        dd.classList.add("is-open");
+        trigger.setAttribute("aria-expanded", "true");
+        menu.hidden = false;
+      });
+
+      menu.querySelectorAll("[data-lang]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setLang(btn.dataset.lang);
+          closeLangDropdowns();
+        });
+      });
+    });
+
+    document.addEventListener("click", () => closeLangDropdowns());
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeLangDropdowns();
+    });
   }
 
   function setStatusMessage(host, text) {
@@ -282,9 +323,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".lang-switch button").forEach((btn) => {
-      btn.addEventListener("click", () => setLang(btn.dataset.lang));
-    });
+    initLangDropdowns();
     setLang(getLang());
     initScrollReveals();
     initHeaderScroll();

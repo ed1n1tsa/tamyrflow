@@ -114,28 +114,100 @@ a {
   gap: 0.75rem;
 }
 
-.lang-switch {
+.lang-dropdown {
+  position: relative;
+}
+
+.lang-trigger {
+  appearance: none;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  width: 42px;
+  height: 42px;
+  padding: 0;
   border: 1px solid var(--line);
   border-radius: 999px;
-  overflow: hidden;
-}
-
-.lang-switch button {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  font: inherit;
-  font-weight: 700;
-  font-size: 0.72rem;
-  padding: 0.35rem 0.48rem;
+  background: #fff;
+  color: var(--text);
   cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.lang-switch button[aria-pressed="true"] {
+.lang-trigger:hover,
+.lang-dropdown.is-open .lang-trigger {
+  border-color: #d6ccff;
   background: var(--purple-soft);
   color: var(--purple);
+  box-shadow: 0 6px 16px rgba(124, 92, 252, 0.12);
+}
+
+.lang-trigger svg {
+  width: 18px;
+  height: 18px;
+}
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 148px;
+  padding: 0.35rem;
+  margin: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(16, 24, 40, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 60;
+}
+
+.lang-dropdown.is-open .lang-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+}
+
+.lang-menu button {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.lang-menu button:hover {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.lang-menu button[aria-checked="true"] {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.lang-menu button span.code {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .btn {
