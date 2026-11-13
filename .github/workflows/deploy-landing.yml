@@ -1,13 +1,8 @@
 name: Deploy landing to GitHub Pages
 
+# Enable once: Repo → Settings → Pages → Build and deployment → Source: GitHub Actions
+# Then run this workflow (Actions → Deploy landing → Run workflow).
 on:
-  push:
-    branches:
-      - cursor/app-store-landing-5c00
-      - main
-    paths:
-      - "landing/**"
-      - ".github/workflows/deploy-landing.yml"
   workflow_dispatch:
 
 permissions:
@@ -31,8 +26,6 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
