@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="TamyrFlow — ваш личный помощник для здоровья, активности и баланса."
+    />
+    <title>TamyrFlow</title>
+    <link rel="icon" href="./apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap nav">
+        <a class="brand" href="./index.html">
+          <img
+            src="./assets/logo.png"
+            alt=""
+            width="34"
+            height="34"
+            onerror="this.onerror=null;this.src='./assets/logo.svg'"
+          />
+          <span>TamyrFlow</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="#features" data-i18n="navFeatures">Возможности</a></li>
+          <li><a href="#about" data-i18n="navAbout">О приложении</a></li>
+          <li><a href="#download" data-i18n="navReviews">Отзывы</a></li>
+        </ul>
+        <div class="nav-actions">
+                    <div class="lang-dropdown">
+            <button
+              type="button"
+              class="lang-trigger"
+              aria-label="Language"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M3 12h18M12 3c2.5 2.8 3.8 6 3.8 9s-1.3 6.2-3.8 9c-2.5-2.8-3.8-6-3.8-9s1.3-6.2 3.8-9z" />
+              </svg>
+            </button>
+            <ul class="lang-menu" role="listbox" hidden>
+              <li><button type="button" role="option" data-lang="ru" aria-checked="false">Русский <span class="code">RU</span></button></li>
+              <li><button type="button" role="option" data-lang="kk" aria-checked="false">Қазақша <span class="code">KK</span></button></li>
+              <li><button type="button" role="option" data-lang="en" aria-checked="false">English <span class="code">EN</span></button></li>
+            </ul>
+          </div>
+<a class="btn btn-purple btn-sm" href="#download" data-i18n="navDownload">Скачать</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="pill" data-reveal style="--reveal-delay: 0s">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 21s-7-4.6-9.5-9A5.4 5.4 0 0 1 12 5.2 5.4 5.4 0 0 1 21.5 12C19 16.4 12 21 12 21z" />
+              </svg>
+              <span data-i18n="heroPill">Фитнес и здоровье</span>
+            </p>
+            <h1 data-reveal style="--reveal-delay: 0.08s">
+              <span data-i18n="heroTitleBefore">Лучшая версия себя</span>
+              <span class="grad" data-i18n="heroTitleGrad">каждый день</span>
+            </h1>
+            <p class="hero-lead" data-reveal style="--reveal-delay: 0.16s" data-i18n="heroLead">
+              TamyrFlow — ваш личный помощник для здоровья, активности и баланса.
+            </p>
+            <div class="cta-row" data-reveal style="--reveal-delay: 0.24s">
+              <a class="btn btn-black" href="#download">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 3 2.3s1.7-.8 3.2-.8 1.9.8 3.2.8 2.1-1.1 2.9-2.2c.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.5-1-2.5-3.8zM13.7 5.7c.7-.9 1.2-2.1 1.1-3.3-1 .1-2.3.7-3 1.6-.7.8-1.3 2.1-1.1 3.3 1.2.1 2.3-.6 3-1.6z" />
+                </svg>
+                <span data-i18n="ctaAppStore">Скачать в App Store</span>
+              </a>
+              <a class="btn btn-outline" href="#about">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7L8 5z" />
+                </svg>
+                <span data-i18n="ctaVideo">Смотреть видео</span>
+              </a>
+            </div>
+          </div>
+          <div class="hero-visual" data-reveal="scale" style="--reveal-delay: 0.18s">
+            <img
+              src="./assets/hero-devices.png"
+              alt="TamyrFlow на iPhone и умных часах"
+              onerror="this.onerror=null;this.src='./assets/hero-devices.svg'"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="features" id="features">
+        <div class="wrap">
+          <ul class="feature-grid">
+            <li data-reveal style="--reveal-delay: 0s">
+              <div class="icon-bubble icon-heart" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.6-9.5-9A5.4 5.4 0 0 1 12 5.2 5.4 5.4 0 0 1 21.5 12C19 16.4 12 21 12 21z" /></svg>
+              </div>
+              <h3 data-i18n="f1Title">Здоровье</h3>
+              <p data-i18n="f1Body">Пульс, давление, кислород и температура — всё под контролем.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.1s">
+              <div class="icon-bubble icon-run" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5a2 2 0 1 0-0.01-4 2 2 0 0 0 .01 4zM9.8 21l1.1-5.2 2.1 2v4h2v-5.5l-2.3-2.2.7-3.3c1.2 1.4 2.9 2.4 4.8 2.5v-2c-1.5-.1-2.8-.9-3.5-2.1l-1-1.6c-.4-.6-1-1-1.7-1-.5 0-1 .2-1.3.5L8 10.2V14h2v-2.7l1.1-.9-.8 4.1L7.4 21h2.4z" /></svg>
+              </div>
+              <h3 data-i18n="f2Title">Активность</h3>
+              <p data-i18n="f2Body">Шаги, калории и тренировки для вашего прогресса.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.2s">
+              <div class="icon-bubble icon-moon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.4 2a9.8 9.8 0 0 0-1.2 19.5A10 10 0 1 1 12.4 2z" /></svg>
+              </div>
+              <h3 data-i18n="f3Title">Восстановление</h3>
+              <p data-i18n="f3Body">Качественный сон и уровень энергии.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.3s">
+              <div class="icon-bubble icon-chart" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20h16v2H2V3h2v17zm4-7h2v5H8v-5zm5-4h2v9h-2V9zm5-5h2v14h-2V4z" /></svg>
+              </div>
+              <h3 data-i18n="f4Title">Аналитика</h3>
+              <p data-i18n="f4Body">Персональные рекомендации на основе ваших данных.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="about" id="about">
+        <div class="wrap about-copy" data-reveal>
+          <p class="pill" data-i18n="aboutPill">Удобный интерфейс</p>
+          <h2>
+            <span data-i18n="aboutTitleBefore">Вся информация в одном</span>
+            <span class="grad" data-i18n="aboutTitleGrad">приложении</span>
+          </h2>
+          <p class="about-lead" data-i18n="aboutLead">
+            Понятные метрики, аккуратный дизайн и всё необходимое, чтобы заботиться о своём здоровье.
+          </p>
+          <ul class="trust-row">
+            <li>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.7c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 3 2.3s1.7-.8 3.2-.8 1.9.8 3.2.8 2.1-1.1 2.9-2.2c.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.5-1-2.5-3.8z" /></svg>
+              iOS
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3zm0 10.9 5-2.5V7.1L12 9.6 7 7.1v3.3l5 2.5z" /></svg>
+              <span data-i18n="trustSafe">Безопасно</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 10-14h-7l0-6z" /></svg>
+              <span data-i18n="trustEasy">Просто</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="cta-band-wrap" id="download">
+        <div class="wrap">
+          <div class="cta-band" data-reveal="scale">
+            <div>
+              <h2 data-i18n="ctaTitle">Начните заботиться о себе уже сегодня</h2>
+              <p data-i18n="ctaBody">Скачайте TamyrFlow и сделайте первый шаг к лучшей версии себя.</p>
+            </div>
+            <a class="btn btn-black" href="https://apps.apple.com/" rel="noopener">
+              <span data-i18n="ctaAppStore">Скачать в App Store</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <a class="brand" href="./index.html">
+          <img
+            src="./assets/logo.png"
+            alt=""
+            width="28"
+            height="28"
+            onerror="this.onerror=null;this.src='./assets/logo.svg'"
+          />
+          <span>TamyrFlow</span>
+        </a>
+        <div class="footer-links">
+          <a href="./privacy.html" data-i18n="footerPrivacy">Политика конфиденциальности</a>
+          <a href="./terms.html" data-i18n="footerTerms">Условия использования</a>
+          <a href="./support.html" data-i18n="footerSupport">Поддержка</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./site.js" defer></script>
+  </body>
+</html>
