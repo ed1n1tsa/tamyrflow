@@ -10,7 +10,7 @@
   --black: #111111;
   --max: 1120px;
   --font: "Manrope", system-ui, sans-serif;
-  --display: "Syne", system-ui, sans-serif;
+  --display: "Manrope", system-ui, sans-serif;
 }
 
 *,
@@ -239,12 +239,13 @@ a {
 
 .hero h1 {
   margin: 0 0 1rem;
-  font-family: var(--display);
+  font-family: var(--font);
   font-weight: 800;
-  font-size: clamp(2.4rem, 5.2vw, 3.8rem);
-  line-height: 1.05;
-  letter-spacing: -0.035em;
-  max-width: 11ch;
+  font-size: clamp(2.35rem, 4.8vw, 3.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  max-width: 16rem;
+  font-stretch: normal;
 }
 
 .grad {
@@ -252,6 +253,8 @@ a {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  font-weight: inherit;
+  letter-spacing: inherit;
 }
 
 .hero-lead {
