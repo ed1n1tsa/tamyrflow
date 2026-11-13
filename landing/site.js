@@ -124,44 +124,67 @@
     if (host?.dataset.doc) renderLegal(host.dataset.doc, lang);
   }
 
-  function escapeHtml(s) {
-    return String(s)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;");
+  function setStatusMessage(host, text) {
+    while (host.firstChild) host.removeChild(host.firstChild);
+    const p = document.createElement("p");
+    p.className = "meta";
+    p.textContent = text;
+    host.appendChild(p);
+  }
+
+  function appendLegalBlock(parent, block) {
+    if (block.type === "p") {
+      const p = document.createElement("p");
+      p.textContent = String(block.text ?? "");
+      parent.appendChild(p);
+      return;
+    }
+    if (block.type === "ul") {
+      const ul = document.createElement("ul");
+      for (const item of block.items || []) {
+        const li = document.createElement("li");
+        li.textContent = String(item);
+        ul.appendChild(li);
+      }
+      parent.appendChild(ul);
+      return;
+    }
+    if (block.type === "contact") {
+      const p = document.createElement("p");
+      p.className = "contact-row";
+      const strong = document.createElement("strong");
+      strong.textContent = `${String(block.label ?? "")}:`;
+      p.appendChild(strong);
+      p.appendChild(document.createTextNode(` ${String(block.value ?? "")}`));
+      parent.appendChild(p);
+    }
   }
 
   async function renderLegal(docKey, lang) {
     const host = document.getElementById("legal-root");
     if (!host) return;
     const t = copy[lang];
-    host.innerHTML = `<p class="meta">${escapeHtml(t.loadingLegal)}</p>`;
+    setStatusMessage(host, t.loadingLegal);
     try {
       const res = await fetch("./legal-data.json", { cache: "no-store" });
       if (!res.ok) throw new Error("fetch failed");
       const data = await res.json();
       const sections = data[docKey]?.[lang] || [];
       if (!sections.length) throw new Error("empty");
-      host.innerHTML = sections
-        .map((section) => {
-          const blocks = (section.blocks || [])
-            .map((b) => {
-              if (b.type === "p") return `<p>${escapeHtml(b.text)}</p>`;
-              if (b.type === "ul") {
-                return `<ul>${(b.items || []).map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>`;
-              }
-              if (b.type === "contact") {
-                return `<p class="contact-row"><strong>${escapeHtml(b.label)}:</strong> ${escapeHtml(b.value)}</p>`;
-              }
-              return "";
-            })
-            .join("");
-          return `<section id="s-${escapeHtml(section.id)}"><h2>${escapeHtml(section.title)}</h2>${blocks}</section>`;
-        })
-        .join("");
+      while (host.firstChild) host.removeChild(host.firstChild);
+      for (const section of sections) {
+        const sectionEl = document.createElement("section");
+        sectionEl.id = `s-${String(section.id ?? "")}`;
+        const h2 = document.createElement("h2");
+        h2.textContent = String(section.title ?? "");
+        sectionEl.appendChild(h2);
+        for (const block of section.blocks || []) {
+          appendLegalBlock(sectionEl, block);
+        }
+        host.appendChild(sectionEl);
+      }
     } catch {
-      host.innerHTML = `<p class="meta">${escapeHtml(t.legalError)}</p>`;
+      setStatusMessage(host, t.legalError);
     }
   }
 
