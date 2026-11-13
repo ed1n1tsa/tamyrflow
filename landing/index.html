@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="TamyrFlow — fitness and wellness app for compatible smartwatches and Apple Health. Privacy, terms, and support."
+    />
+    <title>TamyrFlow</title>
+    <link rel="icon" href="./apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-title-template="TamyrFlow">
+    <header class="site-header">
+      <div class="wrap nav">
+        <a class="brand" href="./index.html">
+          <img src="./icon-1024.png" alt="" width="36" height="36" />
+          TamyrFlow
+        </a>
+        <nav aria-label="Primary">
+          <ul class="nav-links">
+            <li><a href="./index.html" aria-current="page" data-i18n="navHome">Главная</a></li>
+            <li><a href="./privacy.html" data-i18n="navPrivacy">Конфиденциальность</a></li>
+            <li><a href="./terms.html" data-i18n="navTerms">Условия</a></li>
+            <li><a href="./support.html" data-i18n="navSupport">Поддержка</a></li>
+            <li>
+              <div class="lang-switch" role="group" aria-label="Language">
+                <button type="button" data-lang="ru" aria-pressed="true">RU</button>
+                <button type="button" data-lang="en" aria-pressed="false">EN</button>
+              </div>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow reveal" data-i18n="eyebrow">Фитнес и wellness</p>
+            <h1 class="reveal reveal-delay-1" data-i18n="heroTitle">TamyrFlow</h1>
+            <p class="hero-lead reveal reveal-delay-2" data-i18n="heroLead">
+              Приложение для отслеживания активности и показателей с совместимых умных часов и Apple Health.
+            </p>
+            <div class="cta-row reveal reveal-delay-3">
+              <a class="btn btn-primary" href="./privacy.html" data-i18n="ctaPrivacy">Политика конфиденциальности</a>
+              <a class="btn btn-ghost" href="./support.html" data-i18n="ctaSupport">Поддержка</a>
+            </div>
+          </div>
+          <div class="hero-visual reveal reveal-delay-2" aria-hidden="true">
+            <img src="./icon-1024.png" alt="" />
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="wrap">
+          <div class="section-head">
+            <h2 data-i18n="featuresTitle">Что внутри</h2>
+            <p data-i18n="featuresLead">
+              Коротко о возможностях приложения для App Store и новых пользователей.
+            </p>
+          </div>
+          <ul class="feature-list">
+            <li>
+              <div class="accent-line" aria-hidden="true"></div>
+              <h3 data-i18n="f1Title">Часы по Bluetooth</h3>
+              <p data-i18n="f1Body">
+                Подключение совместимых часов, синхронизация шагов, пульса и других доступных метрик.
+              </p>
+            </li>
+            <li>
+              <div class="accent-line" aria-hidden="true"></div>
+              <h3 data-i18n="f2Title">Apple Health</h3>
+              <p data-i18n="f2Body">
+                Чтение разрешённых показателей из Apple Health. Запись в HealthKit не выполняется.
+              </p>
+            </li>
+            <li>
+              <div class="accent-line" aria-hidden="true"></div>
+              <h3 data-i18n="f3Title">Цели и профиль</h3>
+              <p data-i18n="f3Body">
+                Личный профиль, цели и история измерений в облаке при входе в аккаунт.
+              </p>
+            </li>
+          </ul>
+          <p class="disclaimer" data-i18n="disclaimer">
+            TamyrFlow предназначен для фитнеса и общего wellness. Это не медицинское изделие и не заменяет консультацию врача.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <p data-i18n="footerRights">© TamyrFlow. Республика Казахстан.</p>
+        <div class="footer-links">
+          <a href="./privacy.html" data-i18n="navPrivacy">Конфиденциальность</a>
+          <a href="./terms.html" data-i18n="navTerms">Условия</a>
+          <a href="./support.html" data-i18n="navSupport">Поддержка</a>
+          <a href="mailto:tamyrflow@gmail.com">tamyrflow@gmail.com</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./site.js" defer></script>
+  </body>
+</html>

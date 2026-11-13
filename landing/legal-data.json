@@ -1,0 +1,534 @@
+{
+  "privacy": {
+    "ru": [
+      {
+        "id": "1",
+        "title": "1. Общие положения",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow — мобильное приложение для фитнеса и отслеживания физической активности, которое помогает пользователям просматривать показатели здоровья и самочувствия, получаемые с совместимых умных часов и из Apple Health, отслеживать изменения показателей и управлять персональными целями."
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "title": "2. Какие данные мы собираем",
+        "blocks": []
+      },
+      {
+        "id": "3",
+        "title": "3. Как мы используем данные",
+        "blocks": []
+      },
+      {
+        "id": "4",
+        "title": "4. Bluetooth и подключённые устройства",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow использует Bluetooth для обнаружения, подключения и синхронизации совместимых умных часов."
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "5. Apple Health и HealthKit",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow может получать данные из Apple Health с использованием HealthKit исключительно после предоставления разрешения пользователем."
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "title": "6. Хранение и безопасность данных",
+        "blocks": []
+      },
+      {
+        "id": "7",
+        "title": "7. Передача данных третьим сторонам",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow может использовать сторонние сервисы для хранения данных пользователей, обеспечения работы приложения и технической поддержки."
+          }
+        ]
+      },
+      {
+        "id": "8",
+        "title": "8. Права пользователя",
+        "blocks": []
+      },
+      {
+        "id": "9",
+        "title": "9. Удаление аккаунта",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Пользователь может инициировать удаление аккаунта непосредственно в приложении TamyrFlow."
+          }
+        ]
+      },
+      {
+        "id": "10",
+        "title": "10. Медицинский дисклеймер",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow предназначен для отслеживания физической активности, общего самочувствия и отображения данных совместимых устройств."
+          }
+        ]
+      },
+      {
+        "id": "11",
+        "title": "11. Разрешения iOS",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Для работы отдельных функций TamyrFlow может запрашивать следующие разрешения."
+          }
+        ]
+      },
+      {
+        "id": "12",
+        "title": "12. Изменения политики",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Мы можем периодически обновлять настоящую Политику конфиденциальности в связи с изменением функций приложения, способов обработки данных или требований законодательства."
+          }
+        ]
+      },
+      {
+        "id": "13",
+        "title": "13. Контакты",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Если у вас есть вопросы о конфиденциальности, обработке или удалении персональных данных, вы можете связаться с нами."
+          }
+        ]
+      }
+    ],
+    "en": [
+      {
+        "id": "1",
+        "title": "1. General",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow is a fitness and activity-tracking mobile app that helps users view wellness metrics from compatible smartwatches and Apple Health, track changes over time, and manage personal goals."
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "title": "2. Data we collect",
+        "blocks": []
+      },
+      {
+        "id": "3",
+        "title": "3. How we use data",
+        "blocks": []
+      },
+      {
+        "id": "4",
+        "title": "4. Bluetooth and connected devices",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow uses Bluetooth to discover, connect, and sync compatible smartwatches."
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "5. Apple Health and HealthKit",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow may read Apple Health data via HealthKit only after you grant permission."
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "title": "6. Storage and security",
+        "blocks": []
+      },
+      {
+        "id": "7",
+        "title": "7. Sharing with third parties",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow may use third-party services for storage, app operation, and technical support."
+          }
+        ]
+      },
+      {
+        "id": "8",
+        "title": "8. Your rights",
+        "blocks": []
+      },
+      {
+        "id": "9",
+        "title": "9. Account deletion",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "You can start account deletion directly in TamyrFlow."
+          }
+        ]
+      },
+      {
+        "id": "10",
+        "title": "10. Medical disclaimer",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow is for tracking physical activity, general wellness, and displaying data from compatible devices."
+          }
+        ]
+      },
+      {
+        "id": "11",
+        "title": "11. iOS permissions",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Some features may request these permissions."
+          }
+        ]
+      },
+      {
+        "id": "12",
+        "title": "12. Policy changes",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "We may update this Privacy Policy when features, processing practices, or legal requirements change."
+          }
+        ]
+      },
+      {
+        "id": "13",
+        "title": "13. Contact",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "If you have questions about privacy, processing, or deletion of personal data, contact us."
+          }
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "ru": [
+      {
+        "id": "1",
+        "title": "1. Общие положения",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow — мобильное приложение для фитнеса и отслеживания физической активности, которое позволяет просматривать показатели здоровья и самочувствия, получаемые с совместимых умных часов и из Apple Health."
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "title": "2. Функции приложения",
+        "blocks": []
+      },
+      {
+        "id": "3",
+        "title": "3. Регистрация и аккаунт",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Для использования отдельных функций приложения может потребоваться создание аккаунта."
+          }
+        ]
+      },
+      {
+        "id": "4",
+        "title": "4. Подключение умных часов",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow использует Bluetooth для подключения совместимых умных часов и получения показателей измерений."
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "5. Apple Health",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow может получать данные из Apple Health с разрешения пользователя."
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "title": "6. Медицинский дисклеймер",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow предназначен для отслеживания физической активности, общего самочувствия и отображения данных совместимых устройств."
+          }
+        ]
+      },
+      {
+        "id": "7",
+        "title": "7. Правила использования",
+        "blocks": []
+      },
+      {
+        "id": "8",
+        "title": "8. Конфиденциальность",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Обработка персональных данных осуществляется в соответствии с Политикой конфиденциальности TamyrFlow."
+          }
+        ]
+      },
+      {
+        "id": "9",
+        "title": "9. Хранение данных",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow может использовать облачную инфраструктуру для хранения информации аккаунта, пользовательских настроек и поддерживаемых данных приложения."
+          }
+        ]
+      },
+      {
+        "id": "10",
+        "title": "10. Доступность приложения",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Мы стремимся обеспечивать стабильную работу TamyrFlow."
+          }
+        ]
+      },
+      {
+        "id": "11",
+        "title": "11. Интеллектуальная собственность",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Название TamyrFlow, дизайн, программный код, графические элементы и другие материалы приложения защищаются применимым законодательством об интеллектуальной собственности."
+          }
+        ]
+      },
+      {
+        "id": "12",
+        "title": "12. Ограничение ответственности",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow отображает информацию о физической активности и показателях, получаемых с совместимых устройств."
+          }
+        ]
+      },
+      {
+        "id": "13",
+        "title": "13. Удаление аккаунта",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Пользователь может прекратить использование приложения в любое время."
+          }
+        ]
+      },
+      {
+        "id": "14",
+        "title": "14. Изменение условий",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Мы можем обновлять настоящие Условия в связи с изменением функций приложения или законодательства."
+          }
+        ]
+      },
+      {
+        "id": "15",
+        "title": "15. Применимое законодательство",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Настоящие Условия регулируются законодательством Республики Казахстан."
+          }
+        ]
+      },
+      {
+        "id": "16",
+        "title": "16. Контакты",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "По вопросам использования приложения, технической поддержки и обработки персональных данных обращайтесь:"
+          }
+        ]
+      }
+    ],
+    "en": [
+      {
+        "id": "1",
+        "title": "1. General",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow is a fitness and activity-tracking mobile app for viewing wellness metrics from compatible smartwatches and Apple Health."
+          }
+        ]
+      },
+      {
+        "id": "2",
+        "title": "2. App features",
+        "blocks": []
+      },
+      {
+        "id": "3",
+        "title": "3. Registration and account",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Some features may require an account."
+          }
+        ]
+      },
+      {
+        "id": "4",
+        "title": "4. Connecting a smartwatch",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow uses Bluetooth to connect compatible smartwatches and receive measurements."
+          }
+        ]
+      },
+      {
+        "id": "5",
+        "title": "5. Apple Health",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow may read Apple Health data with your permission."
+          }
+        ]
+      },
+      {
+        "id": "6",
+        "title": "6. Medical disclaimer",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow is for tracking activity, general wellness, and displaying data from compatible devices."
+          }
+        ]
+      },
+      {
+        "id": "7",
+        "title": "7. Acceptable use",
+        "blocks": []
+      },
+      {
+        "id": "8",
+        "title": "8. Privacy",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "Personal data is processed under the TamyrFlow Privacy Policy."
+          }
+        ]
+      },
+      {
+        "id": "9",
+        "title": "9. Data storage",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow may use cloud infrastructure to store account information, settings, and supported app data."
+          }
+        ]
+      },
+      {
+        "id": "10",
+        "title": "10. Availability",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "We aim to keep TamyrFlow stable."
+          }
+        ]
+      },
+      {
+        "id": "11",
+        "title": "11. Intellectual property",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "The TamyrFlow name, design, code, graphics, and other materials are protected by applicable intellectual property law."
+          }
+        ]
+      },
+      {
+        "id": "12",
+        "title": "12. Limitation of liability",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "TamyrFlow displays activity and metric information from compatible devices."
+          }
+        ]
+      },
+      {
+        "id": "13",
+        "title": "13. Account deletion",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "You may stop using the app at any time."
+          }
+        ]
+      },
+      {
+        "id": "14",
+        "title": "14. Changes to the Terms",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "We may update these Terms when app features or laws change."
+          }
+        ]
+      },
+      {
+        "id": "15",
+        "title": "15. Governing law",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "These Terms are governed by the laws of the Republic of Kazakhstan."
+          }
+        ]
+      },
+      {
+        "id": "16",
+        "title": "16. Contact",
+        "blocks": [
+          {
+            "type": "p",
+            "text": "For questions about the app, support, or personal data processing, contact:"
+          }
+        ]
+      }
+    ]
+  }
+}
