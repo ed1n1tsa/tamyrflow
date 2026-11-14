@@ -1,6 +1,7 @@
 import Foundation
 
 /// Structured Terms of Use — readable scrolling document.
+/// Content mirrors landing/legal-data.json (RU/EN/KK).
 enum TermsOfUseDocument {
     typealias Section = LegalRichDocument.Section
     typealias Block = LegalRichDocument.Block
@@ -143,107 +144,107 @@ enum TermsOfUseDocument {
     // MARK: - English
 
     private static let english: [Section] = [
-        Section(id: "1", title: "1. General", blocks: [
-            .paragraph("TamyrFlow is a fitness and activity-tracking mobile app for viewing wellness metrics from compatible smartwatches and Apple Health."),
-            .paragraph("These Terms govern use of the TamyrFlow app."),
-            .paragraph("By using the app, you confirm that you have read and accept these Terms."),
-            .paragraph("If you do not agree, stop using the app."),
+        Section(id: "1", title: "1. General provisions", blocks: [
+            .paragraph("TamyrFlow is a mobile fitness and activity-tracking app that lets you view health and well-being metrics from compatible smartwatches and Apple Health."),
+            .paragraph("These Terms govern the use of the TamyrFlow app."),
+            .paragraph("By using the app, the user confirms that they have read and accept these Terms."),
+            .paragraph("If the user does not agree with the Terms, they should stop using the app."),
             .paragraph("The app is intended for users in the Republic of Kazakhstan.")
         ]),
         Section(id: "2", title: "2. App features", blocks: [
-            .paragraph("TamyrFlow lets you:"),
+            .paragraph("TamyrFlow provides the ability to:"),
             .bullets([
                 "create and edit a personal profile;",
                 "connect compatible smartwatches via Bluetooth;",
                 "view step count;",
                 "track heart rate;",
-                "view blood oxygen (SpO₂);",
+                "view blood oxygen level (SpO₂);",
                 "view blood pressure;",
                 "view temperature;",
-                "track calories burned;",
+                "track calorie expenditure;",
                 "view measurement history;",
                 "set and track personal goals;",
-                "receive Apple Health data you allow."
+                "receive user-authorized data from Apple Health."
             ]),
-            .paragraph("Feature availability depends on device model, app version, and permissions granted.")
+            .paragraph("Feature availability depends on the device model, app version, and permissions granted.")
         ]),
         Section(id: "3", title: "3. Registration and account", blocks: [
-            .paragraph("Some features may require an account."),
-            .paragraph("You agree to provide accurate information and keep your account secure."),
-            .paragraph("If you notice unauthorized access, contact support."),
-            .paragraph("You may start account deletion through the in-app option.")
+            .paragraph("Creating an account may be required to use certain app features."),
+            .paragraph("The user agrees to provide accurate information and keep their account secure."),
+            .paragraph("If unauthorized access is detected, the user may contact support."),
+            .paragraph("The user may initiate account deletion through the corresponding in-app feature.")
         ]),
         Section(id: "4", title: "4. Connecting a smartwatch", blocks: [
-            .paragraph("TamyrFlow uses Bluetooth to connect compatible smartwatches and receive measurements."),
+            .paragraph("TamyrFlow uses Bluetooth to connect compatible smartwatches and receive measurement metrics."),
             .paragraph("The app displays data produced by the connected device."),
-            .paragraph("Accuracy depends on the watch, measurement conditions, and correct use."),
-            .paragraph("Compatibility with every device model is not guaranteed.")
+            .paragraph("Measurement accuracy depends on the watch characteristics, measurement conditions, and correct use."),
+            .paragraph("Compatibility with all device models is not guaranteed.")
         ]),
         Section(id: "5", title: "5. Apple Health", blocks: [
-            .paragraph("TamyrFlow may read Apple Health data with your permission."),
-            .paragraph("HealthKit access is read-only for supported metrics."),
-            .paragraph("TamyrFlow does not write or change Apple Health data."),
-            .paragraph("You may revoke permissions in iOS Settings.")
+            .paragraph("TamyrFlow may obtain data from Apple Health with the user’s permission."),
+            .paragraph("The app uses HealthKit only to read supported metrics."),
+            .paragraph("TamyrFlow does not write to or modify data in Apple Health."),
+            .paragraph("The user may revoke permissions in iOS Settings.")
         ]),
         Section(id: "6", title: "6. Medical disclaimer", blocks: [
-            .paragraph("TamyrFlow is for tracking activity, general wellness, and displaying data from compatible devices."),
-            .paragraph("It is not for diagnosing disease, prescribing treatment, or replacing medical advice."),
-            .paragraph("Heart rate, blood pressure, blood oxygen, and temperature come from connected devices or other allowed sources."),
-            .paragraph("Accuracy depends on the device used."),
-            .paragraph("Do not rely on app data alone for medical decisions."),
+            .paragraph("TamyrFlow is intended for tracking physical activity, general well-being, and displaying data from compatible devices."),
+            .paragraph("The app is not intended for diagnosing diseases, prescribing treatment, or replacing consultation with a medical professional."),
+            .paragraph("Heart rate, blood pressure, blood oxygen, and temperature metrics come from connected devices or other authorized sources."),
+            .paragraph("Accuracy of metrics depends on the device used."),
+            .paragraph("App data should not be used as the sole basis for medical decisions."),
             .paragraph("If you have health questions, consult a qualified medical professional.")
         ]),
         Section(id: "7", title: "7. Acceptable use", blocks: [
-            .paragraph("You agree to:"),
+            .paragraph("The user agrees to:"),
             .bullets([
                 "comply with the laws of the Republic of Kazakhstan;",
                 "not attempt unauthorized access;",
-                "not interfere with the app;",
+                "not interfere with the operation of the app;",
                 "not use the app for unlawful purposes;",
-                "not infringe other users’ rights."
+                "not violate the rights of other users."
             ])
         ]),
         Section(id: "8", title: "8. Privacy", blocks: [
-            .paragraph("Personal data is processed under the TamyrFlow Privacy Policy."),
-            .paragraph("The app may process account information, health and activity metrics, and technical data needed to run the service."),
+            .paragraph("Personal data is processed in accordance with the TamyrFlow Privacy Policy."),
+            .paragraph("The app may process account information, health and physical activity metrics, and technical data needed to operate the service."),
             .paragraph("The Privacy Policy is available in the app.")
         ]),
         Section(id: "9", title: "9. Data storage", blocks: [
-            .paragraph("TamyrFlow may use cloud infrastructure to store account information, settings, and supported app data."),
-            .paragraph("Sync may require an internet connection."),
-            .paragraph("Without connectivity, some features may be unavailable.")
+            .paragraph("TamyrFlow may use cloud infrastructure to store account information, user settings, and supported app data."),
+            .paragraph("An internet connection may be required for sync."),
+            .paragraph("Without a connection, certain features may be unavailable.")
         ]),
         Section(id: "10", title: "10. Availability", blocks: [
-            .paragraph("We aim to keep TamyrFlow stable."),
-            .paragraph("Some features may be temporarily unavailable due to maintenance, updates, connectivity issues, or third-party outages."),
+            .paragraph("We aim to keep TamyrFlow running reliably."),
+            .paragraph("Certain features may be temporarily unavailable due to maintenance, updates, connectivity issues, or third-party service outages."),
             .paragraph("App functionality may be updated and improved.")
         ]),
         Section(id: "11", title: "11. Intellectual property", blocks: [
-            .paragraph("The TamyrFlow name, design, code, graphics, and other materials are protected by applicable intellectual property law."),
-            .paragraph("Using the app does not give you ownership of the software or materials."),
-            .paragraph("You receive a limited, non-exclusive, non-transferable right to use the app for personal purposes under these Terms.")
+            .paragraph("The TamyrFlow name, design, software code, graphics, and other app materials are protected by applicable intellectual property law."),
+            .paragraph("Using the app does not grant the user ownership of the software or materials."),
+            .paragraph("The user is granted a limited, non-exclusive, non-transferable right to use the app for personal purposes in accordance with these Terms.")
         ]),
         Section(id: "12", title: "12. Limitation of liability", blocks: [
-            .paragraph("TamyrFlow displays activity and metric information from compatible devices."),
-            .paragraph("We do not guarantee absolute accuracy or uninterrupted availability of measurements."),
-            .paragraph("To the extent allowed by law, liability for consequences of using the app in breach of these Terms or device-maker instructions may be limited."),
+            .paragraph("TamyrFlow displays information about physical activity and metrics obtained from compatible devices."),
+            .paragraph("We do not guarantee absolute accuracy or continuous availability of measurements."),
+            .paragraph("To the extent permitted by applicable law, liability for consequences of using the app in violation of these Terms or device manufacturer instructions may be limited."),
             .paragraph("These Terms do not limit consumer rights guaranteed by the laws of the Republic of Kazakhstan.")
         ]),
         Section(id: "13", title: "13. Account deletion", blocks: [
-            .paragraph("You may stop using the app at any time."),
-            .paragraph("If you have an account, you may start deletion in the app."),
-            .paragraph("Personal data deletion follows the Privacy Policy and applicable law.")
+            .paragraph("The user may stop using the app at any time."),
+            .paragraph("If an account exists, the user may initiate its deletion directly in the app."),
+            .paragraph("Deletion of personal data is carried out in accordance with the Privacy Policy and applicable law.")
         ]),
         Section(id: "14", title: "14. Changes to the Terms", blocks: [
-            .paragraph("We may update these Terms when app features or laws change."),
+            .paragraph("We may update these Terms due to changes in app features or legislation."),
             .paragraph("For material changes, users will be notified by available means.")
         ]),
         Section(id: "15", title: "15. Governing law", blocks: [
             .paragraph("These Terms are governed by the laws of the Republic of Kazakhstan."),
-            .paragraph("Disputes are resolved under applicable Kazakhstan law.")
+            .paragraph("Disputes are resolved in accordance with the applicable laws of the Republic of Kazakhstan.")
         ]),
         Section(id: "16", title: "16. Contact", blocks: [
-            .paragraph("For questions about the app, support, or personal data processing, contact:"),
+            .paragraph("For questions about using the app, technical support, and personal data processing, contact:"),
             .contact(label: "App", value: "TamyrFlow"),
             .contact(label: "Email", value: "tamyrflow@gmail.com"),
             .contact(label: "Phone", value: "+7 706 690 55 06"),
@@ -255,86 +256,106 @@ enum TermsOfUseDocument {
 
     private static let kazakh: [Section] = [
         Section(id: "1", title: "1. Жалпы ережелер", blocks: [
-            .paragraph("TamyrFlow — үйлесімді смарт-сағаттар мен Apple Health көрсеткіштерін қарауға арналған фитнес қолданбасы."),
-            .paragraph("Осы Шарттар TamyrFlow пайдалануды реттейді."),
-            .paragraph("Қолданбаны пайдалану арқылы сіз Шарттармен танысқаныңызды және қабылдайтыныңызды растайсыз."),
-            .paragraph("Келіспесеңіз, қолданбаны пайдалануды тоқтатыңыз."),
+            .paragraph("TamyrFlow — үйлесімді смарт сағаттардан және Apple Health-тен алынатын денсаулық пен өзін-өзі сезіну көрсеткіштерін көруге мүмкіндік беретін фитнес пен физикалық белсенділікті қадағалауға арналған мобильді қолданба."),
+            .paragraph("Осы Шарттар TamyrFlow қолданбасын пайдалануды реттейді."),
+            .paragraph("Қолданбаны пайдалана отырып, пайдаланушы осы Шарттармен танысқанын және оларды қабылдайтынын растайды."),
+            .paragraph("Пайдаланушы Шарттармен келіспесе, қолданбаны пайдалануды тоқтатуы керек."),
             .paragraph("Қолданба Қазақстан Республикасы аумағындағы пайдаланушыларға арналған.")
         ]),
         Section(id: "2", title: "2. Қолданба функциялары", blocks: [
-            .paragraph("TamyrFlow мүмкіндік береді:"),
+            .paragraph("TamyrFlow мына мүмкіндіктерді ұсынады:"),
             .bullets([
                 "жеке профиль жасау және өңдеу;",
-                "Bluetooth арқылы үйлесімді сағат қосу;",
+                "үйлесімді смарт сағаттарды Bluetooth арқылы қосу;",
                 "қадам санын көру;",
-                "пульсті бақылау;",
-                "SpO₂, қысым, температураны көру;",
-                "калория шығынын бақылау;",
-                "өлшеу тарихын көру;",
-                "жеке мақсаттар қою;",
-                "рұқсат етілген Apple Health деректерін алу."
+                "пульсті қадағалау;",
+                "қандағы оттегі деңгейін (SpO₂) көру;",
+                "артериялық қысымды көру;",
+                "температураны көру;",
+                "калория шығынын қадағалау;",
+                "өлшеулер тарихын көру;",
+                "жеке мақсаттарды орнату және қадағалау;",
+                "пайдаланушы рұқсат еткен деректерді Apple Health-тен алу."
             ]),
-            .paragraph("Функциялар құрылғы моделіне, нұсқаға және рұқсаттарға байланысты.")
+            .paragraph("Функциялардың қолжетімділігі құрылғы моделіне, қолданба нұсқасына және берілген рұқсаттарға байланысты.")
         ]),
         Section(id: "3", title: "3. Тіркеу және аккаунт", blocks: [
-            .paragraph("Кейбір функциялар үшін аккаунт қажет болуы мүмкін."),
-            .paragraph("Сіз нақты ақпарат беруге және аккаунт қауіпсіздігін сақтауға міндеттесесіз."),
-            .paragraph("Аккаунтты қолданбадағы тиісті функция арқылы жоюға болады.")
+            .paragraph("Қолданбаның жекелеген функцияларын пайдалану үшін аккаунт жасау қажет болуы мүмкін."),
+            .paragraph("Пайдаланушы шынайы ақпарат беруге және өз тіркелгісінің қауіпсіздігін қамтамасыз етуге міндеттенеді."),
+            .paragraph("Рұқсатсыз қол жеткізу анықталса, пайдаланушы қолдау қызметіне жүгіне алады."),
+            .paragraph("Пайдаланушы аккаунтты жоюды қолданбадағы тиісті функция арқылы бастай алады.")
         ]),
-        Section(id: "4", title: "4. Сағатты қосу", blocks: [
-            .paragraph("TamyrFlow үйлесімді сағаттарды Bluetooth арқылы қосады және өлшемдерді алады."),
-            .paragraph("Дәлдік құрылғыға және өлшеу жағдайына байланысты; барлық модельдермен үйлесімділік кепілденбейді.")
+        Section(id: "4", title: "4. Смарт сағатты қосу", blocks: [
+            .paragraph("TamyrFlow үйлесімді смарт сағаттарды қосу және өлшеу көрсеткіштерін алу үшін Bluetooth пайдаланады."),
+            .paragraph("Қолданба қосылған құрылғы қалыптастырған деректерді көрсетеді."),
+            .paragraph("Өлшеулердің дәлдігі сағат сипаттамаларына, өлшеу жағдайларына және оларды дұрыс пайдалануға байланысты."),
+            .paragraph("Барлық құрылғы модельдерімен үйлесімділікке кепілдік берілмейді.")
         ]),
         Section(id: "5", title: "5. Apple Health", blocks: [
-            .paragraph("Apple Health деректері тек сіздің рұқсатыңызбен оқылады."),
-            .paragraph("TamyrFlow Apple Health-қа жазбайды және өзгертпейді."),
-            .paragraph("Рұқсатты iOS баптауларында кері қайтаруға болады.")
+            .paragraph("TamyrFlow пайдаланушы рұқсатымен Apple Health-тен деректер алуы мүмкін."),
+            .paragraph("Қолданба HealthKit-ті тек қолдау көрсетілетін көрсеткіштерді оқу үшін пайдаланады."),
+            .paragraph("TamyrFlow Apple Health-тегі деректерді жазбайды және өзгертпейді."),
+            .paragraph("Пайдаланушы рұқсаттарды iOS параметрлері арқылы қайтарып ала алады.")
         ]),
         Section(id: "6", title: "6. Медициналық ескерту", blocks: [
-            .paragraph("TamyrFlow фитнес пен жалпы әл-ауқатты бақылауға арналған, диагноз немесе емдеу үшін емес."),
-            .paragraph("Деректерді медициналық шешімнің жалғыз негізі ретінде пайдаланбаңыз."),
-            .paragraph("Денсаулық мәселесінде білікті дәрігерге жүгініңіз.")
+            .paragraph("TamyrFlow физикалық белсенділікті, жалпы өзін-өзі сезінуді қадағалауға және үйлесімді құрылғылардың деректерін көрсетуге арналған."),
+            .paragraph("Қолданба ауруларды диагностикалауға, ем тағайындауға немесе медициналық маман кеңесін алмастыруға арналмаған."),
+            .paragraph("Пульс, артериялық қысым, қандағы оттегі және температура көрсеткіштері қосылған құрылғылардан немесе басқа рұқсат етілген көздерден түседі."),
+            .paragraph("Көрсеткіштердің дәлдігі пайдаланылатын құрылғыға байланысты."),
+            .paragraph("Қолданба деректерін медициналық шешім қабылдаудың жалғыз негізі ретінде пайдаланбау керек."),
+            .paragraph("Денсаулық туралы сұрақтар туындаса, білікті медициналық маманға жүгіну ұсынылады.")
         ]),
         Section(id: "7", title: "7. Пайдалану ережелері", blocks: [
+            .paragraph("Пайдаланушы міндеттенеді:"),
             .bullets([
-                "ҚР заңнамасын сақтау;",
-                "рұқсатсыз қол жеткізуге әрекет жасамау;",
-                "қолданба жұмысына кедергі жасамау;",
-                "заңсыз мақсаттарға пайдаланбау;",
-                "басқа пайдаланушылардың құқығын бұзбау."
+                "Қазақстан Республикасының заңнамасын сақтау;",
+                "рұқсатсыз қол жеткізу әрекеттерін жасамау;",
+                "қолданба жұмысына араласпау;",
+                "қолданбаны құқыққа қайшы мақсаттарға пайдаланбау;",
+                "басқа пайдаланушылардың құқықтарын бұзбау."
             ])
         ]),
         Section(id: "8", title: "8. Құпиялылық", blocks: [
             .paragraph("Жеке деректер TamyrFlow Құпиялылық саясатына сәйкес өңделеді."),
-            .paragraph("Саясат қолданбада қолжетімді.")
+            .paragraph("Қолданба аккаунт ақпаратын, денсаулық пен физикалық белсенділік көрсеткіштерін, сондай-ақ сервистің жұмысы үшін қажет техникалық деректерді өңдеуі мүмкін."),
+            .paragraph("Құпиялылық саясаты қолданбада қолжетімді.")
         ]),
         Section(id: "9", title: "9. Деректерді сақтау", blocks: [
-            .paragraph("Аккаунт пен қолданба деректері бұлтта сақталуы мүмкін."),
-            .paragraph("Синхрондау үшін интернет қажет болуы мүмкін.")
+            .paragraph("TamyrFlow аккаунт ақпаратын, пайдаланушы параметрлерін және қолданбаның қолдау көрсетілетін деректерін сақтау үшін бұлттық инфрақұрылымды пайдалануы мүмкін."),
+            .paragraph("Синхрондау үшін интернет-қосылым қажет болуы мүмкін."),
+            .paragraph("Қосылым болмаса, жекелеген функциялар қолжетімсіз болуы мүмкін.")
         ]),
         Section(id: "10", title: "10. Қолжетімділік", blocks: [
-            .paragraph("Біз тұрақты жұмысқа ұмтыламыз; техникалық себептермен кей функциялар уақытша қолжетімсіз болуы мүмкін.")
+            .paragraph("Біз TamyrFlow-тың тұрақты жұмысын қамтамасыз етуге тырысамыз."),
+            .paragraph("Жекелеген функциялар техникалық қызмет көрсету, жаңартулар, қосылым мәселелері немесе үшінші тарап сервистерінің ақаулары салдарынан уақытша қолжетімсіз болуы мүмкін."),
+            .paragraph("Қолданба функционалдығы жаңартылып, жетілдірілуі мүмкін.")
         ]),
         Section(id: "11", title: "11. Зияткерлік меншік", blocks: [
-            .paragraph("TamyrFlow атауы, дизайн, код және материалдар зияткерлік меншікпен қорғалады."),
-            .paragraph("Қолданбаны пайдалану меншік құқығын бермейді.")
+            .paragraph("TamyrFlow атауы, дизайны, бағдарламалық коды, графикалық элементтері және басқа материалдары қолданыстағы зияткерлік меншік заңнамасымен қорғалады."),
+            .paragraph("Қолданбаны пайдалану пайдаланушыға бағдарламалық жасақтама мен материалдарға меншік құқығын бермейді."),
+            .paragraph("Пайдаланушыға осы Шарттарға сәйкес қолданбаны жеке мақсатта пайдаланудың шектеулі, айрықша емес және берілмейтін құқығы беріледі.")
         ]),
         Section(id: "12", title: "12. Жауапкершілікті шектеу", blocks: [
-            .paragraph("Өлшемдердің абсолют дәлдігіне немесе үздіксіз қолжетімділігіне кепілдік берілмейді."),
-            .paragraph("Шарттар ҚР тұтынушы құқықтарын шектемейді.")
+            .paragraph("TamyrFlow үйлесімді құрылғылардан алынатын физикалық белсенділік пен көрсеткіштер туралы ақпаратты көрсетеді."),
+            .paragraph("Біз өлшеулердің абсолютті дәлдігіне немесе үздіксіз қолжетімділігіне кепілдік бермейміз."),
+            .paragraph("Қолданыстағы заңнама рұқсат ететін шекте осы Шарттарды немесе құрылғы өндірушісінің нұсқауларын бұза отырып қолданбаны пайдалану салдарлары үшін жауапкершілік шектелуі мүмкін."),
+            .paragraph("Осы Шарттар Қазақстан Республикасының заңнамасымен кепілдендірілген тұтынушы құқықтарын шектемейді.")
         ]),
         Section(id: "13", title: "13. Аккаунтты жою", blocks: [
-            .paragraph("Қолданбаны кез келген уақытта тоқтатуға болады."),
-            .paragraph("Аккаунтты қолданбадан жоюға болады; деректер Құпиялылық саясатына сәйкес жойылады.")
+            .paragraph("Пайдаланушы қолданбаны пайдалануды кез келген уақытта тоқтата алады."),
+            .paragraph("Аккаунт болса, пайдаланушы оны тікелей қолданбада жоюды бастай алады."),
+            .paragraph("Жеке деректерді жою Құпиялылық саясатына және қолданыстағы заңнамаға сәйкес жүргізіледі.")
         ]),
         Section(id: "14", title: "14. Шарттарды өзгерту", blocks: [
-            .paragraph("Шарттар қолданба немесе заң өзгерісіне байланысты жаңартылуы мүмкін.")
+            .paragraph("Біз қолданба функцияларының немесе заңнаманың өзгеруіне байланысты осы Шарттарды жаңартуымыз мүмкін."),
+            .paragraph("Маңызды өзгерістер болғанда пайдаланушылар қолжетімді құралдар арқылы хабардар етіледі.")
         ]),
         Section(id: "15", title: "15. Қолданылатын заң", blocks: [
-            .paragraph("Шарттар Қазақстан Республикасының заңнамасымен реттеледі.")
+            .paragraph("Осы Шарттар Қазақстан Республикасының заңнамасымен реттеледі."),
+            .paragraph("Даулар Қазақстан Республикасының қолданыстағы заңнамасына сәйкес шешіледі.")
         ]),
         Section(id: "16", title: "16. Байланыс", blocks: [
-            .paragraph("Қолдау және деректер бойынша сұрақтар үшін:"),
+            .paragraph("Қолданбаны пайдалану, техникалық қолдау және жеке деректерді өңдеу мәселелері бойынша хабарласыңыз:"),
             .contact(label: "Қолданба", value: "TamyrFlow"),
             .contact(label: "Email", value: "tamyrflow@gmail.com"),
             .contact(label: "Телефон", value: "+7 706 690 55 06"),

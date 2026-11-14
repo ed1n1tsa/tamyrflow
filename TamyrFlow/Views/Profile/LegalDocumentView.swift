@@ -1,9 +1,17 @@
 import SwiftUI
 
-enum LegalDocumentKind {
+enum LegalDocumentKind: Identifiable {
     case terms
     case privacyPolicy
     case privacyControls
+
+    var id: String {
+        switch self {
+        case .terms: return "terms"
+        case .privacyPolicy: return "privacyPolicy"
+        case .privacyControls: return "privacyControls"
+        }
+    }
 
     var title: String {
         switch self {

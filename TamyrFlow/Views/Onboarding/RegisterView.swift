@@ -51,7 +51,7 @@ struct RegisterView: View {
                     }
                     .padding(.top, 16)
 
-                    termsRow
+                    AuthTermsConsentRow(accepted: $acceptedTerms)
                         .padding(.top, 26)
 
                     if let infoMessage {
@@ -184,33 +184,6 @@ struct RegisterView: View {
         Text(text)
             .font(AppFont.interBold(16))
             .foregroundStyle(AppTheme.authFieldPlaceholder)
-    }
-
-    private var termsRow: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Button { acceptedTerms.toggle() } label: {
-                ZStack {
-                    Circle().strokeBorder(Color.white, lineWidth: 2).frame(width: 22, height: 22)
-                    if acceptedTerms {
-                        Circle().fill(AppTheme.authLink).frame(width: 12, height: 12)
-                    }
-                }
-            }
-            .buttonStyle(.plain)
-            .padding(.top, 2)
-
-            (
-                Text(L10n.Auth.termsPrefix).foregroundColor(.white)
-                + Text(L10n.Auth.privacy).foregroundColor(AppTheme.authLink)
-                + Text(L10n.Auth.termsAnd).foregroundColor(.white)
-                + Text(L10n.Auth.terms).foregroundColor(AppTheme.authLink)
-                + Text(L10n.Auth.termsSuffix).foregroundColor(.white)
-            )
-            .font(AppFont.interBold(13))
-            .multilineTextAlignment(.leading)
-            .fixedSize(horizontal: false, vertical: true)
-            .id(language.code)
-        }
     }
 
     private func submit() async {
