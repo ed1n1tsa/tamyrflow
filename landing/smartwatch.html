@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="ET488 smartwatch documentation for TamyrFlow — Bluetooth pairing, supported wellness features, and device documents."
+    />
+    <title>ET488 Smartwatch &amp; Documentation | TamyrFlow</title>
+    <link rel="icon" href="./apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap nav">
+        <a class="brand" href="./index.html">
+          <img
+            src="./assets/logo.png"
+            alt=""
+            width="34"
+            height="34"
+            onerror="this.onerror=null;this.src='./assets/logo.svg'"
+          />
+          <span>TamyrFlow</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="./index.html#features" data-i18n="navFeatures">Features</a></li>
+          <li><a href="./index.html#about" data-i18n="navAbout">About</a></li>
+          <li>
+            <a href="./smartwatch.html" aria-current="page" data-i18n="navSmartwatch"
+              >Smartwatch</a
+            >
+          </li>
+          <li><a href="./index.html#download" data-i18n="navDownload">Download</a></li>
+        </ul>
+        <div class="nav-actions">
+          <div class="lang-dropdown">
+            <button
+              type="button"
+              class="lang-trigger"
+              aria-label="Language"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path
+                  d="M3 12h18M12 3c2.5 2.8 3.8 6 3.8 9s-1.3 6.2-3.8 9c-2.5-2.8-3.8-6-3.8-9s1.3-6.2 3.8-9z"
+                />
+              </svg>
+            </button>
+            <ul class="lang-menu" role="listbox" hidden>
+              <li>
+                <button type="button" role="option" data-lang="ru" aria-checked="false">
+                  Русский <span class="code">RU</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" role="option" data-lang="kk" aria-checked="false">
+                  Қазақша <span class="code">KK</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" role="option" data-lang="en" aria-checked="false">
+                  English <span class="code">EN</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+          <a class="btn btn-purple btn-sm" href="./index.html" data-i18n="navHome">Home</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="sw-hero">
+        <div class="wrap sw-hero-grid">
+          <div data-reveal>
+            <p class="pill">
+              <span data-i18n="swPill">Compatible device</span>
+            </p>
+            <h1 data-i18n="swHeroTitle">ET488 Smartwatch</h1>
+            <p class="hero-lead" data-i18n="swHeroLead">
+              Compatible smartwatch for activity tracking and general wellness measurements with
+              TamyrFlow.
+            </p>
+            <ul class="sw-meta-list">
+              <li>
+                <strong data-i18n="swModelLabel">Model</strong>
+                <span>ET488</span>
+              </li>
+              <li>
+                <strong data-i18n="swConnectLabel">Connection</strong>
+                <span data-i18n="swConnectValue">Bluetooth</span>
+              </li>
+              <li>
+                <strong data-i18n="swAppLabel">App</strong>
+                <span>TamyrFlow (iOS)</span>
+              </li>
+            </ul>
+            <p class="sw-integration" data-i18n="swIntegration">
+              TamyrFlow pairs with a compatible ET488 over Bluetooth, receives supported wellness
+              measurements from the watch hardware, and shows values, trends, and history in the
+              app. Availability of each metric depends on the device hardware and firmware.
+            </p>
+          </div>
+          <div class="sw-gallery" data-reveal="scale" aria-label="ET488 photos">
+            <figure class="sw-shot sw-shot-main">
+              <div class="sw-photo-frame">
+                <img
+                  src="./assets/et488/front.jpg"
+                  alt="ET488 smartwatch — front view"
+                  loading="eager"
+                  onerror="this.classList.add('is-missing'); this.alt=''; this.nextElementSibling.hidden=false"
+                />
+                <span class="sw-photo-ph" hidden>Add assets/et488/front.jpg</span>
+              </div>
+            </figure>
+            <figure class="sw-shot">
+              <div class="sw-photo-frame">
+                <img
+                  src="./assets/et488/side.jpg"
+                  alt="ET488 smartwatch — side view"
+                  loading="lazy"
+                  onerror="this.classList.add('is-missing'); this.alt=''; this.nextElementSibling.hidden=false"
+                />
+                <span class="sw-photo-ph" hidden>Add assets/et488/side.jpg</span>
+              </div>
+            </figure>
+            <figure class="sw-shot">
+              <div class="sw-photo-frame">
+                <img
+                  src="./assets/et488/angle.jpg"
+                  alt="ET488 smartwatch — angled view"
+                  loading="lazy"
+                  onerror="this.classList.add('is-missing'); this.alt=''; this.nextElementSibling.hidden=false"
+                />
+                <span class="sw-photo-ph" hidden>Add assets/et488/angle.jpg</span>
+              </div>
+            </figure>
+            <figure class="sw-shot">
+              <div class="sw-photo-frame">
+                <img
+                  src="./assets/et488/back.jpg"
+                  alt="ET488 smartwatch — product detail"
+                  loading="lazy"
+                  onerror="this.classList.add('is-missing'); this.alt=''; this.nextElementSibling.hidden=false"
+                />
+                <span class="sw-photo-ph" hidden>Add assets/et488/back.jpg</span>
+              </div>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="sw-section" id="features">
+        <div class="wrap">
+          <header class="sw-section-head" data-reveal>
+            <h2 data-i18n="swFeaturesTitle">Supported Features</h2>
+            <p data-i18n="swFeaturesLead">
+              TamyrFlow can display the following wellness and activity data when provided by a
+              compatible ET488. Availability depends on the smartwatch hardware and firmware. These
+              measurements are for general fitness and wellness — not medical-grade claims.
+            </p>
+          </header>
+          <ul class="sw-feature-grid">
+            <li data-reveal style="--reveal-delay: 0s">
+              <h3 data-i18n="swF1">Heart Rate (Pulse)</h3>
+              <p data-i18n="swF1Body">Pulse readings received from the connected watch.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.05s">
+              <h3 data-i18n="swF2">Blood Oxygen (SpO₂)</h3>
+              <p data-i18n="swF2Body">SpO₂ values when supported by the device.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.1s">
+              <h3 data-i18n="swF3">Body Temperature</h3>
+              <p data-i18n="swF3Body">Temperature readings when a sensor is available.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.15s">
+              <h3 data-i18n="swF4">Blood Pressure</h3>
+              <p data-i18n="swF4Body">Blood pressure values when supported by firmware.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.2s">
+              <h3 data-i18n="swF5">Daily Steps</h3>
+              <p data-i18n="swF5Body">Step count synchronized from the watch.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.25s">
+              <h3 data-i18n="swF6">Activity Tracking</h3>
+              <p data-i18n="swF6Body">Activity progress and related fitness data in the app.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.3s">
+              <h3 data-i18n="swF7">Measurement History</h3>
+              <p data-i18n="swF7Body">Past readings, charts, and trends in TamyrFlow.</p>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.35s">
+              <h3 data-i18n="swF8">Bluetooth Synchronization</h3>
+              <p data-i18n="swF8Body">Pairing and data sync over Bluetooth.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="sw-section sw-section-soft" id="how">
+        <div class="wrap">
+          <header class="sw-section-head" data-reveal>
+            <h2 data-i18n="swHowTitle">How It Works</h2>
+            <p data-i18n="swHowLead">
+              A simple flow from install to viewing wellness data. Some TamyrFlow screens remain
+              available without a connected watch; live measurements require a paired compatible
+              device.
+            </p>
+          </header>
+          <ol class="sw-steps">
+            <li data-reveal style="--reveal-delay: 0s">
+              <span class="sw-step-num">1</span>
+              <div>
+                <h3 data-i18n="swStep1Title">Install TamyrFlow</h3>
+                <p data-i18n="swStep1Body">Download the iOS app and create or sign in to your account.</p>
+              </div>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.08s">
+              <span class="sw-step-num">2</span>
+              <div>
+                <h3 data-i18n="swStep2Title">Connect ET488 via Bluetooth</h3>
+                <p data-i18n="swStep2Body">
+                  Pair a compatible ET488 smartwatch. Location permission may be requested only to
+                  help find nearby Bluetooth devices.
+                </p>
+              </div>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.16s">
+              <span class="sw-step-num">3</span>
+              <div>
+                <h3 data-i18n="swStep3Title">Start a supported measurement</h3>
+                <p data-i18n="swStep3Body">
+                  Use the smartwatch to run a supported wellness measurement.
+                </p>
+              </div>
+            </li>
+            <li data-reveal style="--reveal-delay: 0.24s">
+              <span class="sw-step-num">4</span>
+              <div>
+                <h3 data-i18n="swStep4Title">View data in TamyrFlow</h3>
+                <p data-i18n="swStep4Body">
+                  Review received values, trends, and history in the app.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="sw-section" id="documentation">
+        <div class="wrap">
+          <header class="sw-section-head" data-reveal>
+            <h2 data-i18n="swDocsTitle">Device Documentation</h2>
+            <p data-i18n="swDocsLead">
+              Supporting documents for the ET488. PDFs open at public URLs when a verified file is
+              available. Documents pending verification are labeled accordingly — no fabricated
+              certificates or unverified “Verified” badges.
+            </p>
+          </header>
+          <div id="device-docs-root" class="sw-docs" data-reveal>
+            <p class="meta" data-i18n="loadingLegal">Loading documents…</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="sw-section" id="disclaimer">
+        <div class="wrap">
+          <aside class="sw-disclaimer" data-reveal role="note">
+            <h2 data-i18n="swDiscTitle">Important Medical Disclaimer</h2>
+            <p data-i18n="swDisc1">
+              TamyrFlow is intended for general fitness and wellness purposes only. It is not a
+              medical device and does not provide medical diagnoses, treatment recommendations, or
+              medical advice.
+            </p>
+            <p data-i18n="swDisc2">
+              Measurements are provided by compatible smartwatch hardware. Their accuracy and
+              availability depend on the connected device.
+            </p>
+            <p data-i18n="swDisc3">Do not use these measurements to make medical decisions.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="sw-section sw-section-soft" id="app-review">
+        <div class="wrap">
+          <div class="sw-review" data-reveal>
+            <h2 data-i18n="swReviewTitle">Information for App Review</h2>
+            <p data-i18n="swReview1">
+              TamyrFlow displays wellness measurements received from compatible smartwatches.
+            </p>
+            <p data-i18n="swReview2">
+              The application does not independently measure physiological parameters or claim
+              medical-grade accuracy.
+            </p>
+            <p data-i18n="swReview3">
+              Supporting device documentation is provided above where available.
+            </p>
+            <p data-i18n="swReview4">
+              TamyrFlow is intended for fitness and general wellness use only.
+            </p>
+            <p class="sw-review-links">
+              <a href="./privacy.html" data-i18n="footerPrivacy">Privacy Policy</a>
+              <span aria-hidden="true">·</span>
+              <a href="./terms.html" data-i18n="footerTerms">Terms of Use</a>
+              <span aria-hidden="true">·</span>
+              <a href="./support.html" data-i18n="footerSupport">Support</a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap footer-grid">
+        <a class="brand" href="./index.html">
+          <img
+            src="./assets/logo.png"
+            alt=""
+            width="28"
+            height="28"
+            onerror="this.onerror=null;this.src='./assets/logo.svg'"
+          />
+          <span>TamyrFlow</span>
+        </a>
+        <div class="footer-links">
+          <a href="./smartwatch.html" data-i18n="navSmartwatch">Smartwatch</a>
+          <a href="./privacy.html" data-i18n="footerPrivacy">Privacy Policy</a>
+          <a href="./terms.html" data-i18n="footerTerms">Terms of Use</a>
+          <a href="./support.html" data-i18n="footerSupport">Support</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./site.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+{
+  "categories": [
+    {
+      "id": "device",
+      "documents": [
+        {
+          "id": "et488-quick-instructions",
+          "status": "available",
+          "file": "docs/et488-watch-quick-instructions.pdf",
+          "i18n": {
+            "en": {
+              "title": "Watch Quick Instructions",
+              "type": "User Manual",
+              "description": "Quick start / user instructions for the ET488 smartwatch used with TamyrFlow."
+            },
+            "ru": {
+              "title": "Краткая инструкция к часам",
+              "type": "Руководство",
+              "description": "Краткая инструкция / руководство пользователя для умных часов ET488, используемых с TamyrFlow."
+            },
+            "kk": {
+              "title": "Сағаттың қысқаша нұсқаулығы",
+              "type": "Нұсқаулық",
+              "description": "TamyrFlow-пен қолданылатын ET488 смарт сағатының қысқаша нұсқаулығы."
+            }
+          }
+        },
+        {
+          "id": "et488-rohs",
+          "status": "available",
+          "file": "docs/et488-rohs-test-report.pdf",
+          "i18n": {
+            "en": {
+              "title": "RoHS Test Report",
+              "type": "Compliance report",
+              "description": "RoHS test report confirming restricted hazardous substance testing results for the device. This document does not validate measurement accuracy."
+            },
+            "ru": {
+              "title": "Отчёт RoHS",
+              "type": "Отчёт о соответствии",
+              "description": "Отчёт RoHS подтверждает результаты испытаний по ограничению опасных веществ. Этот документ не подтверждает точность измерений."
+            },
+            "kk": {
+              "title": "RoHS сынақ есебі",
+              "type": "Сәйкестік есебі",
+              "description": "RoHS есебі құрылғыдағы шектелген қауіпті заттар сынағының нәтижелерін растайды. Бұл құжат өлшеу дәлдігін растамайды."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

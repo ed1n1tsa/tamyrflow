@@ -1,0 +1,19 @@
+Put your 2 PDF files HERE — in this folder:
+
+  landing/docs/
+
+Exact filenames (rename your files to these names):
+
+  1) et488-watch-quick-instructions.pdf   ← Watch Quick Instructions
+  2) et488-rohs-test-report.pdf           ← RoHS Test Report
+
+Then in landing/device-docs.json set each document "status" to "available"
+(or tell the agent after you drop the files and it will flip the flags).
+
+Full paths in the repo:
+  /landing/docs/et488-watch-quick-instructions.pdf
+  /landing/docs/et488-rohs-test-report.pdf
+
+Public URLs after deploy:
+  https://ed1n1tsa.github.io/tamyrflow/docs/et488-watch-quick-instructions.pdf
+  https://ed1n1tsa.github.io/tamyrflow/docs/et488-rohs-test-report.pdf

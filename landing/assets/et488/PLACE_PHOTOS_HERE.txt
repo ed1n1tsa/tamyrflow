@@ -1,0 +1,7 @@
+ET488 photos currently in use:
+  front.jpg  — front view
+  side.jpg   — side / buttons
+  angle.jpg  — angled view with face on
+  back.jpg   — additional product angle (true sensor-back photo optional)
+
+Replace any file with the same name to update the site.
