@@ -1,18 +1,19 @@
-Place authentic ET488 / TamyrFlow supporting PDFs here.
+Put your 2 PDF files HERE — in this folder:
 
-Expected filenames (see device-docs.json):
+  landing/docs/
 
-  et488-user-manual.pdf
-  et488-rohs-test-report.pdf
-  et488-heart-rate-accuracy-test-report.pdf
-  et488-spo2-accuracy-validation-report.pdf
-  et488-temperature-accuracy-test-report.pdf
-  et488-blood-pressure-accuracy-validation-report.pdf
+Exact filenames (rename your files to these names):
 
-After adding a file, set that document's "status" to "available" in
-landing/device-docs.json (only when authenticity for ET488 is verified).
-Localized titles live under each document's "i18n" object (en/ru/kk).
+  1) et488-watch-quick-instructions.pdf   ← Watch Quick Instructions
+  2) et488-rohs-test-report.pdf           ← RoHS Test Report
 
-RoHS reports = hazardous substance testing, NOT measurement accuracy.
-Do not mark documents Verified without confirmation.
-Do not invent FDA/CE/EAC marks or registration numbers.
+Then in landing/device-docs.json set each document "status" to "available"
+(or tell the agent after you drop the files and it will flip the flags).
+
+Full paths in the repo:
+  /landing/docs/et488-watch-quick-instructions.pdf
+  /landing/docs/et488-rohs-test-report.pdf
+
+Public URLs after deploy:
+  https://ed1n1tsa.github.io/tamyrflow/docs/et488-watch-quick-instructions.pdf
+  https://ed1n1tsa.github.io/tamyrflow/docs/et488-rohs-test-report.pdf

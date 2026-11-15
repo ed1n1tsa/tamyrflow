@@ -4,24 +4,24 @@
       "id": "device",
       "documents": [
         {
-          "id": "et488-user-manual",
+          "id": "et488-quick-instructions",
           "status": "pending",
-          "file": "docs/et488-user-manual.pdf",
+          "file": "docs/et488-watch-quick-instructions.pdf",
           "i18n": {
             "en": {
-              "title": "ET488 User Manual",
+              "title": "Watch Quick Instructions",
               "type": "User Manual",
-              "description": "Official user documentation for the ET488 smartwatch model used with TamyrFlow."
+              "description": "Quick start / user instructions for the ET488 smartwatch used with TamyrFlow."
             },
             "ru": {
-              "title": "Руководство пользователя ET488",
+              "title": "Краткая инструкция к часам",
               "type": "Руководство",
-              "description": "Официальная пользовательская документация для модели умных часов ET488, используемых с TamyrFlow."
+              "description": "Краткая инструкция / руководство пользователя для умных часов ET488, используемых с TamyrFlow."
             },
             "kk": {
-              "title": "ET488 пайдаланушы нұсқаулығы",
+              "title": "Сағаттың қысқаша нұсқаулығы",
               "type": "Нұсқаулық",
-              "description": "TamyrFlow-пен қолданылатын ET488 смарт сағат моделінің ресми пайдаланушы құжаттамасы."
+              "description": "TamyrFlow-пен қолданылатын ET488 смарт сағатының қысқаша нұсқаулығы."
             }
           }
         },
@@ -31,112 +31,19 @@
           "file": "docs/et488-rohs-test-report.pdf",
           "i18n": {
             "en": {
-              "title": "ET488 RoHS Test Report",
+              "title": "RoHS Test Report",
               "type": "Compliance report",
               "description": "RoHS test report confirming restricted hazardous substance testing results for the device. This document does not validate measurement accuracy."
             },
             "ru": {
-              "title": "Отчёт RoHS для ET488",
+              "title": "Отчёт RoHS",
               "type": "Отчёт о соответствии",
               "description": "Отчёт RoHS подтверждает результаты испытаний по ограничению опасных веществ. Этот документ не подтверждает точность измерений."
             },
             "kk": {
-              "title": "ET488 RoHS сынақ есебі",
+              "title": "RoHS сынақ есебі",
               "type": "Сәйкестік есебі",
               "description": "RoHS есебі құрылғыдағы шектелген қауіпті заттар сынағының нәтижелерін растайды. Бұл құжат өлшеу дәлдігін растамайды."
-            }
-          }
-        }
-      ]
-    },
-    {
-      "id": "accuracy",
-      "documents": [
-        {
-          "id": "hr-accuracy",
-          "status": "pending",
-          "file": "docs/et488-heart-rate-accuracy-test-report.pdf",
-          "i18n": {
-            "en": {
-              "title": "Heart Rate Accuracy Test Report",
-              "type": "Accuracy validation",
-              "description": "Supporting report related to heart rate measurement validation for the ET488, when available and verified."
-            },
-            "ru": {
-              "title": "Отчёт о точности измерения пульса",
-              "type": "Валидация точности",
-              "description": "Сопроводительный отчёт по валидации измерения пульса для ET488 — когда документ доступен и проверен."
-            },
-            "kk": {
-              "title": "Пульс дәлдігі сынақ есебі",
-              "type": "Дәлдікті тексеру",
-              "description": "ET488 пульс өлшеуін тексеруге қатысты қосымша есеп — құжат қолжетімді және расталған кезде."
-            }
-          }
-        },
-        {
-          "id": "spo2-accuracy",
-          "status": "pending",
-          "file": "docs/et488-spo2-accuracy-validation-report.pdf",
-          "i18n": {
-            "en": {
-              "title": "SpO₂ Accuracy Validation Report",
-              "type": "Accuracy validation",
-              "description": "Supporting report related to blood oxygen (SpO₂) measurement validation for the ET488, when available and verified."
-            },
-            "ru": {
-              "title": "Отчёт о валидации точности SpO₂",
-              "type": "Валидация точности",
-              "description": "Сопроводительный отчёт по валидации измерения кислорода в крови (SpO₂) для ET488 — когда документ доступен и проверен."
-            },
-            "kk": {
-              "title": "SpO₂ дәлдігін тексеру есебі",
-              "type": "Дәлдікті тексеру",
-              "description": "ET488 қандағы оттегі (SpO₂) өлшеуін тексеруге қатысты қосымша есеп — құжат қолжетімді және расталған кезде."
-            }
-          }
-        },
-        {
-          "id": "temp-accuracy",
-          "status": "pending",
-          "file": "docs/et488-temperature-accuracy-test-report.pdf",
-          "i18n": {
-            "en": {
-              "title": "Temperature Accuracy Test Report",
-              "type": "Accuracy validation",
-              "description": "Supporting report related to temperature measurement validation for the ET488, when available and verified."
-            },
-            "ru": {
-              "title": "Отчёт о точности измерения температуры",
-              "type": "Валидация точности",
-              "description": "Сопроводительный отчёт по валидации измерения температуры для ET488 — когда документ доступен и проверен."
-            },
-            "kk": {
-              "title": "Температура дәлдігі сынақ есебі",
-              "type": "Дәлдікті тексеру",
-              "description": "ET488 температура өлшеуін тексеруге қатысты қосымша есеп — құжат қолжетімді және расталған кезде."
-            }
-          }
-        },
-        {
-          "id": "bp-accuracy",
-          "status": "pending",
-          "file": "docs/et488-blood-pressure-accuracy-validation-report.pdf",
-          "i18n": {
-            "en": {
-              "title": "Blood Pressure Accuracy Validation Report",
-              "type": "Accuracy validation",
-              "description": "Supporting report related to blood pressure measurement validation for the ET488, when available and verified."
-            },
-            "ru": {
-              "title": "Отчёт о валидации точности давления",
-              "type": "Валидация точности",
-              "description": "Сопроводительный отчёт по валидации измерения артериального давления для ET488 — когда документ доступен и проверен."
-            },
-            "kk": {
-              "title": "Қан қысымы дәлдігін тексеру есебі",
-              "type": "Дәлдікті тексеру",
-              "description": "ET488 қан қысымын өлшеуін тексеруге қатысты қосымша есеп — құжат қолжетімді және расталған кезде."
             }
           }
         }
