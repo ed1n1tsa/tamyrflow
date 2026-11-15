@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - cursor/app-store-landing-5c00
+      - cursor/smartwatch-docs-5c00
       - main
     paths:
       - "landing/**"

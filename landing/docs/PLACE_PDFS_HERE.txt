@@ -1,0 +1,17 @@
+Place authentic ET488 / TamyrFlow supporting PDFs here.
+
+Expected filenames (see device-docs.json):
+
+  et488-user-manual.pdf
+  et488-rohs-test-report.pdf
+  et488-heart-rate-accuracy-test-report.pdf
+  et488-spo2-accuracy-validation-report.pdf
+  et488-temperature-accuracy-test-report.pdf
+  et488-blood-pressure-accuracy-validation-report.pdf
+
+After adding a file, set that document's "status" to "available" in
+landing/device-docs.json (only when authenticity for ET488 is verified).
+
+RoHS reports = hazardous substance testing, NOT measurement accuracy.
+Do not mark documents Verified without confirmation.
+Do not invent FDA/CE/EAC marks or registration numbers.
