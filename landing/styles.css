@@ -799,6 +799,10 @@ a {
   line-height: 1.35;
 }
 
+.sw-photo-ph[hidden] {
+  display: none !important;
+}
+
 .sw-shot figcaption {
   margin-top: 0.4rem;
   font-size: 0.8rem;

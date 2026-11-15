@@ -82,7 +82,7 @@
       swDocsTitle: "Документация устройства",
       swDocsLead:
         "Сопроводительные документы для ET488. PDF открываются по публичным URL, когда проверенный файл доступен. Документы на проверке помечены соответствующим статусом — без вымышленных сертификатов и непроверенных отметок «Verified».",
-      docsCatAvailable: "Доступная документация устройства",
+      docsCatDevice: "Документация устройства",
       docsCatAccuracy: "Документы по валидации точности",
       docViewPdf: "Открыть PDF",
       docPending: "Ожидает проверки",
@@ -198,7 +198,7 @@
       swDocsTitle: "Device Documentation",
       swDocsLead:
         "Supporting documents for the ET488. PDFs open at public URLs when a verified file is available. Documents pending verification are labeled accordingly — no fabricated certificates or unverified “Verified” badges.",
-      docsCatAvailable: "Available device documentation",
+      docsCatDevice: "Device documentation",
       docsCatAccuracy: "Accuracy Validation Documents",
       docViewPdf: "View PDF",
       docPending: "Pending verification",
@@ -315,7 +315,7 @@
       swDocsTitle: "Құрылғы құжаттамасы",
       swDocsLead:
         "ET488 үшін қосымша құжаттар. Тексерілген файл қолжетімді болса PDF жария URL арқылы ашылады. Тексеру күтіп тұрған құжаттар тиісінше белгіленеді — ойдан шығарылған сертификаттар мен расталмаған “Verified” белгілері жоқ.",
-      docsCatAvailable: "Қолжетімді құрылғы құжаттамасы",
+      docsCatDevice: "Құрылғы құжаттамасы",
       docsCatAccuracy: "Дәлдікті тексеру құжаттары",
       docViewPdf: "PDF ашу",
       docPending: "Тексеру күтілуде",
@@ -363,9 +363,10 @@
     return "ru";
   }
 
-  function setLang(lang) {
+  function setLang(lang, options = {}) {
+    const persist = options.persist !== false;
     if (!copy[lang]) lang = "ru";
-    localStorage.setItem(STORAGE_KEY, lang);
+    if (persist) localStorage.setItem(STORAGE_KEY, lang);
     document.documentElement.lang = lang;
     const t = copy[lang];
     document.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -463,16 +464,33 @@
     }
   }
 
+  let legalRenderToken = 0;
+  let deviceDocsRenderToken = 0;
+
+  async function fetchJson(url, timeoutMs = 8000) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { cache: "no-store", signal: ctrl.signal });
+      if (!res.ok) throw new Error("fetch failed");
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async function renderLegal(docKey, lang) {
     const host = document.getElementById("legal-root");
     if (!host) return;
+    const token = ++legalRenderToken;
     const t = copy[lang] || copy.ru;
     setStatusMessage(host, t.loadingLegal);
     try {
-      const res = await fetch("./legal-data.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("fetch failed");
-      const data = await res.json();
-      const sections = data[docKey]?.[lang] || data[docKey]?.ru || [];
+      const data = await fetchJson("./legal-data.json");
+      if (token !== legalRenderToken) return;
+      const activeLang = document.documentElement.lang || lang;
+      const sections =
+        data[docKey]?.[activeLang] || data[docKey]?.[lang] || data[docKey]?.ru || [];
       if (!sections.length) throw new Error("empty");
       while (host.firstChild) host.removeChild(host.firstChild);
       for (const section of sections) {
@@ -487,12 +505,14 @@
         host.appendChild(sectionEl);
       }
     } catch {
-      setStatusMessage(host, t.legalError);
+      if (token !== legalRenderToken) return;
+      const active = copy[document.documentElement.lang] || t;
+      setStatusMessage(host, active.legalError);
     }
   }
 
   function categoryTitle(id, t) {
-    if (id === "available") return t.docsCatAvailable || "Available device documentation";
+    if (id === "device") return t.docsCatDevice || "Device documentation";
     if (id === "accuracy") return t.docsCatAccuracy || "Accuracy Validation Documents";
     return id;
   }
@@ -503,43 +523,55 @@
     return t.docNotAvailable || "Not available";
   }
 
+  function localizedDocFields(doc, lang) {
+    const pack = doc?.i18n?.[lang] || doc?.i18n?.en || {};
+    return {
+      title: String(pack.title || doc.title || ""),
+      type: String(pack.type || doc.type || ""),
+      description: String(pack.description || doc.description || ""),
+    };
+  }
+
   async function renderDeviceDocs(lang) {
     const host = document.getElementById("device-docs-root");
     if (!host) return;
+    const token = ++deviceDocsRenderToken;
     const t = copy[lang] || copy.en;
     setStatusMessage(host, t.loadingLegal || "Loading…");
     try {
-      const res = await fetch("./device-docs.json", { cache: "no-store" });
-      if (!res.ok) throw new Error("fetch failed");
-      const data = await res.json();
+      const data = await fetchJson("./device-docs.json");
+      if (token !== deviceDocsRenderToken) return;
+      const activeLang = document.documentElement.lang || lang;
+      const activeCopy = copy[activeLang] || t;
       while (host.firstChild) host.removeChild(host.firstChild);
 
       for (const category of data.categories || []) {
         const block = document.createElement("section");
         block.className = "sw-docs-category";
         const h3 = document.createElement("h3");
-        h3.textContent = categoryTitle(category.id, t);
+        h3.textContent = categoryTitle(category.id, activeCopy);
         block.appendChild(h3);
 
         const grid = document.createElement("div");
         grid.className = "sw-docs-grid";
 
         for (const doc of category.documents || []) {
+          const fields = localizedDocFields(doc, activeLang);
           const card = document.createElement("article");
           card.className = "sw-doc-card";
 
           const type = document.createElement("p");
           type.className = "sw-doc-type";
-          type.textContent = String(doc.type ?? "");
+          type.textContent = fields.type;
           card.appendChild(type);
 
           const title = document.createElement("h4");
-          title.textContent = String(doc.title ?? "");
+          title.textContent = fields.title;
           card.appendChild(title);
 
           const desc = document.createElement("p");
           desc.className = "sw-doc-desc";
-          desc.textContent = String(doc.description ?? "");
+          desc.textContent = fields.description;
           card.appendChild(desc);
 
           const status = String(doc.status || "not_available");
@@ -549,12 +581,12 @@
             link.href = `./${String(doc.file).replace(/^\.\//, "")}`;
             link.target = "_blank";
             link.rel = "noopener";
-            link.textContent = statusLabel(status, t);
+            link.textContent = statusLabel(status, activeCopy);
             card.appendChild(link);
           } else {
             const badge = document.createElement("span");
             badge.className = `sw-doc-status is-${status === "pending" ? "pending" : "na"}`;
-            badge.textContent = statusLabel(status, t);
+            badge.textContent = statusLabel(status, activeCopy);
             card.appendChild(badge);
           }
 
@@ -565,7 +597,9 @@
         host.appendChild(block);
       }
     } catch {
-      setStatusMessage(host, t.docsLoadError || t.legalError);
+      if (token !== deviceDocsRenderToken) return;
+      const active = copy[document.documentElement.lang] || t;
+      setStatusMessage(host, active.docsLoadError || active.legalError);
     }
   }
 
@@ -604,14 +638,17 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     initLangDropdowns();
-    // Smartwatch page is English-primary for App Review when no saved preference.
-    const initialLang = (() => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === "ru" || saved === "en" || saved === "kk") return saved;
-      if (document.getElementById("device-docs-root")) return "en";
-      return getLang();
-    })();
-    setLang(initialLang);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const hasSaved = saved === "ru" || saved === "en" || saved === "kk";
+    const onSmartwatch = Boolean(document.getElementById("device-docs-root"));
+    if (hasSaved) {
+      setLang(saved);
+    } else if (onSmartwatch) {
+      // English-primary for App Review UI, without overwriting browser preference.
+      setLang("en", { persist: false });
+    } else {
+      setLang(getLang());
+    }
     initScrollReveals();
     initHeaderScroll();
   });

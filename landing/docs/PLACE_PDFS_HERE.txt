@@ -11,6 +11,7 @@ Expected filenames (see device-docs.json):
 
 After adding a file, set that document's "status" to "available" in
 landing/device-docs.json (only when authenticity for ET488 is verified).
+Localized titles live under each document's "i18n" object (en/ru/kk).
 
 RoHS reports = hazardous substance testing, NOT measurement accuracy.
 Do not mark documents Verified without confirmation.
