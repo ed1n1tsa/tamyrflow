@@ -1,0 +1,69 @@
+{
+  "categories": [
+    {
+      "id": "available",
+      "title": "Available device documentation",
+      "documents": [
+        {
+          "id": "et488-user-manual",
+          "title": "ET488 User Manual",
+          "type": "User Manual",
+          "description": "Official user documentation for the ET488 smartwatch model used with TamyrFlow.",
+          "status": "pending",
+          "file": "docs/et488-user-manual.pdf"
+        },
+        {
+          "id": "et488-rohs",
+          "title": "ET488 RoHS Test Report",
+          "type": "Compliance report",
+          "description": "RoHS test report confirming restricted hazardous substance testing results for the device. This document does not validate measurement accuracy.",
+          "status": "pending",
+          "file": "docs/et488-rohs-test-report.pdf"
+        }
+      ]
+    },
+    {
+      "id": "accuracy",
+      "title": "Accuracy Validation Documents",
+      "documents": [
+        {
+          "id": "hr-accuracy",
+          "title": "Heart Rate Accuracy Test Report",
+          "type": "Accuracy validation",
+          "description": "Supporting report related to heart rate measurement validation for the ET488, when available and verified.",
+          "status": "pending",
+          "file": "docs/et488-heart-rate-accuracy-test-report.pdf"
+        },
+        {
+          "id": "spo2-accuracy",
+          "title": "SpO₂ Accuracy Validation Report",
+          "type": "Accuracy validation",
+          "description": "Supporting report related to blood oxygen (SpO₂) measurement validation for the ET488, when available and verified.",
+          "status": "pending",
+          "file": "docs/et488-spo2-accuracy-validation-report.pdf"
+        },
+        {
+          "id": "temp-accuracy",
+          "title": "Temperature Accuracy Test Report",
+          "type": "Accuracy validation",
+          "description": "Supporting report related to temperature measurement validation for the ET488, when available and verified.",
+          "status": "pending",
+          "file": "docs/et488-temperature-accuracy-test-report.pdf"
+        },
+        {
+          "id": "bp-accuracy",
+          "title": "Blood Pressure Accuracy Validation Report",
+          "type": "Accuracy validation",
+          "description": "Supporting report related to blood pressure measurement validation for the ET488, when available and verified.",
+          "status": "pending",
+          "file": "docs/et488-blood-pressure-accuracy-validation-report.pdf"
+        }
+      ]
+    }
+  ],
+  "statusLabels": {
+    "available": "View PDF",
+    "pending": "Pending verification",
+    "not_available": "Not available"
+  }
+}

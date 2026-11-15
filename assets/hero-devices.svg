@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1000" viewBox="0 0 1200 1000">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="100%" stop-color="#93c5fd"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1000" rx="48" fill="url(#g)" opacity="0.35"/>
+  <rect x="380" y="80" width="320" height="680" rx="40" fill="#111827" opacity="0.85"/>
+  <circle cx="820" cy="420" r="170" fill="#111827" opacity="0.85"/>
+  <text x="600" y="920" text-anchor="middle" font-family="system-ui" font-size="36" fill="#4c1d95">hero-devices.png</text>
+</svg>
