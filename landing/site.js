@@ -47,7 +47,7 @@
       swPhotoFront: "Спереди",
       swPhotoSide: "Сбоку",
       swPhotoAngle: "Ракурс",
-      swPhotoBack: "Сзади",
+      swPhotoBack: "Деталь",
       swFeaturesTitle: "Поддерживаемые функции",
       swFeaturesLead:
         "TamyrFlow может отображать следующие данные о самочувствии и активности, если их передаёт совместимый ET488. Доступность зависит от аппаратного обеспечения и прошивки. Показатели предназначены для фитнеса и общего самочувствия — без заявлений о медицинской точности.",
@@ -163,7 +163,7 @@
       swPhotoFront: "Front",
       swPhotoSide: "Side",
       swPhotoAngle: "Angle",
-      swPhotoBack: "Back",
+      swPhotoBack: "Detail",
       swFeaturesTitle: "Supported Features",
       swFeaturesLead:
         "TamyrFlow can display the following wellness and activity data when provided by a compatible ET488. Availability depends on the smartwatch hardware and firmware. These measurements are for general fitness and wellness — not medical-grade claims.",
@@ -280,7 +280,7 @@
       swPhotoFront: "Алдынан",
       swPhotoSide: "Қапталынан",
       swPhotoAngle: "Бұрыш",
-      swPhotoBack: "Артынан",
+      swPhotoBack: "Деталь",
       swFeaturesTitle: "Қолдау көрсетілетін мүмкіндіктер",
       swFeaturesLead:
         "TamyrFlow үйлесімді ET488 ұсынған кезде келесі әл-ауқат және белсенділік деректерін көрсете алады. Қолжетімділік сағат аппараттығы мен прошивкасына байланысты. Бұл өлшемдер жалпы фитнес пен әл-ауқат үшін — медициналық дәлдік туралы мәлімдеме жоқ.",

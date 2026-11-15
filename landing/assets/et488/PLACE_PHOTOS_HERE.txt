@@ -1,11 +1,7 @@
-Place real ET488 smartwatch photos here (authorized for use only).
+ET488 photos currently in use:
+  front.jpg  — front view
+  side.jpg   — side / buttons
+  angle.jpg  — angled view with face on
+  back.jpg   — additional product angle (true sensor-back photo optional)
 
-Recommended filenames used by smartwatch.html:
-
-  front.jpg   — front / face view
-  side.jpg    — side profile
-  angle.jpg   — three-quarter / angled view
-  back.jpg    — back / sensors (optional)
-
-Preferred format: JPG or WebP, max long edge ~1600px, optimized for web.
-Do not use unrelated stock watches or fake certification marks.
+Replace any file with the same name to update the site.
