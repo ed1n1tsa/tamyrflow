@@ -5,7 +5,7 @@
       "documents": [
         {
           "id": "et488-quick-instructions",
-          "status": "pending",
+          "status": "available",
           "file": "docs/et488-watch-quick-instructions.pdf",
           "i18n": {
             "en": {
@@ -27,7 +27,7 @@
         },
         {
           "id": "et488-rohs",
-          "status": "pending",
+          "status": "available",
           "file": "docs/et488-rohs-test-report.pdf",
           "i18n": {
             "en": {
