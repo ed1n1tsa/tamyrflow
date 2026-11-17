@@ -97,7 +97,7 @@ final class WatchPermissionService: NSObject, ObservableObject, CLLocationManage
         let store = HKHealthStore()
         var read: Set<HKObjectType> = []
         var share: Set<HKSampleType> = []
-        if let steps = HKObjectType.quantityType(forIdentifier: .stepCount) { read.insert(steps) }
+        // Steps come from the watch SDK — do not request unused HealthKit stepCount.
         if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) {
             read.insert(hr)
             share.insert(hr)
@@ -107,10 +107,17 @@ final class WatchPermissionService: NSObject, ObservableObject, CLLocationManage
         do {
             // Share HR so in-app «Измерить пульс» can write into Apple Health (App Review path).
             try await store.requestAuthorization(toShare: share, read: read)
-            statuses[.health] = .granted
+            if let hr = HKObjectType.quantityType(forIdentifier: .heartRate),
+               store.authorizationStatus(for: hr) == .sharingAuthorized {
+                statuses[.health] = .granted
+            } else {
+                // Read grants cannot be queried; treat completed sheet without write as pending/denied.
+                statuses[.health] = .denied
+            }
         } catch {
             // Missing HealthKit entitlement shows up here — treat as unavailable, not user-deny.
             let ns = error as NSError
+            print("[HealthKit] watch permission request failed: \(error.localizedDescription)")
             if ns.domain == "com.apple.healthkit", ns.code == 4 {
                 statuses[.health] = .unavailable
             } else {

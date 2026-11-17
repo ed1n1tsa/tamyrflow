@@ -70,9 +70,9 @@ enum TermsOfUseDocument {
         ]),
         Section(id: "5", title: "5. Apple Health", blocks: [
             .paragraph("TamyrFlow может получать данные из Apple Health с разрешения пользователя."),
-            .paragraph("Приложение использует HealthKit только для чтения поддерживаемых показателей."),
-            .paragraph("TamyrFlow не записывает и не изменяет данные в Apple Health."),
-            .paragraph("Пользователь может отозвать разрешения через настройки iOS.")
+            .paragraph("Приложение читает поддерживаемые показатели (пульс, сон) и может записывать в Apple Health измерения пульса, сделанные в приложении."),
+            .paragraph("Другие данные в Apple Health приложение не изменяет."),
+            .paragraph("Пользователь может отозвать разрешения через приложение «Здоровье» или настройки iOS.")
         ]),
         Section(id: "6", title: "6. Медицинский дисклеймер", blocks: [
             .paragraph("TamyrFlow предназначен для отслеживания физической активности, общего самочувствия и отображения данных совместимых устройств."),
@@ -181,9 +181,9 @@ enum TermsOfUseDocument {
         ]),
         Section(id: "5", title: "5. Apple Health", blocks: [
             .paragraph("TamyrFlow may read Apple Health data with your permission."),
-            .paragraph("HealthKit access is read-only for supported metrics."),
-            .paragraph("TamyrFlow does not write or change Apple Health data."),
-            .paragraph("You may revoke permissions in iOS Settings.")
+            .paragraph("The app reads supported metrics (heart rate, sleep) and may write heart-rate samples from in-app pulse measurements to Apple Health."),
+            .paragraph("It does not otherwise change data in Apple Health."),
+            .paragraph("You may revoke permissions in the Health app or iOS Settings.")
         ]),
         Section(id: "6", title: "6. Medical disclaimer", blocks: [
             .paragraph("TamyrFlow is for tracking activity, general wellness, and displaying data from compatible devices."),
@@ -287,8 +287,9 @@ enum TermsOfUseDocument {
         ]),
         Section(id: "5", title: "5. Apple Health", blocks: [
             .paragraph("Apple Health деректері тек сіздің рұқсатыңызбен оқылады."),
-            .paragraph("TamyrFlow Apple Health-қа жазбайды және өзгертпейді."),
-            .paragraph("Рұқсатты iOS баптауларында кері қайтаруға болады.")
+            .paragraph("Қолданба пульс пен ұйқыны оқи алады және қолданбадағы пульс өлшемдерін Apple Health-қа жаза алады."),
+            .paragraph("Басқа Apple Health деректерін өзгертпейді."),
+            .paragraph("Рұқсатты «Денсаулық» немесе iOS баптауларында кері қайтаруға болады.")
         ]),
         Section(id: "6", title: "6. Медициналық ескерту", blocks: [
             .paragraph("TamyrFlow фитнес пен жалпы әл-ауқатты бақылауға арналған, диагноз немесе емдеу үшін емес."),

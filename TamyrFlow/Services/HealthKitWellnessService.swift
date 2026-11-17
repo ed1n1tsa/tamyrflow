@@ -5,42 +5,60 @@ import HealthKit
 enum HealthKitWellnessService {
     private static let store = HKHealthStore()
 
-    /// Full TamyrFlow HealthKit access used by the Apple Health settings screen (Guideline 2.5.1).
-    @discardableResult
-    static func requestAllAppAccess() async -> Bool {
-        guard HKHealthStore.isHealthDataAvailable() else { return false }
-        var read: Set<HKObjectType> = []
-        var share: Set<HKSampleType> = []
-        if let steps = HKObjectType.quantityType(forIdentifier: .stepCount) { read.insert(steps) }
-        if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) {
-            read.insert(hr)
-            share.insert(hr)
-        }
+    /// Result of presenting the system HealthKit permission sheet.
+    enum AccessRequestResult {
+        case unavailable
+        case failed
+        /// At least heart-rate *write* is authorized (readable status Apple exposes).
+        case writeAuthorized
+        /// Sheet completed but write remains denied / not granted.
+        case writeNotAuthorized
+    }
+
+    /// TamyrFlow HealthKit types actually used in code: HR read+write, sleep read.
+    /// Steps come from the watch SDK — do not request unused HealthKit step access.
+    static func requestAllAppAccess() async -> AccessRequestResult {
+        guard HKHealthStore.isHealthDataAvailable() else { return .unavailable }
+        guard let hrType = HKObjectType.quantityType(forIdentifier: .heartRate) else { return .unavailable }
+        var read: Set<HKObjectType> = [hrType]
+        let share: Set<HKSampleType> = [hrType]
         if let sleep = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { read.insert(sleep) }
         do {
             try await store.requestAuthorization(toShare: share, read: read)
-            return true
+            switch store.authorizationStatus(for: hrType) {
+            case .sharingAuthorized:
+                return .writeAuthorized
+            case .sharingDenied, .notDetermined:
+                return .writeNotAuthorized
+            @unknown default:
+                return .writeNotAuthorized
+            }
         } catch {
-            return false
+            print("[HealthKit] requestAllAppAccess failed: \(error.localizedDescription)")
+            return .failed
         }
     }
 
-    /// Share authorization can be queried; read authorization cannot — show write status for HR.
-    static func heartRateShareStatusLabel() -> String {
+    /// Apple only exposes *share* (write) status via API. Read status is managed in the Health app.
+    static func heartRateWriteStatusLabel() -> String {
         guard HKHealthStore.isHealthDataAvailable(),
               let hrType = HKObjectType.quantityType(forIdentifier: .heartRate) else {
             return L10n.AppleHealth.unavailable
         }
         switch store.authorizationStatus(for: hrType) {
         case .sharingAuthorized:
-            return L10n.AppleHealth.readWrite
+            return L10n.AppleHealth.writeAuthorized
         case .sharingDenied:
-            return L10n.AppleHealth.denied
+            return L10n.AppleHealth.writeDenied
         case .notDetermined:
-            return L10n.AppleHealth.notDetermined
+            return L10n.AppleHealth.writeNotDetermined
         @unknown default:
-            return L10n.AppleHealth.notDetermined
+            return L10n.AppleHealth.writeNotDetermined
         }
+    }
+
+    static func readAccessManagedLabel() -> String {
+        L10n.AppleHealth.readManagedInHealth
     }
 
     /// Request sleep read access (no-op if already determined). Returns false if HealthKit unavailable.
@@ -52,6 +70,7 @@ enum HealthKitWellnessService {
             try await store.requestAuthorization(toShare: [], read: [sleepType])
             return true
         } catch {
+            print("[HealthKit] ensureSleepReadAccess failed: \(error.localizedDescription)")
             return false
         }
     }
@@ -66,6 +85,7 @@ enum HealthKitWellnessService {
             try await store.requestAuthorization(toShare: share, read: [hrType])
             return true
         } catch {
+            print("[HealthKit] ensureHeartRateReadAccess failed: \(error.localizedDescription)")
             return false
         }
     }

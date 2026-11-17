@@ -391,18 +391,17 @@ enum L10n {
         static var manageSection: String { tr("apple_health_manage_section") }
         static var heartRate: String { tr("apple_health_hr") }
         static var heartRateDetail: String { tr("apple_health_hr_detail") }
-        static var steps: String { tr("apple_health_steps") }
-        static var stepsDetail: String { tr("apple_health_steps_detail") }
         static var sleep: String { tr("apple_health_sleep") }
         static var sleepDetail: String { tr("apple_health_sleep_detail") }
-        static var readOnly: String { tr("apple_health_read_only") }
-        static var readWrite: String { tr("apple_health_read_write") }
-        static var denied: String { tr("apple_health_denied") }
-        static var notDetermined: String { tr("apple_health_not_determined") }
+        static var writeAuthorized: String { tr("apple_health_write_authorized") }
+        static var writeDenied: String { tr("apple_health_write_denied") }
+        static var writeNotDetermined: String { tr("apple_health_write_not_determined") }
+        static var readManagedInHealth: String { tr("apple_health_read_managed") }
         static var connectButton: String { tr("apple_health_connect") }
         static var openSettingsButton: String { tr("apple_health_open_settings") }
         static var manageHint: String { tr("apple_health_manage_hint") }
         static var connectDone: String { tr("apple_health_connect_done") }
+        static var connectDenied: String { tr("apple_health_connect_denied") }
         static var connectFailed: String { tr("apple_health_connect_failed") }
         static var disclaimerTitle: String { tr("apple_health_disclaimer_title") }
         static var disclaimerBody: String { tr("apple_health_disclaimer_body") }

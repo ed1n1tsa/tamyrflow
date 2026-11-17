@@ -7,11 +7,12 @@ struct AppleHealthSettingsView: View {
     @EnvironmentObject private var language: LanguageStore
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var isRequesting = false
     @State private var toast: String?
     @State private var availabilityLabel = ""
-    @State private var heartRateShareStatus = ""
+    @State private var heartRateWriteStatus = ""
 
     var body: some View {
         let _ = language.revision
@@ -57,6 +58,9 @@ struct AppleHealthSettingsView: View {
         .navigationBarHidden(true)
         .id(language.code)
         .task { refreshStatus() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { refreshStatus() }
+        }
     }
 
     private var topBar: some View {
@@ -131,21 +135,14 @@ struct AppleHealthSettingsView: View {
                 title: L10n.AppleHealth.heartRate,
                 detail: L10n.AppleHealth.heartRateDetail,
                 systemImage: "heart.fill",
-                status: heartRateShareStatus
-            )
-            divider
-            dataRow(
-                title: L10n.AppleHealth.steps,
-                detail: L10n.AppleHealth.stepsDetail,
-                systemImage: "figure.walk",
-                status: L10n.AppleHealth.readOnly
+                status: heartRateWriteStatus
             )
             divider
             dataRow(
                 title: L10n.AppleHealth.sleep,
                 detail: L10n.AppleHealth.sleepDetail,
                 systemImage: "moon.zzz.fill",
-                status: L10n.AppleHealth.readOnly
+                status: HealthKitWellnessService.readAccessManagedLabel()
             )
         }
         .profileCard()
@@ -247,19 +244,25 @@ struct AppleHealthSettingsView: View {
         } else {
             availabilityLabel = L10n.AppleHealth.unavailable
         }
-        heartRateShareStatus = HealthKitWellnessService.heartRateShareStatusLabel()
+        heartRateWriteStatus = HealthKitWellnessService.heartRateWriteStatusLabel()
     }
 
     private func connectAppleHealth() async {
         isRequesting = true
         defer { isRequesting = false }
-        let ok = await HealthKitWellnessService.requestAllAppAccess()
+        let result = await HealthKitWellnessService.requestAllAppAccess()
         refreshStatus()
-        flash(ok ? L10n.AppleHealth.connectDone : L10n.AppleHealth.connectFailed)
+        switch result {
+        case .writeAuthorized:
+            flash(L10n.AppleHealth.connectDone)
+        case .writeNotAuthorized:
+            flash(L10n.AppleHealth.connectDenied)
+        case .failed, .unavailable:
+            flash(L10n.AppleHealth.connectFailed)
+        }
     }
 
     private func openSystemHealthSettings() {
-        // Prefer Health app sources page when available; fall back to app settings.
         if let healthURL = URL(string: "x-apple-health://"),
            UIApplication.shared.canOpenURL(healthURL) {
             openURL(healthURL)

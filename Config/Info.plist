@@ -11,9 +11,13 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>TamyrFlow uses your location to find nearby wearable devices over Bluetooth.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>TamyrFlow reads wellness data such as steps, heart rate, and sleep to show your progress.</string>
+	<string>TamyrFlow reads heart rate and sleep from Apple Health to show your wellness progress.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>TamyrFlow may save wellness data you choose to track in the app.</string>
+	<string>TamyrFlow may save heart-rate measurements you take in the app to Apple Health.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>x-apple-health</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<!-- Keep BLE sessions alive / wake silently so bonded watches (e.g. ET488)
