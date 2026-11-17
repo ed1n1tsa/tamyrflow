@@ -7,6 +7,7 @@ struct AppSettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var toast: String?
+    @State private var showAppleHealth = false
 
     var body: some View {
         ZStack {
@@ -19,6 +20,9 @@ struct AppSettingsView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 14) {
+                        sectionTitle(L10n.Settings.appleHealthSection)
+                        appleHealthCard
+
                         sectionTitle(L10n.Settings.languageSection)
                         languageCard
 
@@ -52,6 +56,35 @@ struct AppSettingsView: View {
         }
         .navigationBarHidden(true)
         .id(language.code)
+        .navigationDestination(isPresented: $showAppleHealth) {
+            AppleHealthSettingsView()
+        }
+    }
+
+    private var appleHealthCard: some View {
+        Button { showAppleHealth = true } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "heart.text.square.fill")
+                    .foregroundStyle(ProfileTheme.accent)
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(ProfileTheme.accent.opacity(0.16)))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.Settings.appleHealthRow)
+                        .font(AppFont.interBold(15))
+                        .foregroundStyle(.white)
+                    Text(L10n.Settings.appleHealthRowSub)
+                        .font(AppFont.interBold(12))
+                        .foregroundStyle(ProfileTheme.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(ProfileTheme.muted)
+            }
+            .padding(14)
+            .profileCard()
+        }
+        .buttonStyle(.plain)
     }
 
     private var topBar: some View {

@@ -175,11 +175,11 @@
           },
           {
             "type": "p",
-            "text": "Приложение использует доступ к Apple Health только для чтения поддерживаемых показателей."
+            "text": "Приложение читает поддерживаемые показатели (пульс, сон) и может записывать в Apple Health измерения пульса, сделанные в приложении."
           },
           {
             "type": "p",
-            "text": "TamyrFlow не записывает и не изменяет данные в Apple Health."
+            "text": "Другие данные в Apple Health приложение не изменяет."
           },
           {
             "type": "p",
@@ -625,11 +625,11 @@
           },
           {
             "type": "p",
-            "text": "The app uses Apple Health access only to read supported metrics."
+            "text": "The app reads supported metrics (heart rate, sleep) and may write heart-rate samples from in-app pulse measurements to Apple Health."
           },
           {
             "type": "p",
-            "text": "TamyrFlow does not write to or modify data in Apple Health."
+            "text": "It does not otherwise change data in Apple Health."
           },
           {
             "type": "p",
@@ -1075,11 +1075,11 @@
           },
           {
             "type": "p",
-            "text": "Қолданба Apple Health-ке қолжетімділікті тек қолдау көрсетілетін көрсеткіштерді оқу үшін пайдаланады."
+            "text": "Қолданба пульс пен ұйқыны оқи алады және қолданбадағы пульс өлшемдерін Apple Health-қа жаза алады."
           },
           {
             "type": "p",
-            "text": "TamyrFlow Apple Health-тегі деректерді жазбайды және өзгертпейді."
+            "text": "Басқа Apple Health деректерін өзгертпейді."
           },
           {
             "type": "p",
@@ -1463,15 +1463,15 @@
           },
           {
             "type": "p",
-            "text": "Приложение использует HealthKit только для чтения поддерживаемых показателей."
+            "text": "Приложение читает поддерживаемые показатели (пульс, сон) и может записывать в Apple Health измерения пульса, сделанные в приложении."
           },
           {
             "type": "p",
-            "text": "TamyrFlow не записывает и не изменяет данные в Apple Health."
+            "text": "Другие данные в Apple Health приложение не изменяет."
           },
           {
             "type": "p",
-            "text": "Пользователь может отозвать разрешения через настройки iOS."
+            "text": "Пользователь может отозвать разрешения через приложение «Здоровье» или настройки iOS."
           }
         ]
       },
@@ -1807,15 +1807,15 @@
           },
           {
             "type": "p",
-            "text": "The app uses HealthKit only to read supported metrics."
+            "text": "The app reads supported metrics (heart rate, sleep) and may write heart-rate samples from in-app pulse measurements to Apple Health."
           },
           {
             "type": "p",
-            "text": "TamyrFlow does not write to or modify data in Apple Health."
+            "text": "It does not otherwise change data in Apple Health."
           },
           {
             "type": "p",
-            "text": "The user may revoke permissions in iOS Settings."
+            "text": "The user may revoke permissions in the Health app or iOS Settings."
           }
         ]
       },
@@ -2151,15 +2151,15 @@
           },
           {
             "type": "p",
-            "text": "Қолданба HealthKit-ті тек қолдау көрсетілетін көрсеткіштерді оқу үшін пайдаланады."
+            "text": "Қолданба пульс пен ұйқыны оқи алады және қолданбадағы пульс өлшемдерін Apple Health-қа жаза алады."
           },
           {
             "type": "p",
-            "text": "TamyrFlow Apple Health-тегі деректерді жазбайды және өзгертпейді."
+            "text": "Басқа Apple Health деректерін өзгертпейді."
           },
           {
             "type": "p",
-            "text": "Пайдаланушы рұқсаттарды iOS параметрлері арқылы қайтарып ала алады."
+            "text": "Рұқсатты «Денсаулық» немесе iOS баптауларында кері қайтаруға болады."
           }
         ]
       },

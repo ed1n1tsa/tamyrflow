@@ -173,6 +173,8 @@ enum L10n {
         static var menuGoalsSub: String { tr("prof_menu_goals_sub") }
         static var menuSettings: String { tr("prof_menu_settings") }
         static var menuSettingsSub: String { tr("prof_menu_settings_sub") }
+        static var menuAppleHealth: String { tr("prof_menu_apple_health") }
+        static var menuAppleHealthSub: String { tr("prof_menu_apple_health_sub") }
         static var menuPrivacy: String { tr("prof_menu_privacy") }
         static var menuPrivacySub: String { tr("prof_menu_privacy_sub") }
         static var menuSupport: String { tr("prof_menu_support") }
@@ -373,6 +375,36 @@ enum L10n {
         static var languageSaved: String { tr("settings_language_saved") }
         static var togglesApplied: String { tr("settings_toggles_applied") }
         static var timeSynced: String { tr("settings_time_synced") }
+        static var appleHealthSection: String { tr("settings_apple_health_section") }
+        static var appleHealthRow: String { tr("settings_apple_health_row") }
+        static var appleHealthRowSub: String { tr("settings_apple_health_row_sub") }
+    }
+
+    enum AppleHealth {
+        static var title: String { tr("apple_health_title") }
+        static var brandTitle: String { tr("apple_health_brand_title") }
+        static var brandSubtitle: String { tr("apple_health_brand_sub") }
+        static var intro: String { tr("apple_health_intro") }
+        static var available: String { tr("apple_health_available") }
+        static var unavailable: String { tr("apple_health_unavailable") }
+        static var dataSection: String { tr("apple_health_data_section") }
+        static var manageSection: String { tr("apple_health_manage_section") }
+        static var heartRate: String { tr("apple_health_hr") }
+        static var heartRateDetail: String { tr("apple_health_hr_detail") }
+        static var sleep: String { tr("apple_health_sleep") }
+        static var sleepDetail: String { tr("apple_health_sleep_detail") }
+        static var writeAuthorized: String { tr("apple_health_write_authorized") }
+        static var writeDenied: String { tr("apple_health_write_denied") }
+        static var writeNotDetermined: String { tr("apple_health_write_not_determined") }
+        static var readManagedInHealth: String { tr("apple_health_read_managed") }
+        static var connectButton: String { tr("apple_health_connect") }
+        static var openSettingsButton: String { tr("apple_health_open_settings") }
+        static var manageHint: String { tr("apple_health_manage_hint") }
+        static var connectDone: String { tr("apple_health_connect_done") }
+        static var connectDenied: String { tr("apple_health_connect_denied") }
+        static var connectFailed: String { tr("apple_health_connect_failed") }
+        static var disclaimerTitle: String { tr("apple_health_disclaimer_title") }
+        static var disclaimerBody: String { tr("apple_health_disclaimer_body") }
     }
 
     enum Notifications {

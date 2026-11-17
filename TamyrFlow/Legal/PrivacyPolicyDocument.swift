@@ -107,8 +107,8 @@ enum PrivacyPolicyDocument {
         ]),
         Section(id: "5", title: "5. Apple Health и HealthKit", blocks: [
             .paragraph("TamyrFlow может получать данные из Apple Health с использованием HealthKit исключительно после предоставления разрешения пользователем."),
-            .paragraph("Приложение использует доступ к Apple Health только для чтения поддерживаемых показателей."),
-            .paragraph("TamyrFlow не записывает и не изменяет данные в Apple Health."),
+            .paragraph("Приложение читает поддерживаемые показатели (пульс, сон) и может записывать в Apple Health измерения пульса, сделанные в приложении."),
+            .paragraph("Другие данные в Apple Health приложение не изменяет."),
             .paragraph("Полученные данные используются для отображения показателей здоровья, физической активности, статистики и истории."),
             .paragraph("Данные Apple Health не используются для рекламы, маркетингового профилирования или продажи третьим лицам."),
             .paragraph("Передача данных Apple Health в облачное хранилище, если такая функция реализована, допускается только при наличии необходимых разрешений и с соблюдением требований Apple и применимого законодательства."),
@@ -270,8 +270,8 @@ enum PrivacyPolicyDocument {
         ]),
         Section(id: "5", title: "5. Apple Health and HealthKit", blocks: [
             .paragraph("TamyrFlow may read Apple Health data via HealthKit only after you grant permission."),
-            .paragraph("Access is read-only for supported metrics."),
-            .paragraph("TamyrFlow does not write or change data in Apple Health."),
+            .paragraph("The app reads supported metrics (heart rate, sleep) and may write heart-rate samples from in-app pulse measurements to Apple Health."),
+            .paragraph("It does not otherwise change data in Apple Health."),
             .paragraph("Retrieved data is used to show health and activity metrics, statistics, and history."),
             .paragraph("Apple Health data is not used for advertising, marketing profiles, or sale to third parties."),
             .paragraph("If cloud sync of Apple Health–sourced data is enabled, it happens only with the required permissions and in line with Apple rules and applicable law."),
@@ -400,7 +400,7 @@ enum PrivacyPolicyDocument {
         ]),
         Section(id: "5", title: "5. Apple Health және HealthKit", blocks: [
             .paragraph("TamyrFlow Apple Health деректерін тек пайдаланушы рұқсатынан кейін оқи алады."),
-            .paragraph("Қолжетімділік — тек оқу; Apple Health-қа жазу немесе өзгерту жоқ."),
+            .paragraph("Қолданба пульс пен ұйқыны оқи алады және қолданбадағы пульс өлшемдерін Apple Health-қа жаза алады; басқа деректерді өзгертпейді."),
             .paragraph("Бұл деректер жарнамаға немесе үшінші тұлғаларға сатуға қолданылмайды.")
         ]),
         Section(id: "6", title: "6. Сақтау және қауіпсіздік", blocks: [
