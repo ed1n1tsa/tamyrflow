@@ -20,6 +20,7 @@ struct ProfilePage: View {
     @State private var showSettings = false
     @State private var showSupport = false
     @State private var showPrivacyControls = false
+    @State private var showAppleHealth = false
     @State private var showTerms = false
     @State private var showPrivacyPolicy = false
 
@@ -92,6 +93,9 @@ struct ProfilePage: View {
             }
             .navigationDestination(isPresented: $showPrivacyControls) {
                 LegalDocumentView(kind: .privacyControls)
+            }
+            .navigationDestination(isPresented: $showAppleHealth) {
+                AppleHealthSettingsView()
             }
             .navigationDestination(isPresented: $showTerms) {
                 LegalDocumentView(kind: .terms)
@@ -367,6 +371,7 @@ struct ProfilePage: View {
     private var settingsMenu: [MenuItem] {
         [
             .init(title: L10n.Profile.menuSettings, subtitle: L10n.Profile.menuSettingsSub, systemImage: "gearshape.fill"),
+            .init(title: L10n.Profile.menuAppleHealth, subtitle: L10n.Profile.menuAppleHealthSub, systemImage: "heart.text.square.fill"),
             .init(title: L10n.Profile.menuPrivacy, subtitle: L10n.Profile.menuPrivacySub, systemImage: "lock.shield.fill"),
             .init(title: L10n.Profile.menuSupport, subtitle: L10n.Profile.menuSupportSub, systemImage: "questionmark.circle.fill")
         ]
@@ -454,6 +459,8 @@ struct ProfilePage: View {
             selectedTab = .goals
         case L10n.Profile.menuSettings:
             showSettings = true
+        case L10n.Profile.menuAppleHealth:
+            showAppleHealth = true
         case L10n.Profile.menuPrivacy:
             showPrivacyControls = true
         case L10n.Profile.menuSupport:

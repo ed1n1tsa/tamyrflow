@@ -5,6 +5,44 @@ import HealthKit
 enum HealthKitWellnessService {
     private static let store = HKHealthStore()
 
+    /// Full TamyrFlow HealthKit access used by the Apple Health settings screen (Guideline 2.5.1).
+    @discardableResult
+    static func requestAllAppAccess() async -> Bool {
+        guard HKHealthStore.isHealthDataAvailable() else { return false }
+        var read: Set<HKObjectType> = []
+        var share: Set<HKSampleType> = []
+        if let steps = HKObjectType.quantityType(forIdentifier: .stepCount) { read.insert(steps) }
+        if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) {
+            read.insert(hr)
+            share.insert(hr)
+        }
+        if let sleep = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { read.insert(sleep) }
+        do {
+            try await store.requestAuthorization(toShare: share, read: read)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    /// Share authorization can be queried; read authorization cannot — show write status for HR.
+    static func heartRateShareStatusLabel() -> String {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let hrType = HKObjectType.quantityType(forIdentifier: .heartRate) else {
+            return L10n.AppleHealth.unavailable
+        }
+        switch store.authorizationStatus(for: hrType) {
+        case .sharingAuthorized:
+            return L10n.AppleHealth.readWrite
+        case .sharingDenied:
+            return L10n.AppleHealth.denied
+        case .notDetermined:
+            return L10n.AppleHealth.notDetermined
+        @unknown default:
+            return L10n.AppleHealth.notDetermined
+        }
+    }
+
     /// Request sleep read access (no-op if already determined). Returns false if HealthKit unavailable.
     @discardableResult
     static func ensureSleepReadAccess() async -> Bool {
